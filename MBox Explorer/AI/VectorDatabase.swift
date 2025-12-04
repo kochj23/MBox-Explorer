@@ -113,7 +113,7 @@ class VectorDatabase: ObservableObject {
             sqlite3_bind_text(statement, 3, email.body, -1, nil)
             sqlite3_bind_text(statement, 4, email.from, -1, nil)
             sqlite3_bind_text(statement, 5, email.subject, -1, nil)
-            sqlite3_bind_text(statement, 6, email.date.ISO8601Format(), -1, nil)
+            sqlite3_bind_text(statement, 6, email.date, -1, nil)
             sqlite3_bind_text(statement, 7, "{}", -1, nil)  // Placeholder for metadata
 
             if sqlite3_step(statement) != SQLITE_DONE {

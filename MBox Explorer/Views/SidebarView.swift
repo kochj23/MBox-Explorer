@@ -125,6 +125,8 @@ struct SidebarView: View {
     private func icon(for item: SidebarItem) -> String {
         switch item {
         case .allEmails: return "envelope.fill"
+        case .ask: return "sparkles"
+        case .network: return "point.3.connected.trianglepath.dotted"
         case .attachments: return "paperclip"
         case .analytics: return "chart.bar.xaxis"
         case .operations: return "scissors"

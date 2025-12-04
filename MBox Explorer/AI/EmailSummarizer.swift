@@ -52,7 +52,8 @@ class EmailSummarizer: ObservableObject {
         let summary = await llm.summarize(content: combinedContent)
 
         let participants = Set(emails.map { $0.from })
-        let dateRange = (emails.map { $0.date }.min()!, emails.map { $0.date }.max()!)
+        let dateStrings = emails.map { $0.date }
+        let dateRange = (dateStrings.first ?? "", dateStrings.last ?? "")
 
         return ThreadSummary(
             threadSubject: emails.first?.subject ?? "Unknown",
@@ -66,7 +67,10 @@ class EmailSummarizer: ObservableObject {
 
     /// Generate daily digest
     func generateDailyDigest(emails: [Email], date: Date) async -> DailyDigest {
-        let emailsForDay = emails.filter { Calendar.current.isDate($0.date, inSameDayAs: date) }
+        let emailsForDay = emails.filter { email in
+            guard let emailDate = email.dateObject else { return false }
+            return Calendar.current.isDate(emailDate, inSameDayAs: date)
+        }
 
         let summaries = await withTaskGroup(of: String.self) { group in
             for email in emailsForDay.prefix(20) {  // Limit to avoid overwhelming
@@ -198,7 +202,7 @@ struct ThreadSummary: Identifiable {
     let summary: String
     let participants: [String]
     let emailCount: Int
-    let dateRange: (Date, Date)
+    let dateRange: (String, String)
     let keyDecisions: [String]
 }
 

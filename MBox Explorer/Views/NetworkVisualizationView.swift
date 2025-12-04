@@ -109,7 +109,7 @@ struct NetworkVisualizationView: View {
             emailCounts[email.from, default: 0] += 1
 
             // Track to addresses (simplified)
-            let toAddresses = email.to.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            let toAddresses = (email.to ?? "").components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for to in toAddresses where !to.isEmpty {
                 connections[email.from, default: [:]][to, default: 0] += 1
             }
