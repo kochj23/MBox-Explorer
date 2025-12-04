@@ -11,6 +11,41 @@ A powerful, modern macOS application for viewing, searching, analyzing, and mana
 
 MBox Explorer is a native macOS application built with SwiftUI that provides comprehensive tools for working with MBOX email archives. Whether you're analyzing old email archives, searching for specific messages, exporting data for compliance, or preparing emails for RAG (Retrieval-Augmented Generation) workflows, MBox Explorer offers an intuitive interface with powerful features.
 
+## ⭐ NEW: AI-Powered Features
+
+### 🤖 Built-In LLM Query Interface
+**ASK QUESTIONS IN NATURAL LANGUAGE!**
+- "What did John say about the Q4 budget?"
+- "Find emails about project deadlines"
+- AI-powered answers with source citations
+- Local vector database (SQLite FTS5)
+- MLX integration for on-device AI
+- 100% private - all processing local
+
+### 📝 AI Email Summarization
+- Summarize single emails (2-3 sentences)
+- Summarize entire conversation threads
+- Generate daily/weekly digests
+- Extract action items automatically
+- Sentiment analysis (Positive/Negative/Urgent)
+- Key decision extraction
+
+### 🏷️ Smart Auto-Tagging
+- ML-powered categorization (10 categories)
+- Auto-detect: Work, Personal, Finance, Travel, Legal, etc.
+- Priority detection (High/Medium/Low)
+- Sentiment tagging
+- Action item detection
+- Bulk tagging for entire archives
+
+### 🕸️ Email Network Visualization
+- Visual graph of email relationships
+- See who emails whom and how often
+- Identify communication hubs
+- Find team silos
+- Interactive network exploration
+- Community detection
+
 ## Key Features
 
 ### 🎯 Core Functionality (Features 1-5)
