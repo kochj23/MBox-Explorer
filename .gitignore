@@ -1,0 +1,129 @@
+# Xcode Security - CRITICAL FILES - NEVER COMMIT
+# These files contain sensitive information and MUST be excluded from Git
+
+# ====================
+# CODE SIGNING - CRITICAL
+# ====================
+*.p12
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+*.keychain
+*.keychain-db
+exportOptions.plist
+
+# ====================
+# SECRETS AND CREDENTIALS - CRITICAL
+# ====================
+*.xcconfig.secret
+*-Secrets.xcconfig
+Config-Secrets.xcconfig
+secrets.json
+credentials.json
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*_rsa
+*_dsa
+*_ecdsa
+*_ed25519
+
+# ====================
+# API KEYS AND TOKENS - CRITICAL
+# ====================
+google-services.json
+GoogleService-Info.plist
+firebase-adminsdk-*.json
+*-firebase-adminsdk-*.json
+amplify-info.json
+aws-exports.js
+awsconfiguration.json
+
+# ====================
+# USER-SPECIFIC FILES
+# ====================
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad
+*.perspectivev3
+
+# ====================
+# BUILD ARTIFACTS
+# ====================
+build/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.app
+*.framework
+
+# ====================
+# PACKAGE MANAGERS
+# ====================
+# CocoaPods
+Pods/
+# Note: Podfile.lock should usually be committed for consistency
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+# Note: Package.resolved should usually be committed
+
+# ====================
+# IDE FILES
+# ====================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ====================
+# FASTLANE
+# ====================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/.env
+fastlane/.env.*
+
+# ====================
+# TEMPORARY FILES
+# ====================
+*.orig
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# ====================
+# SENSITIVE LOGS AND REPORTS
+# ====================
+*.crash
+*.stackdump
+test_output/
+coverage/
+
+# ====================
+# BACKUP FILES
+# ====================
+*.backup
+*.bak
+*.old
+
+# ====================
+# CUSTOM SECRETS
+# ====================
+# Add any project-specific secret files here
