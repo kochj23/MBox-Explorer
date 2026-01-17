@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BD768E39B961495776874418 /* ModernDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */; };
+
 		6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610D3EFB2D5D23FD826606E /* LocalLLM.swift */; };
 		7EC7E7955FB707BAE5BA53F9 /* EmailSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */; };
 		BA654320B8AE457B9A856B6A /* NetworkVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */; };
@@ -115,7 +117,8 @@
 		MB0000270000000000000001 /* MBox Explorer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MBox Explorer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		MB0000480000000000000001 /* RecentFilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentFilesManager.swift; sourceTree = "<group>"; };
 		MB0000500000000000000001 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+		MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernDesign.swift; sourceTree = "<group>"; };
+	/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		MB0000280000000000000001 /* Frameworks */ = {
@@ -167,7 +170,8 @@
 				MB0000260000000000000001 /* Assets.xcassets */,
 				54503A623328C982A327062B /* AI */,
 				C7A270A06C6F2802B6C6D7B9 /* AI */,
-			);
+			
+				MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */,);
 			path = "MBox Explorer";
 			sourceTree = "<group>";
 		};
@@ -380,7 +384,8 @@
 				C00B2C0479D170F97A8D05F4 /* AutoTagger.swift in Sources */,
 				D8904F77CE2555AEAAD0E03C /* AskView.swift in Sources */,
 				BA654320B8AE457B9A856B6A /* NetworkVisualizationView.swift in Sources */,
-			);
+			
+				BD768E39B961495776874418 /* ModernDesign.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */

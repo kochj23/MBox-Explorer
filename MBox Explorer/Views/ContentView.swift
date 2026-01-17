@@ -18,30 +18,34 @@ struct ContentView: View {
     @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
-        mainView
-            .modifier(SheetsModifier(viewModel: viewModel, alertManager: alertManager, showingExportPicker: $showingExportPicker))
-            .modifier(NotificationsModifier(viewModel: viewModel, columnVisibility: $columnVisibility, showingFilePicker: $showingFilePicker, showingQuickOpen: $showingQuickOpen, copyActions: CopyActions(copyEmail: copyEmailAddress, copySubject: copySubject, copyMessageId: copyMessageId), loadFile: loadMboxFile))
-            .overlay {
-                if showingQuickOpen {
-                    ZStack {
-                        Color.black.opacity(0.3)
-                            .ignoresSafeArea()
-                            .onTapGesture {
-                                showingQuickOpen = false
-                            }
+        ZStack {
+            GlassmorphicBackground()
 
-                        QuickOpenView(isPresented: $showingQuickOpen) { url in
-                            loadMboxFile(url)
+            mainView
+                .modifier(SheetsModifier(viewModel: viewModel, alertManager: alertManager, showingExportPicker: $showingExportPicker))
+                .modifier(NotificationsModifier(viewModel: viewModel, columnVisibility: $columnVisibility, showingFilePicker: $showingFilePicker, showingQuickOpen: $showingQuickOpen, copyActions: CopyActions(copyEmail: copyEmailAddress, copySubject: copySubject, copyMessageId: copyMessageId), loadFile: loadMboxFile))
+                .overlay {
+                    if showingQuickOpen {
+                        ZStack {
+                            Color.black.opacity(0.3)
+                                .ignoresSafeArea()
+                                .onTapGesture {
+                                    showingQuickOpen = false
+                                }
+
+                            QuickOpenView(isPresented: $showingQuickOpen) { url in
+                                loadMboxFile(url)
+                            }
                         }
                     }
                 }
-            }
-            .onAppear {
-                viewModel.alertManager = alertManager
-            }
-            .fileDropTarget { url in
-                loadMboxFile(url)
-            }
+                .onAppear {
+                    viewModel.alertManager = alertManager
+                }
+                .fileDropTarget { url in
+                    loadMboxFile(url)
+                }
+        }
     }
 
     private var mainView: some View {
