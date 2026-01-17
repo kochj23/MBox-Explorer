@@ -316,10 +316,26 @@ private struct ViewNotifications: ViewModifier {
             .onReceive(NotificationCenter.default.publisher(for: .showThemeSettings)) { _ in
                 viewModel.showingThemeSettings = true
             }
+            .onReceive(NotificationCenter.default.publisher(for: .showAISettings)) { _ in
+                openAISettingsWindow()
+            }
             .onReceive(NotificationCenter.default.publisher(for: .toggleLayoutMode)) { _ in
                 viewModel.layoutMode = viewModel.layoutMode == .standard ? .threeColumn : .standard
                 WindowStateManager.shared.saveLayoutMode(viewModel.layoutMode)
             }
+    }
+
+    private func openAISettingsWindow() {
+        let settingsView = AISettingsView()
+        let hostingController = NSHostingController(rootView: settingsView)
+        hostingController.title = "Ollama AI Settings"
+
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "Ollama AI Settings"
+        window.styleMask = [.titled, .closable, .resizable]
+        window.setContentSize(NSSize(width: 600, height: 700))
+        window.center()
+        window.makeKeyAndOrderFront(nil)
     }
 }
 

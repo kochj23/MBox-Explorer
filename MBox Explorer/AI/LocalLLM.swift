@@ -2,110 +2,45 @@
 //  LocalLLM.swift
 //  MBox Explorer
 //
-//  Local LLM integration using Python MLX
+//  Local LLM integration using Ollama
 //  Author: Jordan Koch
 //  Date: 2025-12-03
+//  Updated: 2025-01-17 - Replaced MLX stub with Ollama
 //
 
 import Foundation
 
-/// Local LLM manager using MLX for email queries
+/// Local LLM manager using AI Backend (Ollama or MLX)
 class LocalLLM: ObservableObject {
     @Published var isAvailable = false
     @Published var isProcessing = false
     @Published var lastResponse = ""
 
-    private let pythonPath = "/opt/homebrew/bin/python3"
-    private let mlxScriptPath: String
+    private let aiBackend = AIBackendManager.shared
 
     init() {
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser
-        mlxScriptPath = homeDir.appendingPathComponent(".mlx/mbox_llm.py").path
-        createMLXScript()
         Task {
             await checkAvailability()
         }
     }
 
-    private func createMLXScript() {
-        let script = """
-        #!/usr/bin/env python3
-        import sys
-        import json
-
-        try:
-            import mlx.core as mx
-            import mlx.nn as nn
-        except ImportError:
-            print("MLX not available")
-            sys.exit(1)
-
-        def answer_question(question, context_emails):
-            # Simple answering logic (can be enhanced with actual LLM)
-            # For now, extract relevant information from context
-
-            response = f"Based on {len(context_emails)} emails:\\n\\n"
-
-            # Extract key information
-            for email in context_emails[:3]:  # Top 3 most relevant
-                response += f"From {email['from']} ({email['date']}):\\n"
-                response += f"Subject: {email['subject']}\\n"
-                response += f"{email['snippet']}\\n\\n"
-
-            response += "Sources: " + ", ".join([e['from'] for e in context_emails[:3]])
-
-            return response
-
-        if __name__ == "__main__":
-            if len(sys.argv) < 2:
-                print("Error: No input provided")
-                sys.exit(1)
-
-            input_data = json.loads(sys.argv[1])
-            question = input_data.get('question', '')
-            context = input_data.get('context', [])
-
-            answer = answer_question(question, context)
-            print(answer)
-        """
-
-        let homeDir = FileManager.default.homeDirectoryForCurrentUser
-        let mlxDir = homeDir.appendingPathComponent(".mlx")
-        try? FileManager.default.createDirectory(at: mlxDir, withIntermediateDirectories: true)
-
-        let scriptURL = mlxDir.appendingPathComponent("mbox_llm.py")
-        try? script.write(to: scriptURL, atomically: true, encoding: .utf8)
-
-        // Make executable
-        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: scriptURL.path)
-    }
-
     func checkAvailability() async {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: pythonPath)
-        task.arguments = ["-c", "import mlx.core; print('OK')"]
-
-        let pipe = Pipe()
-        task.standardOutput = pipe
-
-        do {
-            try task.run()
-            task.waitUntilExit()
-
-            await MainActor.run {
-                isAvailable = task.terminationStatus == 0
-            }
-        } catch {
-            await MainActor.run {
-                isAvailable = false
-            }
+        await aiBackend.checkBackendAvailability()
+        await MainActor.run {
+            isAvailable = aiBackend.activeBackend != nil
         }
     }
 
-    /// Ask a question about emails
+    /// Get active backend for display
+    @MainActor
+    func getActiveBackend() -> AIBackend? {
+        return aiBackend.activeBackend
+    }
+
+    /// Ask a question about emails using RAG (Retrieval-Augmented Generation)
     func askQuestion(_ question: String, context: [SearchResult]) async -> String {
         guard isAvailable else {
-            return "MLX not available. Using basic context extraction:\n\n" + generateBasicAnswer(question, context: context)
+            return "AI Backend not available. Using basic context extraction:\n\n" + generateBasicAnswer(question, context: context)
         }
 
         await MainActor.run {
@@ -117,49 +52,48 @@ class LocalLLM: ObservableObject {
             }
         }
 
-        // Prepare context for LLM
-        let contextData = context.map { result in
-            [
-                "from": result.from,
-                "subject": result.subject,
-                "date": result.date,
-                "snippet": result.snippet
-            ]
-        }
+        // Step 1: Prepare context from retrieved emails (RAG - Augmentation step)
+        let contextText = context.prefix(10).map { result in
+            """
+            From: \(result.from)
+            Subject: \(result.subject)
+            Date: \(result.date)
+            \(result.snippet)
+            ---
+            """
+        }.joined(separator: "\n")
 
-        let inputData: [String: Any] = [
-            "question": question,
-            "context": contextData
-        ]
+        // Step 2: Build RAG prompt
+        let systemPrompt = """
+        You are an email assistant. Answer the user's question based on the following emails.
+        Be concise and cite specific emails when relevant. If the emails don't contain enough information to answer the question, say so.
+        """
 
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: inputData),
-              let jsonString = String(data: jsonData, encoding: .utf8) else {
-            return "Error: Could not prepare query"
-        }
+        let userPrompt = """
+        EMAILS:
+        \(contextText)
 
-        // Call Python MLX script
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: pythonPath)
-        task.arguments = [mlxScriptPath, jsonString]
+        QUESTION: \(question)
 
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = pipe
+        Provide a helpful answer based on the email context above.
+        """
 
+        // Step 3: Generate response using AI Backend
         do {
-            try task.run()
-            task.waitUntilExit()
-
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "No response"
+            let response = try await aiBackend.generate(
+                prompt: userPrompt,
+                systemPrompt: systemPrompt
+            )
 
             await MainActor.run {
-                lastResponse = output
+                lastResponse = response
             }
 
-            return output
+            return response
         } catch {
-            return "Error: \(error.localizedDescription)"
+            let errorMessage = "AI Backend error: \(error.localizedDescription)"
+            print(errorMessage)
+            return errorMessage + "\n\nFalling back to basic extraction:\n\n" + generateBasicAnswer(question, context: context)
         }
     }
 
@@ -186,8 +120,33 @@ class LocalLLM: ObservableObject {
             return generateBasicSummary(content)
         }
 
-        // In full implementation, would call MLX LLM for summarization
-        return generateBasicSummary(content)
+        await MainActor.run {
+            isProcessing = true
+        }
+        defer {
+            Task { @MainActor in
+                isProcessing = false
+            }
+        }
+
+        let prompt = """
+        Summarize the following email content in 2-3 sentences. Focus on the key points and main action items.
+
+        EMAIL CONTENT:
+        \(content.prefix(2000))
+        """
+
+        do {
+            let summary = try await aiBackend.generate(
+                prompt: prompt,
+                systemPrompt: "You are a concise email summarizer. Provide brief, clear summaries.",
+                temperature: 0.3 // Lower temperature for more consistent summaries
+            )
+            return summary
+        } catch {
+            print("Summarization error: \(error.localizedDescription)")
+            return generateBasicSummary(content)
+        }
     }
 
     private func generateBasicSummary(_ content: String) -> String {

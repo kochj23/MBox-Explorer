@@ -35,35 +35,64 @@ struct AskView: View {
                                 Circle()
                                     .fill(.green)
                                     .frame(width: 8, height: 8)
-                                Text("MLX AI Online")
+                                Text("AI Connected")
                                     .font(.caption)
                                     .foregroundColor(.green)
+
+                                if let backend = llm.getActiveBackend() {
+                                    Text("(\(backend.rawValue))")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         } else {
                             HStack(spacing: 4) {
                                 Circle()
                                     .fill(.orange)
                                     .frame(width: 8, height: 8)
-                                Text("Basic Search Mode")
+                                Text("AI Not Available")
                                     .font(.caption)
                                     .foregroundColor(.orange)
                             }
                         }
 
                         if vectorDB.isIndexed {
-                            Text("• \(vectorDB.totalDocuments) emails indexed")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            HStack(spacing: 4) {
+                                Text("• \(vectorDB.totalDocuments) emails indexed")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                if vectorDB.useSemanticSearch {
+                                    Text("(semantic search enabled)")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                }
+                            }
                         } else if !viewModel.emails.isEmpty {
-                            Button("Index Emails") {
+                            Button(action: {
                                 Task {
                                     await vectorDB.indexEmails(viewModel.emails) { progress in
-                                        // Progress callback
+                                        // Progress updates handled by @Published property
                                     }
+                                }
+                            }) {
+                                if vectorDB.indexProgress > 0 && vectorDB.indexProgress < 1.0 {
+                                    HStack {
+                                        Text("Indexing... \(Int(vectorDB.indexProgress * 100))%")
+                                        ProgressView()
+                                            .scaleEffect(0.7)
+                                    }
+                                } else {
+                                    Text("Index Emails for AI Search")
                                 }
                             }
                             .buttonStyle(.borderedProminent)
                         }
+
+                        Button("⚙️ AI Settings") {
+                            openAISettings()
+                        }
+                        .buttonStyle(.borderless)
                     }
                 }
 
@@ -357,6 +386,19 @@ struct AskView: View {
     private func copyToClipboard(_ text: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+    }
+
+    private func openAISettings() {
+        let settingsView = AIBackendSettingsView()
+        let hostingController = NSHostingController(rootView: settingsView)
+        hostingController.title = "AI Backend Settings"
+
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "AI Backend Settings"
+        window.styleMask = [.titled, .closable, .resizable]
+        window.setContentSize(NSSize(width: 600, height: 700))
+        window.center()
+        window.makeKeyAndOrderFront(nil)
     }
 }
 

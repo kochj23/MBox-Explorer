@@ -5,6 +5,7 @@
 //  Local vector database for semantic email search
 //  Author: Jordan Koch
 //  Date: 2025-12-03
+//  Updated: 2025-01-17 - Added Ollama embeddings support
 //
 
 import Foundation
@@ -15,9 +16,11 @@ class VectorDatabase: ObservableObject {
     @Published var isIndexed = false
     @Published var indexProgress: Double = 0.0
     @Published var totalDocuments = 0
+    @Published var useSemanticSearch = false
 
     private var db: OpaquePointer?
     private let dbPath: String
+    private var ollamaClient: OllamaClient?
 
     init() {
         let documentsPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -27,6 +30,20 @@ class VectorDatabase: ObservableObject {
         dbPath = appFolder.appendingPathComponent("vectors.db").path
         openDatabase()
         createTables()
+
+        // Initialize Ollama client
+        Task {
+            await initializeOllama()
+        }
+    }
+
+    private func initializeOllama() async {
+        let client = OllamaClient()
+        await client.checkConnection()
+        await MainActor.run {
+            self.ollamaClient = client
+            self.useSemanticSearch = client.isConnected
+        }
     }
 
     deinit {
@@ -74,18 +91,47 @@ class VectorDatabase: ObservableObject {
         }
     }
 
-    /// Index emails for semantic search
+    /// Index emails for semantic search with embeddings
     func indexEmails(_ emails: [Email], progressCallback: @escaping (Double) -> Void) async {
         isIndexed = false
         totalDocuments = 0
 
-        await withTaskGroup(of: Void.self) { group in
-            for (index, email) in emails.enumerated() {
-                group.addTask {
-                    await self.indexEmail(email)
+        // Process in batches for efficiency
+        let batchSize = 20
+        let batches = stride(from: 0, to: emails.count, by: batchSize).map {
+            Array(emails[$0..<min($0 + batchSize, emails.count)])
+        }
+
+        var processedCount = 0
+
+        for batch in batches {
+            // Generate embeddings for batch if Ollama available
+            var embeddings: [[Float]] = []
+
+            if let client = ollamaClient, client.isConnected {
+                let texts = batch.map { email in
+                    // Combine subject + first 500 chars of body for embedding
+                    let bodyPrefix = String(email.body.prefix(500))
+                    return "\(email.subject) \(bodyPrefix)"
                 }
 
-                let progress = Double(index + 1) / Double(emails.count)
+                do {
+                    embeddings = try await client.batchEmbeddings(texts: texts) { current, total in
+                        // Progress within batch
+                    }
+                } catch {
+                    print("Embedding generation error: \(error.localizedDescription)")
+                    // Continue without embeddings
+                }
+            }
+
+            // Store emails with embeddings
+            for (index, email) in batch.enumerated() {
+                let embedding = embeddings.count > index ? embeddings[index] : nil
+                await indexEmail(email, embedding: embedding)
+
+                processedCount += 1
+                let progress = Double(processedCount) / Double(emails.count)
                 await MainActor.run {
                     self.indexProgress = progress
                     progressCallback(progress)
@@ -99,11 +145,10 @@ class VectorDatabase: ObservableObject {
         }
     }
 
-    private func indexEmail(_ email: Email) async {
-        // For now, just store in FTS (full implementation would generate embeddings with MLX)
+    private func indexEmail(_ email: Email, embedding: [Float]?) async {
         let insertSQL = """
-        INSERT OR REPLACE INTO email_vectors (id, email_id, content, from_address, subject, date, metadata)
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        INSERT OR REPLACE INTO email_vectors (id, email_id, content, embedding, from_address, subject, date, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         var statement: OpaquePointer?
@@ -111,10 +156,21 @@ class VectorDatabase: ObservableObject {
             sqlite3_bind_text(statement, 1, email.id.uuidString, -1, nil)
             sqlite3_bind_text(statement, 2, email.messageId, -1, nil)
             sqlite3_bind_text(statement, 3, email.body, -1, nil)
-            sqlite3_bind_text(statement, 4, email.from, -1, nil)
-            sqlite3_bind_text(statement, 5, email.subject, -1, nil)
-            sqlite3_bind_text(statement, 6, email.date, -1, nil)
-            sqlite3_bind_text(statement, 7, "{}", -1, nil)  // Placeholder for metadata
+
+            // Store embedding as BLOB
+            if let embedding = embedding {
+                let data = embedding.withUnsafeBytes { Data($0) }
+                data.withUnsafeBytes { bytes in
+                    sqlite3_bind_blob(statement, 4, bytes.baseAddress, Int32(data.count), nil)
+                }
+            } else {
+                sqlite3_bind_null(statement, 4)
+            }
+
+            sqlite3_bind_text(statement, 5, email.from, -1, nil)
+            sqlite3_bind_text(statement, 6, email.subject, -1, nil)
+            sqlite3_bind_text(statement, 7, email.date, -1, nil)
+            sqlite3_bind_text(statement, 8, "{}", -1, nil)  // Placeholder for metadata
 
             if sqlite3_step(statement) != SQLITE_DONE {
                 print("Error inserting email")
@@ -123,11 +179,94 @@ class VectorDatabase: ObservableObject {
         sqlite3_finalize(statement)
     }
 
-    /// Search emails semantically
+    /// Search emails semantically or with FTS5
     func search(query: String) async -> [SearchResult] {
+        // Try semantic search first if available
+        if useSemanticSearch, let client = ollamaClient, client.isConnected {
+            do {
+                return try await semanticSearch(query: query, client: client)
+            } catch {
+                print("Semantic search failed, falling back to FTS: \(error.localizedDescription)")
+            }
+        }
+
+        // Fallback to FTS5 keyword search
+        return await keywordSearch(query: query)
+    }
+
+    /// Semantic search using vector embeddings
+    private func semanticSearch(query: String, client: OllamaClient) async throws -> [SearchResult] {
+        // Generate query embedding
+        let queryEmbedding = try await client.embeddings(text: query)
+
+        // Fetch all email embeddings from database
+        var emailData: [(id: String, from: String, subject: String, date: String, content: String, embedding: [Float])] = []
+
+        let fetchSQL = """
+        SELECT id, email_id, content, from_address, subject, date, embedding
+        FROM email_vectors
+        WHERE embedding IS NOT NULL;
+        """
+
+        var statement: OpaquePointer?
+        if sqlite3_prepare_v2(db, fetchSQL, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let emailId = String(cString: sqlite3_column_text(statement, 1))
+                let content = String(cString: sqlite3_column_text(statement, 2))
+                let fromAddress = String(cString: sqlite3_column_text(statement, 3))
+                let subject = String(cString: sqlite3_column_text(statement, 4))
+                let dateString = String(cString: sqlite3_column_text(statement, 5))
+
+                // Deserialize embedding BLOB
+                if let blobPointer = sqlite3_column_blob(statement, 6) {
+                    let blobSize = sqlite3_column_bytes(statement, 6)
+                    let data = Data(bytes: blobPointer, count: Int(blobSize))
+
+                    let embedding = data.withUnsafeBytes { buffer -> [Float] in
+                        let floatBuffer = buffer.bindMemory(to: Float.self)
+                        return Array(floatBuffer)
+                    }
+
+                    emailData.append((id: emailId, from: fromAddress, subject: subject, date: dateString, content: content, embedding: embedding))
+                }
+            }
+        }
+        sqlite3_finalize(statement)
+
+        // Calculate cosine similarity for each email
+        var scoredResults: [(result: SearchResult, score: Float)] = []
+
+        for email in emailData {
+            let similarity = cosineSimilarity(queryEmbedding, email.embedding)
+
+            let snippet = String(email.content.prefix(200))
+            let result = SearchResult(
+                emailId: email.id,
+                content: email.content,
+                from: email.from,
+                subject: email.subject,
+                date: email.date,
+                snippet: snippet,
+                score: Double(similarity)
+            )
+
+            scoredResults.append((result: result, score: similarity))
+        }
+
+        // Sort by similarity score (descending) and return top 20
+        let topResults = scoredResults
+            .sorted { $0.score > $1.score }
+            .prefix(20)
+            .map { $0.result }
+
+        return Array(topResults)
+    }
+
+    /// Keyword search using FTS5 (fallback)
+    private func keywordSearch(query: String) async -> [SearchResult] {
         var results: [SearchResult] = []
 
-        // Use FTS5 for fast full-text search
         let searchSQL = """
         SELECT email_id, content, from_address, subject, date,
                snippet(email_fts, -1, '<mark>', '</mark>', '...', 32) as snippet
@@ -164,6 +303,19 @@ class VectorDatabase: ObservableObject {
         sqlite3_finalize(statement)
 
         return results
+    }
+
+    /// Calculate cosine similarity between two vectors
+    private func cosineSimilarity(_ a: [Float], _ b: [Float]) -> Float {
+        guard a.count == b.count else { return 0.0 }
+
+        let dotProduct = zip(a, b).map(*).reduce(0, +)
+        let magnitudeA = sqrt(a.map { $0 * $0 }.reduce(0, +))
+        let magnitudeB = sqrt(b.map { $0 * $0 }.reduce(0, +))
+
+        guard magnitudeA > 0, magnitudeB > 0 else { return 0.0 }
+
+        return dotProduct / (magnitudeA * magnitudeB)
     }
 
     /// Clear database

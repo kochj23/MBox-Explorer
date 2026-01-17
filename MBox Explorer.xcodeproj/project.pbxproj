@@ -10,6 +10,9 @@
 		BD768E39B961495776874418 /* ModernDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */; };
 
 		6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610D3EFB2D5D23FD826606E /* LocalLLM.swift */; };
+		35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */; };
+		36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */; };
+		61396430326536392D316239382D346637352D386133342D /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */; };
 		7EC7E7955FB707BAE5BA53F9 /* EmailSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */; };
 		BA654320B8AE457B9A856B6A /* NetworkVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */; };
 		C00B2C0479D170F97A8D05F4 /* AutoTagger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A989BC566E5181DAB386111 /* AutoTagger.swift */; };
@@ -66,6 +69,9 @@
 /* Begin PBXFileReference section */
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		2610D3EFB2D5D23FD826606E /* LocalLLM.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/LocalLLM.swift; sourceTree = "<group>"; };
+		38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/OllamaClient.swift; sourceTree = "<group>"; };
+		36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AI/AIBackendManager.swift; sourceTree = "<group>"; };
+		31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AISettingsView.swift; sourceTree = "<group>"; };
 		3533E5F905952EC4B14E8BD9 /* VectorDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/VectorDatabase.swift; sourceTree = "<group>"; };
 		4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/EmailSummarizer.swift; sourceTree = "<group>"; };
 		87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkVisualizationView.swift; sourceTree = "<group>"; };
@@ -136,6 +142,8 @@
 			children = (
 				3533E5F905952EC4B14E8BD9 /* VectorDatabase.swift */,
 				2610D3EFB2D5D23FD826606E /* LocalLLM.swift */,
+				38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */,
+				36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */,
 				4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */,
 				9A989BC566E5181DAB386111 /* AutoTagger.swift */,
 			);
@@ -211,6 +219,7 @@
 				MB0000140000000000000001 /* ToolbarCommands.swift */,
 				MB0000500000000000000001 /* ProgressView.swift */,
 				1DA6206E86CAEFE924E9D19C /* AskView.swift */,
+				31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */,
 				87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */,
 			);
 			path = Views;
@@ -380,6 +389,9 @@
 				D078756F2EB1C17800C75A43 /* MboxOperationsView.swift in Sources */,
 				F9C2F929F356DB18CE9FBA36 /* VectorDatabase.swift in Sources */,
 				6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */,
+				35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */,
+				36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */,
+				61396430326536392D316239382D346637352D386133342D /* AISettingsView.swift in Sources */,
 				7EC7E7955FB707BAE5BA53F9 /* EmailSummarizer.swift in Sources */,
 				C00B2C0479D170F97A8D05F4 /* AutoTagger.swift in Sources */,
 				D8904F77CE2555AEAAD0E03C /* AskView.swift in Sources */,

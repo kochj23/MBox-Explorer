@@ -74,6 +74,13 @@ struct MBox_ExplorerApp: App {
             }
 
             CommandMenu("Tools") {
+                Button("AI Configuration...") {
+                    NotificationCenter.default.post(name: .showAISettings, object: nil)
+                }
+                .keyboardShortcut("a", modifiers: [.command, .option])
+
+                Divider()
+
                 Button("PII Redaction Tool...") {
                     NotificationCenter.default.post(name: .showRedactionTool, object: nil)
                 }
@@ -208,6 +215,7 @@ extension Notification.Name {
     static let exportFiltered = Notification.Name("exportFiltered")
     static let exportThread = Notification.Name("exportThread")
     static let showExportSettings = Notification.Name("showExportSettings")
+    static let showAISettings = Notification.Name("showAISettings")
     static let toggleSidebar = Notification.Name("toggleSidebar")
     static let navigateNext = Notification.Name("navigateNext")
     static let navigatePrevious = Notification.Name("navigatePrevious")
