@@ -170,7 +170,16 @@ class VectorDatabase: ObservableObject {
             sqlite3_bind_text(statement, 5, email.from, -1, nil)
             sqlite3_bind_text(statement, 6, email.subject, -1, nil)
             sqlite3_bind_text(statement, 7, email.date, -1, nil)
-            sqlite3_bind_text(statement, 8, "{}", -1, nil)  // Placeholder for metadata
+
+            // Store metadata as JSON
+            let metadataJSON: String
+            if let jsonData = try? JSONSerialization.data(withJSONObject: email.metadata, options: []),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                metadataJSON = jsonString
+            } else {
+                metadataJSON = "{}"
+            }
+            sqlite3_bind_text(statement, 8, metadataJSON, -1, nil)
 
             if sqlite3_step(statement) != SQLITE_DONE {
                 print("Error inserting email")

@@ -605,33 +605,44 @@ extension AIBackendManager {
         maxTokens: Int
     ) async throws -> String {
 
-        // MLX runs via Python subprocess
-        // For now, fallback to Ollama if available
-        if isOllamaAvailable {
-            return try await generateWithOllama(
-                prompt: prompt,
-                systemPrompt: systemPrompt,
-                temperature: 0.7,
-                maxTokens: maxTokens
-            )
-
-        case .openAI:
-            throw AIError.mlxNotImplemented
-
-        case .googleCloud:
-            throw AIError.mlxNotImplemented
-
-        case .azureCognitive:
-            throw AIError.mlxNotImplemented
-
-        case .awsAI:
-            throw AIError.mlxNotImplemented
-
-        case .ibmWatson:
+        let mlxPath = "/opt/homebrew/bin/mlx_lm.generate"
+        guard FileManager.default.fileExists(atPath: mlxPath) else {
+            print("[AIBackend] MLX not installed. Install with: pip install mlx-lm")
             throw AIError.mlxNotImplemented
         }
 
-        throw AIError.mlxNotImplemented
+        var fullPrompt = prompt
+        if let system = systemPrompt {
+            fullPrompt = "\(system)\n\n\(prompt)"
+        }
+
+        let model = "mlx-community/Llama-3.2-3B-Instruct-4bit"
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: mlxPath)
+        process.arguments = ["--model", model, "--prompt", fullPrompt, "--max-tokens", "\(maxTokens)", "--temp", "0.7"]
+
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
+
+        try process.run()
+        process.waitUntilExit()
+
+        let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+
+        if process.terminationStatus != 0 {
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorMessage = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+            throw AIError.mlxNotImplemented
+        }
+
+        guard let output = String(data: outputData, encoding: .utf8), !output.isEmpty else {
+            throw AIError.noResponse
+        }
+
+        return output.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

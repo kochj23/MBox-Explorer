@@ -581,12 +581,68 @@ class EthicalAIGuardian: ObservableObject {
 
     private func parseEthicalAnalysis(_ response: String) -> EthicalAnalysis {
         // Parse JSON response from AI
-        // Placeholder implementation
+        if let jsonData = response.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
+
+            let isUnethical = json["isUnethical"] as? Bool ?? false
+            let confidence = json["confidence"] as? Double ?? 0.5
+
+            // Parse category
+            let categoryStr = json["category"] as? String ?? "other"
+            let category: ViolationCategory = {
+                switch categoryStr.lowercased() {
+                case "illegal_activity", "illegal": return .illegalActivity
+                case "harmful_content", "harmful": return .harmfulContent
+                case "misinformation", "misinfo": return .misinformation
+                case "harassment", "abuse": return .harassment
+                case "privacy_violation", "privacy": return .privacyViolation
+                case "hate_speech", "hate": return .hateSpeech
+                case "deception", "fraud": return .deception
+                default: return .other
+                }
+            }()
+
+            // Parse severity
+            let severityStr = json["severity"] as? String ?? "low"
+            let severity: ViolationSeverity = {
+                switch severityStr.lowercased() {
+                case "critical": return .critical
+                case "high": return .high
+                case "medium": return .medium
+                default: return .low
+                }
+            }()
+
+            // Parse recommended action
+            let actionStr = json["action"] as? String ?? "logOnly"
+            let action: RecommendedAction = {
+                switch actionStr.lowercased() {
+                case "block_completely", "block": return .blockCompletely
+                case "warn_user", "warn": return .warnUser
+                case "flag_for_review", "flag": return .flagForReview
+                case "require_approval", "approve": return .requireApproval
+                default: return .logOnly
+                }
+            }()
+
+            let reasoning = json["reasoning"] as? String ?? ""
+
+            return EthicalAnalysis(
+                isUnethical: isUnethical,
+                category: category,
+                severity: severity,
+                reasoning: reasoning,
+                confidence: confidence,
+                recommendedAction: action
+            )
+        }
+
+        // Fallback: assume safe if parsing fails
         return EthicalAnalysis(
             isUnethical: false,
             category: .other,
             severity: .low,
-            reasoning: "",
+            reasoning: "Parse failed - assuming safe",
             confidence: 0.5,
             recommendedAction: .logOnly
         )
