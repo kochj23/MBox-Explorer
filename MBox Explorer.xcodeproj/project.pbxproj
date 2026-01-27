@@ -7,14 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BD768E39B961495776874418 /* ModernDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */; };
-
-		6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610D3EFB2D5D23FD826606E /* LocalLLM.swift */; };
+		1154255057D856054D457D57 /* ImageGenerationUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */; };
 		35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */; };
 		36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */; };
+		3F172172EF7831896FC85D57 /* SecurityUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569BF452BCAD60FF219195F5 /* SecurityUnified.swift */; };
 		61396430326536392D316239382D346637352D386133342D /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */; };
+		614E01BD25B3A78A49DAF070 /* UnifiedAICapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */; };
+		6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610D3EFB2D5D23FD826606E /* LocalLLM.swift */; };
 		7EC7E7955FB707BAE5BA53F9 /* EmailSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */; };
+		9D912BB0388A479C026C1802 /* VoiceUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */; };
 		BA654320B8AE457B9A856B6A /* NetworkVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */; };
+		BD768E39B961495776874418 /* ModernDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */; };
+		BF708C1D81193E80840A69AA /* AnalysisUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FADA0642D6D75AFE52040D /* AnalysisUnified.swift */; };
 		C00B2C0479D170F97A8D05F4 /* AutoTagger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A989BC566E5181DAB386111 /* AutoTagger.swift */; };
 		D004E8BD2EB1AA8900304FC0 /* AlertManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D004E8BC2EB1AA8900304FC0 /* AlertManager.swift */; };
 		D004E8C02EB1AAD300304FC0 /* ErrorDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D004E8BE2EB1AAD300304FC0 /* ErrorDetailsView.swift */; };
@@ -69,13 +73,17 @@
 /* Begin PBXFileReference section */
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		2610D3EFB2D5D23FD826606E /* LocalLLM.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/LocalLLM.swift; sourceTree = "<group>"; };
-		38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/OllamaClient.swift; sourceTree = "<group>"; };
-		36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AI/AIBackendManager.swift; sourceTree = "<group>"; };
 		31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AISettingsView.swift; sourceTree = "<group>"; };
 		3533E5F905952EC4B14E8BD9 /* VectorDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/VectorDatabase.swift; sourceTree = "<group>"; };
+		36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AI/AIBackendManager.swift; sourceTree = "<group>"; };
+		38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/OllamaClient.swift; sourceTree = "<group>"; };
+		44FADA0642D6D75AFE52040D /* AnalysisUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AnalysisUnified.swift; path = AICapabilities/AnalysisUnified.swift; sourceTree = "<group>"; };
 		4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/EmailSummarizer.swift; sourceTree = "<group>"; };
+		569BF452BCAD60FF219195F5 /* SecurityUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecurityUnified.swift; path = AICapabilities/SecurityUnified.swift; sourceTree = "<group>"; };
 		87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkVisualizationView.swift; sourceTree = "<group>"; };
 		9A989BC566E5181DAB386111 /* AutoTagger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/AutoTagger.swift; sourceTree = "<group>"; };
+		C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceUnified.swift; path = AICapabilities/VoiceUnified.swift; sourceTree = "<group>"; };
+		C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnifiedAICapabilities.swift; path = AICapabilities/UnifiedAICapabilities.swift; sourceTree = "<group>"; };
 		D004E8BC2EB1AA8900304FC0 /* AlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
 		D004E8BE2EB1AAD300304FC0 /* ErrorDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDetailsView.swift; sourceTree = "<group>"; };
 		D004E8BF2EB1AAD300304FC0 /* ExportPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportPreviewView.swift; sourceTree = "<group>"; };
@@ -107,6 +115,7 @@
 		D07875842EB1C4C100C75A43 /* PIIRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PIIRedactor.swift; sourceTree = "<group>"; };
 		D07875852EB1C4C100C75A43 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		D07875882EB1C54C00C75A43 /* ThreeColumnLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeColumnLayoutView.swift; sourceTree = "<group>"; };
+		D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ImageGenerationUnified.swift; path = AICapabilities/ImageGenerationUnified.swift; sourceTree = "<group>"; };
 		MB0000020000000000000001 /* MBox_ExplorerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBox_ExplorerApp.swift; sourceTree = "<group>"; };
 		MB0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		MB0000060000000000000001 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
@@ -124,7 +133,7 @@
 		MB0000480000000000000001 /* RecentFilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentFilesManager.swift; sourceTree = "<group>"; };
 		MB0000500000000000000001 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernDesign.swift; sourceTree = "<group>"; };
-	/* End PBXFileReference section */
+/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		MB0000280000000000000001 /* Frameworks */ = {
@@ -148,6 +157,18 @@
 				9A989BC566E5181DAB386111 /* AutoTagger.swift */,
 			);
 			name = AI;
+			sourceTree = "<group>";
+		};
+		B6AE4F6F079CBEA5FF43DBD7 /* AICapabilities */ = {
+			isa = PBXGroup;
+			children = (
+				C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */,
+				D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */,
+				C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */,
+				44FADA0642D6D75AFE52040D /* AnalysisUnified.swift */,
+				569BF452BCAD60FF219195F5 /* SecurityUnified.swift */,
+			);
+			name = AICapabilities;
 			sourceTree = "<group>";
 		};
 		C7A270A06C6F2802B6C6D7B9 /* AI */ = {
@@ -178,8 +199,9 @@
 				MB0000260000000000000001 /* Assets.xcassets */,
 				54503A623328C982A327062B /* AI */,
 				C7A270A06C6F2802B6C6D7B9 /* AI */,
-			
-				MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */,);
+				MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */,
+				B6AE4F6F079CBEA5FF43DBD7 /* AICapabilities */,
+			);
 			path = "MBox Explorer";
 			sourceTree = "<group>";
 		};
@@ -396,8 +418,13 @@
 				C00B2C0479D170F97A8D05F4 /* AutoTagger.swift in Sources */,
 				D8904F77CE2555AEAAD0E03C /* AskView.swift in Sources */,
 				BA654320B8AE457B9A856B6A /* NetworkVisualizationView.swift in Sources */,
-			
-				BD768E39B961495776874418 /* ModernDesign.swift in Sources */,);
+				BD768E39B961495776874418 /* ModernDesign.swift in Sources */,
+				614E01BD25B3A78A49DAF070 /* UnifiedAICapabilities.swift in Sources */,
+				1154255057D856054D457D57 /* ImageGenerationUnified.swift in Sources */,
+				9D912BB0388A479C026C1802 /* VoiceUnified.swift in Sources */,
+				BF708C1D81193E80840A69AA /* AnalysisUnified.swift in Sources */,
+				3F172172EF7831896FC85D57 /* SecurityUnified.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
