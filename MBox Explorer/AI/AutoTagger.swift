@@ -31,7 +31,7 @@ enum EmailPriority: String {
 struct EmailTags {
     var categories: [EmailCategory] = []
     var priority: EmailPriority = .medium
-    var sentiment: Sentiment = .neutral
+    var sentiment: EmailSentiment = .neutral
     var hasActionItems: Bool = false
     var needsResponse: Bool = false
 }
@@ -49,7 +49,7 @@ class AutoTagger: ObservableObject {
         tags.priority = determinePriority(email)
 
         // Analyze sentiment
-        tags.sentiment = analyzeSentiment(email.body)
+        tags.sentiment = analyzeEmailSentiment(email.body)
 
         // Check for action items
         tags.hasActionItems = hasActionItems(email.body)
@@ -136,7 +136,7 @@ class AutoTagger: ObservableObject {
         return .medium
     }
 
-    private func analyzeSentiment(_ text: String) -> Sentiment {
+    private func analyzeEmailSentiment(_ text: String) -> EmailSentiment {
         let lowerText = text.lowercased()
 
         let positiveWords = ["great", "excellent", "good", "happy", "pleased", "wonderful"]

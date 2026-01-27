@@ -35,7 +35,7 @@ class EmailSummarizer: ObservableObject {
             summary: summary,
             actionItems: actionItems,
             keyPoints: keyPoints,
-            sentiment: analyzeSentiment(email.body)
+            sentiment: analyzeEmailSentiment(email.body)
         )
     }
 
@@ -153,7 +153,7 @@ class EmailSummarizer: ObservableObject {
         return Array(decisions.prefix(5))
     }
 
-    private func analyzeSentiment(_ text: String) -> Sentiment {
+    private func analyzeEmailSentiment(_ text: String) -> EmailSentiment {
         // Simple sentiment analysis (can be enhanced with ML)
         let lowerText = text.lowercased()
 
@@ -193,7 +193,7 @@ struct EmailSummary: Identifiable {
     let summary: String
     let actionItems: [String]
     let keyPoints: [String]
-    let sentiment: Sentiment
+    let sentiment: EmailSentiment
 }
 
 struct ThreadSummary: Identifiable {
@@ -215,7 +215,7 @@ struct DailyDigest: Identifiable {
     let actionItems: [String]
 }
 
-enum Sentiment: String {
+enum EmailSentiment: String {
     case positive = "Positive"
     case negative = "Negative"
     case neutral = "Neutral"
