@@ -275,14 +275,97 @@ class VectorDatabase: ObservableObject {
         // Try semantic search first if available
         if embeddingManager.useSemanticSearch {
             do {
-                return try await semanticSearch(query: query)
+                let results = try await semanticSearch(query: query)
+                if !results.isEmpty {
+                    return results
+                }
             } catch {
                 print("Semantic search failed (\(embeddingManager.selectedProvider.rawValue)), falling back to FTS: \(error.localizedDescription)")
             }
         }
 
-        // Fallback to FTS5 keyword search
-        return await keywordSearch(query: query)
+        // Try FTS5 keyword search with extracted keywords
+        let keywords = extractKeywords(from: query)
+        if !keywords.isEmpty {
+            let ftsResults = await keywordSearch(query: keywords)
+            if !ftsResults.isEmpty {
+                return ftsResults
+            }
+        }
+
+        // CREATIVE FALLBACK: If no search results, return a diverse sample of emails
+        // This ensures the LLM always has context to work with for summary/overview questions
+        print("No search matches found, returning email sample for context")
+        return await getEmailSample(limit: 20)
+    }
+
+    /// Extract meaningful keywords from a natural language query
+    private func extractKeywords(from query: String) -> String {
+        // Remove common question words and stop words
+        let stopWords: Set<String> = [
+            "can", "you", "please", "the", "a", "an", "is", "are", "was", "were",
+            "what", "who", "where", "when", "why", "how", "which", "that", "this",
+            "summarize", "summary", "tell", "me", "about", "show", "find", "search",
+            "email", "emails", "e-mail", "e-mails", "mail", "mails", "message", "messages",
+            "archive", "inbox", "thread", "threads", "contents", "content", "all", "my"
+        ]
+
+        let words = query.lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty && $0.count > 2 && !stopWords.contains($0) }
+
+        // Join with OR for FTS5 query
+        return words.joined(separator: " OR ")
+    }
+
+    /// Get a diverse sample of emails for context when search returns nothing
+    private func getEmailSample(limit: Int) async -> [SearchResult] {
+        return dbQueue.sync {
+            var results: [SearchResult] = []
+
+            // Get a mix of recent and varied emails
+            let sampleSQL = """
+            SELECT email_id, content, from_address, subject, date
+            FROM email_vectors
+            ORDER BY date DESC
+            LIMIT ?;
+            """
+
+            var statement: OpaquePointer?
+            if sqlite3_prepare_v2(db, sampleSQL, -1, &statement, nil) == SQLITE_OK {
+                sqlite3_bind_int(statement, 1, Int32(limit))
+
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    guard let emailIdPtr = sqlite3_column_text(statement, 0),
+                          let contentPtr = sqlite3_column_text(statement, 1),
+                          let fromPtr = sqlite3_column_text(statement, 2),
+                          let subjectPtr = sqlite3_column_text(statement, 3),
+                          let datePtr = sqlite3_column_text(statement, 4) else {
+                        continue
+                    }
+
+                    let emailId = String(cString: emailIdPtr)
+                    let content = String(cString: contentPtr)
+                    let fromAddress = String(cString: fromPtr)
+                    let subject = String(cString: subjectPtr)
+                    let dateString = String(cString: datePtr)
+                    let snippet = String(content.prefix(300))
+
+                    results.append(SearchResult(
+                        emailId: emailId,
+                        content: content,
+                        from: fromAddress,
+                        subject: subject,
+                        date: dateString,
+                        snippet: snippet,
+                        score: 0.5  // Lower score since it's a sample, not a match
+                    ))
+                }
+            }
+            sqlite3_finalize(statement)
+
+            return results
+        }
     }
 
     /// Semantic search using vector embeddings
