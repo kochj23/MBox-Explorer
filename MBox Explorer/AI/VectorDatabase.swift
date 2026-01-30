@@ -6,6 +6,7 @@
 //  Author: Jordan Koch
 //  Date: 2025-12-03
 //  Updated: 2025-01-17 - Added Ollama embeddings support
+//  Updated: 2026-01-30 - Added multi-provider embedding support (MLX, OpenAI, sentence-transformers)
 //
 
 import Foundation
@@ -17,10 +18,12 @@ class VectorDatabase: ObservableObject {
     @Published var indexProgress: Double = 0.0
     @Published var totalDocuments = 0
     @Published var useSemanticSearch = false
+    @Published var embeddingProvider: String = "None"
+    @Published var embeddingDimension: Int = 0
 
     private var db: OpaquePointer?
     private let dbPath: String
-    private var ollamaClient: OllamaClient?
+    private let embeddingManager = EmbeddingManager.shared
 
     init() {
         let documentsPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -31,18 +34,28 @@ class VectorDatabase: ObservableObject {
         openDatabase()
         createTables()
 
-        // Initialize Ollama client
+        // Initialize embedding provider
         Task {
-            await initializeOllama()
+            await initializeEmbeddings()
         }
     }
 
-    private func initializeOllama() async {
-        let client = OllamaClient()
-        await client.checkConnection()
+    private func initializeEmbeddings() async {
+        await embeddingManager.updateActiveProvider()
         await MainActor.run {
-            self.ollamaClient = client
-            self.useSemanticSearch = client.isConnected
+            self.useSemanticSearch = embeddingManager.useSemanticSearch
+            self.embeddingProvider = embeddingManager.selectedProvider.rawValue
+            self.embeddingDimension = embeddingManager.currentDimension
+        }
+    }
+
+    /// Refresh embedding provider status
+    func refreshEmbeddingStatus() async {
+        await embeddingManager.updateActiveProvider()
+        await MainActor.run {
+            self.useSemanticSearch = embeddingManager.useSemanticSearch
+            self.embeddingProvider = embeddingManager.selectedProvider.rawValue
+            self.embeddingDimension = embeddingManager.currentDimension
         }
     }
 
@@ -96,6 +109,9 @@ class VectorDatabase: ObservableObject {
         isIndexed = false
         totalDocuments = 0
 
+        // Refresh embedding status
+        await refreshEmbeddingStatus()
+
         // Process in batches for efficiency
         let batchSize = 20
         let batches = stride(from: 0, to: emails.count, by: batchSize).map {
@@ -105,10 +121,10 @@ class VectorDatabase: ObservableObject {
         var processedCount = 0
 
         for batch in batches {
-            // Generate embeddings for batch if Ollama available
+            // Generate embeddings for batch if embedding provider available
             var embeddings: [[Float]] = []
 
-            if let client = ollamaClient, client.isConnected {
+            if embeddingManager.useSemanticSearch {
                 let texts = batch.map { email in
                     // Combine subject + first 500 chars of body for embedding
                     let bodyPrefix = String(email.body.prefix(500))
@@ -116,11 +132,9 @@ class VectorDatabase: ObservableObject {
                 }
 
                 do {
-                    embeddings = try await client.batchEmbeddings(texts: texts) { current, total in
-                        // Progress within batch
-                    }
+                    embeddings = try await embeddingManager.generateBatchEmbeddings(for: texts)
                 } catch {
-                    print("Embedding generation error: \(error.localizedDescription)")
+                    print("Embedding generation error (\(embeddingManager.selectedProvider.rawValue)): \(error.localizedDescription)")
                     // Continue without embeddings
                 }
             }
@@ -190,12 +204,15 @@ class VectorDatabase: ObservableObject {
 
     /// Search emails semantically or with FTS5
     func search(query: String) async -> [SearchResult] {
+        // Refresh embedding status
+        await refreshEmbeddingStatus()
+
         // Try semantic search first if available
-        if useSemanticSearch, let client = ollamaClient, client.isConnected {
+        if embeddingManager.useSemanticSearch {
             do {
-                return try await semanticSearch(query: query, client: client)
+                return try await semanticSearch(query: query)
             } catch {
-                print("Semantic search failed, falling back to FTS: \(error.localizedDescription)")
+                print("Semantic search failed (\(embeddingManager.selectedProvider.rawValue)), falling back to FTS: \(error.localizedDescription)")
             }
         }
 
@@ -204,9 +221,9 @@ class VectorDatabase: ObservableObject {
     }
 
     /// Semantic search using vector embeddings
-    private func semanticSearch(query: String, client: OllamaClient) async throws -> [SearchResult] {
-        // Generate query embedding
-        let queryEmbedding = try await client.embeddings(text: query)
+    private func semanticSearch(query: String) async throws -> [SearchResult] {
+        // Generate query embedding using active provider
+        let queryEmbedding = try await embeddingManager.generateEmbedding(for: query)
 
         // Fetch all email embeddings from database
         var emailData: [(id: String, from: String, subject: String, date: String, content: String, embedding: [Float])] = []
