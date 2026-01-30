@@ -87,10 +87,57 @@ MBox Explorer includes a **native RAG (Retrieval-Augmented Generation) pipeline*
 
 ### 2. Embedding Generation
 
-- **Provider**: Ollama API (`/api/embeddings`)
-- **Default model**: `nomic-embed-text`
-- **Chunking strategy**: Subject + first 500 characters of body
+MBox Explorer supports **4 embedding providers** - choose based on your needs:
+
+#### Embedding Provider Comparison
+
+| Provider | Cost | Privacy | Speed | Quality | Setup |
+|----------|------|---------|-------|---------|-------|
+| **Ollama** | Free | 100% Local | Fast | Good | `brew install ollama && ollama pull nomic-embed-text` |
+| **MLX** | Free | 100% Local | Very Fast | Good | Built-in (Apple Silicon only) |
+| **OpenAI** | $0.02/1M tokens | Cloud | Fast | Excellent | API key required |
+| **Sentence Transformers** | Free | 100% Local | Medium | Excellent | `pip install sentence-transformers` |
+
+#### Detailed Provider Analysis
+
+**1. Ollama Embeddings** (Recommended for most users)
+| Aspect | Details |
+|--------|---------|
+| Pros | Free, private, runs locally, easy setup, multiple models |
+| Cons | Requires Ollama daemon running |
+| Models | `nomic-embed-text` (768d), `all-minilm` (384d), `mxbai-embed-large` (1024d) |
+| Best for | Users who want local, private semantic search |
+
+**2. MLX Embeddings** (Best for Apple Silicon users)
+| Aspect | Details |
+|--------|---------|
+| Pros | Native Apple Silicon, fastest inference, no external dependencies |
+| Cons | macOS only, Apple Silicon required, model download on first use |
+| Models | `all-MiniLM-L6-v2` (384d), `nomic-embed-text-v1.5` (768d), `bge-small-en-v1.5` (384d) |
+| Best for | M1/M2/M3 Mac users wanting maximum performance |
+
+**3. OpenAI Embeddings** (Best quality)
+| Aspect | Details |
+|--------|---------|
+| Pros | Highest quality, well-documented, reliable |
+| Cons | Costs money, data sent to cloud, requires API key |
+| Models | `text-embedding-3-small` (1536d, $0.02/1M), `text-embedding-3-large` (3072d, $0.13/1M) |
+| Best for | Users who prioritize quality and don't mind cloud processing |
+
+**4. Sentence Transformers** (Best flexibility)
+| Aspect | Details |
+|--------|---------|
+| Pros | Excellent quality, huge model selection, local processing |
+| Cons | Requires Python, slower startup, larger disk footprint |
+| Models | Any HuggingFace sentence-transformers model |
+| Best for | ML enthusiasts who want model flexibility |
+
+#### Configuration
+
 - **Storage**: Embeddings stored in SQLite as binary data
+- **Chunking strategy**: Subject + first 500 characters of body
+- **Dimension tracking**: Automatically tracked per provider
+- **Provider switching**: Change in Settings → AI → Embedding Provider
 
 ### 3. Retrieval Methods
 
@@ -185,17 +232,28 @@ USER QUESTION: [query]
 
 ### AI Backend Support
 
+#### LLM Providers (Text Generation)
+
 | Backend | Type | Cost | Features |
 |---------|------|------|----------|
-| Ollama | Local | Free | Embeddings + LLM |
-| MLX | Local | Free | Apple Silicon optimized |
-| TinyLLM | Local | Free | Lightweight |
+| Ollama | Local | Free | LLM + Embeddings |
+| MLX | Local | Free | Apple Silicon optimized LLM |
+| TinyLLM | Local | Free | Lightweight LLM |
 | OpenWebUI | Self-hosted | Free | Web interface |
 | OpenAI | Cloud | Paid | GPT-4o |
 | Google Cloud | Cloud | Paid | Vertex AI |
 | Azure | Cloud | Paid | Cognitive Services |
 | AWS | Cloud | Paid | Bedrock |
 | IBM Watson | Cloud | Paid | NLU |
+
+#### Embedding Providers (Semantic Search)
+
+| Provider | Type | Cost | Dimensions | Speed |
+|----------|------|------|------------|-------|
+| Ollama | Local | Free | 384-1024 | Fast |
+| MLX | Local | Free | 384-768 | Very Fast |
+| OpenAI | Cloud | Paid | 1536-3072 | Fast |
+| Sentence Transformers | Local | Free | 384-768+ | Medium |
 
 ---
 
@@ -215,6 +273,8 @@ cp -R build/Release/*.app ~/Applications/
 ```
 
 ### AI Backend Setup (Recommended)
+
+**Option 1: Ollama (Recommended - easiest)**
 ```bash
 # Install Ollama for local, private AI
 brew install ollama
@@ -223,6 +283,25 @@ ollama serve
 # Pull models for RAG
 ollama pull mistral:latest        # For chat/Q&A
 ollama pull nomic-embed-text      # For embeddings (semantic search)
+```
+
+**Option 2: MLX (Apple Silicon - fastest)**
+```bash
+# Built-in! Just select MLX in Settings → AI → Embedding Provider
+# Models download automatically on first use
+```
+
+**Option 3: OpenAI (Cloud - best quality)**
+```bash
+# Get API key from platform.openai.com
+# Enter key in Settings → AI → Cloud API Keys → OpenAI
+```
+
+**Option 4: Sentence Transformers (Most flexible)**
+```bash
+# Requires Python 3.8+
+pip install sentence-transformers
+# Select Sentence Transformers in Settings → AI → Embedding Provider
 ```
 
 ---
@@ -311,6 +390,15 @@ All AI operations are monitored for:
 ---
 
 ## 📊 Version History
+
+### v2.1 - Multi-Provider Embeddings (January 30, 2026)
+- **4 Embedding Providers**: Ollama, MLX, OpenAI, Sentence Transformers
+- Provider comparison table with pros/cons
+- Automatic provider detection and fallback
+- MLX native Apple Silicon embeddings
+- OpenAI text-embedding-3-small/large support
+- Python bridge for sentence-transformers
+- Unified EmbeddingManager for all providers
 
 ### v2.0 - RAG Edition (January 30, 2026)
 - Native RAG pipeline implementation

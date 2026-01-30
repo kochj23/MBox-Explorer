@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		0060E523835F69E77DC40F8D /* HypotheticalAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4FE314B120E4916E4FEA7A /* HypotheticalAnalyzer.swift */; };
 		050AE07D9F0290A9C9B59841 /* CommitmentTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408098289A40C753C412475A /* CommitmentTracker.swift */; };
+		EMB001010000000000000001 /* EmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002010000000000000001 /* EmbeddingProvider.swift */; };
+		EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */; };
+		EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002030000000000000001 /* MLXEmbeddingProvider.swift */; };
+		EMB001040000000000000001 /* OpenAIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */; };
+		EMB001050000000000000001 /* SentenceTransformerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002050000000000000001 /* SentenceTransformerProvider.swift */; };
 		0ACC5F34C57FEAFED5D7DF30 /* DecisionArchaeologist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */; };
 		1154255057D856054D457D57 /* ImageGenerationUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */; };
 		12DE38BA3A71B50A678A12B3 /* PersonaChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6531667EE7C788EA76F5A0F /* PersonaChat.swift */; };
@@ -91,6 +96,11 @@
 /* Begin PBXFileReference section */
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		25ACFE0E46E831D381EB3E35 /* EmailSearchAgent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmailSearchAgent.swift; path = "AI/Integration/EmailSearchAgent.swift"; sourceTree = "<group>"; };
+		EMB002010000000000000001 /* EmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmbeddingProvider.swift; path = "AI/Embeddings/EmbeddingProvider.swift"; sourceTree = "<group>"; };
+		EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OllamaEmbeddingProvider.swift; path = "AI/Embeddings/OllamaEmbeddingProvider.swift"; sourceTree = "<group>"; };
+		EMB002030000000000000001 /* MLXEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MLXEmbeddingProvider.swift; path = "AI/Embeddings/MLXEmbeddingProvider.swift"; sourceTree = "<group>"; };
+		EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenAIEmbeddingProvider.swift; path = "AI/Embeddings/OpenAIEmbeddingProvider.swift"; sourceTree = "<group>"; };
+		EMB002050000000000000001 /* SentenceTransformerProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentenceTransformerProvider.swift; path = "AI/Embeddings/SentenceTransformerProvider.swift"; sourceTree = "<group>"; };
 		2610D3EFB2D5D23FD826606E /* LocalLLM.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/LocalLLM.swift; sourceTree = "<group>"; };
 		31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AISettingsView.swift; sourceTree = "<group>"; };
 		32B46A71F0106A905F6218BA /* TimeTravelEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TimeTravelEngine.swift; path = "AI/Advanced/TimeTravelEngine.swift"; sourceTree = "<group>"; };
@@ -196,8 +206,21 @@
 				D87970D6F05B3258CDDD530B /* Intelligence */,
 				F151225335B055EE327A55C3 /* Advanced */,
 				ACD84A2E903D00EEA83ED620 /* Integration */,
+				EMB003000000000000000001 /* Embeddings */,
 			);
 			name = AI;
+			sourceTree = "<group>";
+		};
+		EMB003000000000000000001 /* Embeddings */ = {
+			isa = PBXGroup;
+			children = (
+				EMB002010000000000000001 /* EmbeddingProvider.swift */,
+				EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */,
+				EMB002030000000000000001 /* MLXEmbeddingProvider.swift */,
+				EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */,
+				EMB002050000000000000001 /* SentenceTransformerProvider.swift */,
+			);
+			name = Embeddings;
 			sourceTree = "<group>";
 		};
 		56D930EA56AFE7611177F548 /* Analysis */ = {
@@ -546,6 +569,11 @@
 				3D6775E92896C02CF56EEFC2 /* SmartForwarder.swift in Sources */,
 				A9149DF9944F63BE246AB2EF /* EmailSearchAgent.swift in Sources */,
 				8238508A80546774B50AD050 /* ConversationView.swift in Sources */,
+				EMB001010000000000000001 /* EmbeddingProvider.swift in Sources */,
+				EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */,
+				EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */,
+				EMB001040000000000000001 /* OpenAIEmbeddingProvider.swift in Sources */,
+				EMB001050000000000000001 /* SentenceTransformerProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -685,7 +713,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = QRRCB8HB3W;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -699,7 +727,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.digitalnoise.MBox-Explorer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -715,7 +743,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = QRRCB8HB3W;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -729,7 +757,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.digitalnoise.MBox-Explorer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
