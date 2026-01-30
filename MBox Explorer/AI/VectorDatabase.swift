@@ -372,10 +372,13 @@ class VectorDatabase: ObservableObject {
         return dbQueue.sync {
             var results: [SearchResult] = []
 
+            // FTS5 external content tables don't store actual data - must JOIN with email_vectors
+            // Use highlight() for the FTS columns, then get full content from joined table
             let searchSQL = """
-            SELECT email_id, content, from_address, subject, date,
-                   snippet(email_fts, -1, '<mark>', '</mark>', '...', 32) as snippet
+            SELECT ev.email_id, ev.content, ev.from_address, ev.subject, ev.date,
+                   highlight(email_fts, 0, '<mark>', '</mark>') as snippet
             FROM email_fts
+            JOIN email_vectors ev ON ev.rowid = email_fts.rowid
             WHERE email_fts MATCH ?
             ORDER BY rank
             LIMIT 20;
@@ -390,8 +393,7 @@ class VectorDatabase: ObservableObject {
                           let contentPtr = sqlite3_column_text(statement, 1),
                           let fromPtr = sqlite3_column_text(statement, 2),
                           let subjectPtr = sqlite3_column_text(statement, 3),
-                          let datePtr = sqlite3_column_text(statement, 4),
-                          let snippetPtr = sqlite3_column_text(statement, 5) else {
+                          let datePtr = sqlite3_column_text(statement, 4) else {
                         continue
                     }
 
@@ -400,7 +402,14 @@ class VectorDatabase: ObservableObject {
                     let fromAddress = String(cString: fromPtr)
                     let subject = String(cString: subjectPtr)
                     let dateString = String(cString: datePtr)
-                    let snippet = String(cString: snippetPtr)
+
+                    // Snippet may be null, use content prefix as fallback
+                    let snippet: String
+                    if let snippetPtr = sqlite3_column_text(statement, 5) {
+                        snippet = String(cString: snippetPtr)
+                    } else {
+                        snippet = String(content.prefix(200))
+                    }
 
                     let result = SearchResult(
                         emailId: emailId,
@@ -412,6 +421,11 @@ class VectorDatabase: ObservableObject {
                         score: 1.0
                     )
                     results.append(result)
+                }
+            } else {
+                // Log SQL error for debugging
+                if let errorMsg = sqlite3_errmsg(db) {
+                    print("FTS search SQL error: \(String(cString: errorMsg))")
                 }
             }
             sqlite3_finalize(statement)
