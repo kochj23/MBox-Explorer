@@ -86,6 +86,44 @@ struct SidebarView: View {
 
             Divider()
 
+            // Navigation Section (outside List for proper rendering)
+            if !viewModel.emails.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Views")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+
+                    ForEach([SidebarItem.allEmails, .ask, .network, .attachments, .analytics, .operations], id: \.self) { item in
+                        Button(action: { selectedView = item }) {
+                            HStack {
+                                Label(item.rawValue, systemImage: icon(for: item))
+                                    .foregroundColor(selectedView == item ? .accentColor : .primary)
+                                Spacer()
+                                if selectedView == item {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(.accentColor)
+                                        .font(.caption)
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(selectedView == item ? Color.accentColor.opacity(0.15) : Color.clear)
+                            )
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 8)
+                    }
+                }
+
+                Divider()
+                    .padding(.vertical, 8)
+            }
+
             // Statistics
             List {
                 if !viewModel.emails.isEmpty {

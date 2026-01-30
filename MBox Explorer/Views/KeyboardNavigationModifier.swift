@@ -22,9 +22,22 @@ struct KeyboardNavigationModifier: ViewModifier {
     }
 
     private func handleKeyEvent(_ event: NSEvent) -> Bool {
-        // Don't intercept if text field is focused
+        // Don't intercept if search field is focused
         if searchFocused {
             return false
+        }
+
+        // Don't intercept if ANY text field/text view is the first responder
+        // This prevents consuming keystrokes when typing in AskView or other text inputs
+        if let firstResponder = NSApp.keyWindow?.firstResponder {
+            if firstResponder is NSTextView || firstResponder is NSTextField {
+                return false
+            }
+            // Also check for SwiftUI text field backing views
+            let className = String(describing: type(of: firstResponder))
+            if className.contains("TextField") || className.contains("TextEditor") || className.contains("NSTextInputClient") {
+                return false
+            }
         }
 
         // Don't intercept if modifier keys are pressed (except Shift for X)

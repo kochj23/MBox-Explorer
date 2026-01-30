@@ -7,12 +7,53 @@
 
 import SwiftUI
 
+// MARK: - AI Status Indicator for Toolbar
+
+struct AIStatusIndicator: View {
+    @StateObject private var llm = LocalLLM()
+    @State private var showingSettings = false
+
+    var body: some View {
+        Button(action: { showingSettings = true }) {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(llm.isAvailable ? Color.green : Color.orange)
+                    .frame(width: 8, height: 8)
+
+                if let backend = llm.getActiveBackend() {
+                    Text(backend.rawValue)
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                } else {
+                    Text("AI Offline")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.secondary.opacity(0.1))
+            )
+        }
+        .buttonStyle(.plain)
+        .help(llm.isAvailable ? "AI is connected - click to configure" : "AI is offline - click to configure")
+        .sheet(isPresented: $showingSettings) {
+            AISettingsView()
+        }
+    }
+}
+
 struct ToolbarCommands: View {
     @ObservedObject var viewModel: MboxViewModel
     @Binding var showingFilePicker: Bool
 
     var body: some View {
         Group {
+            // AI Status indicator (compact)
+            AIStatusIndicator()
+
             // List density picker
             Menu {
                 Picker("List Density", selection: $viewModel.listDensity) {

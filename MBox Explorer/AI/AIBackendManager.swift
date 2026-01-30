@@ -108,6 +108,11 @@ class AIBackendManager: ObservableObject {
     // OpenWebUI-specific
     @Published var openWebUIServerURL: String = "http://localhost:8080"
 
+    // Temperature settings (user-configurable)
+    @Published var questionTemperature: Float = 0.2  // Low for factual Q&A (reduces hallucinations)
+    @Published var summaryTemperature: Float = 0.3   // Slightly higher for summaries
+    @Published var creativeTemperature: Float = 0.7  // Higher for creative tasks
+
     // MARK: - Private Properties
 
     private let userDefaults = UserDefaults.standard
@@ -121,6 +126,9 @@ class AIBackendManager: ObservableObject {
         static let tinyLLMServerURL = "AIBackendManager_TinyLLMServerURL"
         static let tinyChatServerURL = "AIBackendManager_TinyChatServerURL"
         static let openWebUIServerURL = "AIBackendManager_OpenWebUIServerURL"
+        static let questionTemperature = "AIBackendManager_QuestionTemperature"
+        static let summaryTemperature = "AIBackendManager_SummaryTemperature"
+        static let creativeTemperature = "AIBackendManager_CreativeTemperature"
     }
 
     // MARK: - Initialization
@@ -146,6 +154,11 @@ class AIBackendManager: ObservableObject {
         tinyLLMServerURL = userDefaults.string(forKey: Keys.tinyLLMServerURL) ?? "http://localhost:8000"
         tinyChatServerURL = userDefaults.string(forKey: Keys.tinyChatServerURL) ?? "http://localhost:8000"
         openWebUIServerURL = userDefaults.string(forKey: Keys.openWebUIServerURL) ?? "http://localhost:8080"
+
+        // Load temperature settings (with sensible defaults)
+        questionTemperature = userDefaults.object(forKey: Keys.questionTemperature) as? Float ?? 0.2
+        summaryTemperature = userDefaults.object(forKey: Keys.summaryTemperature) as? Float ?? 0.3
+        creativeTemperature = userDefaults.object(forKey: Keys.creativeTemperature) as? Float ?? 0.7
     }
 
     func saveSettings() {
@@ -156,6 +169,9 @@ class AIBackendManager: ObservableObject {
         userDefaults.set(tinyLLMServerURL, forKey: Keys.tinyLLMServerURL)
         userDefaults.set(tinyChatServerURL, forKey: Keys.tinyChatServerURL)
         userDefaults.set(openWebUIServerURL, forKey: Keys.openWebUIServerURL)
+        userDefaults.set(questionTemperature, forKey: Keys.questionTemperature)
+        userDefaults.set(summaryTemperature, forKey: Keys.summaryTemperature)
+        userDefaults.set(creativeTemperature, forKey: Keys.creativeTemperature)
     }
 
     // MARK: - Backend Availability Checking
@@ -1016,6 +1032,61 @@ struct AIBackendSettingsView: View {
                             .foregroundColor(.blue)
 
                         Text("Default: http://localhost:8080 or http://localhost:3000")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+
+            Section(header: Text("Temperature Settings")) {
+                VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Q&A Temperature:")
+                            Spacer()
+                            Text(String(format: "%.2f", manager.questionTemperature))
+                                .foregroundColor(.secondary)
+                                .frame(width: 40)
+                        }
+                        Slider(value: $manager.questionTemperature, in: 0.0...1.0, step: 0.05)
+                            .onChange(of: manager.questionTemperature) { _, _ in
+                                manager.saveSettings()
+                            }
+                        Text("Lower = more factual, less hallucination. Recommended: 0.1-0.3")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Summary Temperature:")
+                            Spacer()
+                            Text(String(format: "%.2f", manager.summaryTemperature))
+                                .foregroundColor(.secondary)
+                                .frame(width: 40)
+                        }
+                        Slider(value: $manager.summaryTemperature, in: 0.0...1.0, step: 0.05)
+                            .onChange(of: manager.summaryTemperature) { _, _ in
+                                manager.saveSettings()
+                            }
+                        Text("For email summaries. Recommended: 0.2-0.4")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Creative Temperature:")
+                            Spacer()
+                            Text(String(format: "%.2f", manager.creativeTemperature))
+                                .foregroundColor(.secondary)
+                                .frame(width: 40)
+                        }
+                        Slider(value: $manager.creativeTemperature, in: 0.0...1.0, step: 0.05)
+                            .onChange(of: manager.creativeTemperature) { _, _ in
+                                manager.saveSettings()
+                            }
+                        Text("For creative tasks. Higher = more varied output.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

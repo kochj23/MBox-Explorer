@@ -1,19 +1,34 @@
 # MBox Explorer
 
-**AI-Powered Application with Cloud Integration & Ethical Safeguards**
+**AI-Powered Email Archive Analysis with Native RAG Pipeline**
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-Production-success)
-![AI](https://img.shields.io/badge/AI-5%20Cloud%20Providers-purple)
+![AI](https://img.shields.io/badge/AI-RAG%20Pipeline-purple)
 ![Ethics](https://img.shields.io/badge/Ethics-Protected-green)
 
 ---
 
-## ✨ Latest Update: January 26, 2026
+## ✨ Latest Update: January 30, 2026
 
 ### 🎉 Major Enhancements:
+
+#### 🤖 Native RAG Pipeline (NEW)
+- **Retrieval-Augmented Generation** built entirely in Swift
+- **Vector database** with SQLite + FTS5 full-text search
+- **Semantic search** via Ollama embeddings
+- **Smart question routing** for optimal context selection
+- **Conversation memory** for follow-up questions
+- **Custom system prompts** for personalized AI behavior
+
+#### 💬 Ask AI Interface (NEW)
+- Natural language queries about your email archive
+- Real-time AI responses with source citations
+- Debug panel to inspect AI prompts
+- Export conversations to Markdown/JSON
+- Temperature controls to reduce hallucinations
 
 #### ☁️ Cloud AI Integration (5 Providers)
 - **OpenAI API** - GPT-4o for advanced capabilities
@@ -22,146 +37,312 @@
 - **AWS AI Services** - Bedrock, Rekognition, Polly
 - **IBM Watson** - NLU, Speech, Discovery
 
-#### 🚀 Enhanced Features
-- **AI Backend Status Menu** - Visual indicators (🟢/🔴/⚪)
-- **Auto-Fallback System** - Switches backends if primary fails
-- **Connection Testing** - Verify API keys work
-- **Usage Tracking** - Token counts and cost estimation
-- **Performance Metrics** - Latency and success rates
-- **Notification System** - Backend status alerts
-- **Keyboard Shortcuts** - ⌘1-⌘9 for quick switching
+#### 🛡️ Ethical AI Safeguards
+- Comprehensive content monitoring
+- Prohibited use detection (100+ patterns)
+- Automatic blocking of illegal/harmful content
+- Crisis resource referrals
+- Legal compliance (CSAM reporting, etc.)
 
-#### 🛡️ Ethical AI Safeguards (NEW)
-- **Comprehensive content monitoring**
-- **Prohibited use detection** (100+ patterns)
-- **Automatic blocking** of illegal/harmful content
-- **Crisis resource referrals**
-- **Usage logging** (hashed, not plaintext)
-- **Legal compliance** (CSAM reporting, etc.)
-- **Terms of Service** enforcement
+---
 
-**⛔️ Cannot Be Used For:**
-- Illegal activities
-- Harmful content
-- Hate speech
-- Misinformation generation
-- Privacy violations
-- Harassment or abuse
-- Fraud or deception
+## 🧠 RAG Pipeline Architecture
+
+MBox Explorer includes a **native RAG (Retrieval-Augmented Generation) pipeline** - no external frameworks required.
+
+### Pipeline Components
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        RAG PIPELINE                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
+│  │  Query   │───▶│ Question │───▶│ Retrieve │───▶│ Augment  │  │
+│  │  Input   │    │  Router  │    │ Context  │    │  Prompt  │  │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
+│                                         │              │        │
+│                                         ▼              ▼        │
+│                                  ┌──────────┐    ┌──────────┐  │
+│                                  │  Vector  │    │   LLM    │  │
+│                                  │    DB    │    │ Generate │  │
+│                                  └──────────┘    └──────────┘  │
+│                                                        │        │
+│                                                        ▼        │
+│                                                 ┌──────────┐   │
+│                                                 │ Response │   │
+│                                                 │ + Sources│   │
+│                                                 └──────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Document Store (`VectorDatabase.swift`)
+
+| Feature | Implementation |
+|---------|----------------|
+| Storage | SQLite database (`~/Library/Application Support/MBoxExplorer/vectors.db`) |
+| Full-text search | FTS5 with ranking |
+| Vector storage | Float arrays as BLOBs |
+| Indexing | Batch processing with progress |
+
+### 2. Embedding Generation
+
+- **Provider**: Ollama API (`/api/embeddings`)
+- **Default model**: `nomic-embed-text`
+- **Chunking strategy**: Subject + first 500 characters of body
+- **Storage**: Embeddings stored in SQLite as binary data
+
+### 3. Retrieval Methods
+
+```swift
+// Three search modes with automatic fallback:
+
+1. Semantic Search (if Ollama available)
+   → Generate query embedding
+   → Cosine similarity against stored embeddings
+   → Return top 20 results
+
+2. Keyword Search (FTS5 fallback)
+   → FTS5 MATCH query
+   → Ranked by relevance
+   → Snippet extraction
+
+3. Direct Search (no indexing required)
+   → In-memory text matching
+   → Score by term frequency
+   → Bonus for subject/sender matches
+```
+
+### 4. Smart Question Routing
+
+The pipeline automatically detects question types and optimizes context:
+
+| Question Type | Example | Context Used |
+|---------------|---------|--------------|
+| `STATISTICS` | "How many emails?" | Metadata only |
+| `TOP_LIST` | "Who sent the most?" | Metadata + samples |
+| `DATE_RANGE` | "What's the date range?" | Metadata only |
+| `CONTENT_SEARCH` | "Find emails about project X" | Full RAG search |
+| `SUMMARY` | "Summarize main themes" | Extended context (15 emails) |
+| `FOLLOW_UP` | "Tell me more" | Previous conversation + search |
+
+### 5. Context Augmentation
+
+The prompt sent to the LLM includes:
+
+```
+MAILBOX STATISTICS:
+- Total emails: [count]
+- Date range: [start] - [end]
+- Total threads: [count]
+- Unique senders: [count]
+- Top senders: [list with counts]
+
+PREVIOUS CONVERSATION: (if memory enabled)
+[Recent Q&A turns for context]
+
+RETRIEVED EMAILS:
+From: [sender]
+Subject: [subject]
+Date: [date]
+Content: [snippet]
+---
+[...more relevant emails...]
+
+USER QUESTION: [query]
+```
+
+### 6. Generation Settings
+
+| Setting | Default | Purpose |
+|---------|---------|---------|
+| Q&A Temperature | 0.2 | Low for factual accuracy |
+| Summary Temperature | 0.3 | Slightly higher for synthesis |
+| Creative Temperature | 0.7 | Higher for varied output |
+| Max Conversation History | 10 turns | Follow-up context |
 
 ---
 
 ## 🎯 Features
 
-### Current Capabilities:
-[App-specific features would be listed here]
+### Ask AI Interface
 
-### AI Backend Support:
-- Ollama (local, free)
-- MLX (Apple Silicon optimized)
-- TinyLLM/TinyChat (lightweight)
-- OpenWebUI (self-hosted)
-- OpenAI (cloud, paid)
-- Google Cloud (cloud, paid)
-- Azure (cloud, paid)
-- AWS (cloud, paid)
-- IBM Watson (cloud, paid)
+- **Natural language queries** - Ask questions about your emails in plain English
+- **Source citations** - See which emails were used to generate answers
+- **Debug panel** - Inspect the full prompt sent to the AI
+- **Conversation memory** - Follow-up questions maintain context
+- **Export conversations** - Save Q&A sessions as Markdown or JSON
+- **Custom system prompts** - Modify AI behavior in settings
 
----
+### Email Analysis
 
-## 🔒 Security & Ethics
+- **Smart filters** - Filter by sender, date, size, attachments
+- **Thread detection** - Group related emails
+- **Duplicate finder** - Identify duplicate messages
+- **Statistics dashboard** - Email counts, top senders, date ranges
+- **Network visualization** - See communication patterns
+- **Attachment browser** - Browse and export attachments
 
-### Ethical AI Guardian:
-All AI operations are monitored for:
-- ✅ Legal compliance
-- ✅ Ethical use
-- ✅ Safety
-- ✅ Privacy protection
+### AI Backend Support
 
-Violations are:
-- Automatically detected
-- Immediately blocked
-- Securely logged
-- Reported if required by law
-
-**Read full terms:** [ETHICAL_AI_TERMS_OF_SERVICE.md](./ETHICAL_AI_TERMS_OF_SERVICE.md)
+| Backend | Type | Cost | Features |
+|---------|------|------|----------|
+| Ollama | Local | Free | Embeddings + LLM |
+| MLX | Local | Free | Apple Silicon optimized |
+| TinyLLM | Local | Free | Lightweight |
+| OpenWebUI | Self-hosted | Free | Web interface |
+| OpenAI | Cloud | Paid | GPT-4o |
+| Google Cloud | Cloud | Paid | Vertex AI |
+| Azure | Cloud | Paid | Cognitive Services |
+| AWS | Cloud | Paid | Bedrock |
+| IBM Watson | Cloud | Paid | NLU |
 
 ---
 
 ## 📦 Installation
 
+### From DMG
 ```bash
-# Install from DMG
-open MBox Explorer-latest.dmg
+open MBox-Explorer-latest.dmg
+# Drag to Applications
+```
 
-# Or from source
+### From Source
+```bash
 cd "/Volumes/Data/xcode/MBox Explorer"
-xcodebuild -project "MBox Explorer.xcodeproj" -scheme "MBox Explorer" -configuration Release build
+xcodebuild -scheme "MBox Explorer" -configuration Release build
 cp -R build/Release/*.app ~/Applications/
 ```
 
-### AI Backend Setup (Optional):
+### AI Backend Setup (Recommended)
 ```bash
-# Install Ollama (free, local, private)
+# Install Ollama for local, private AI
 brew install ollama
 ollama serve
-ollama pull mistral:latest
 
-# Or configure cloud AI in Settings
+# Pull models for RAG
+ollama pull mistral:latest        # For chat/Q&A
+ollama pull nomic-embed-text      # For embeddings (semantic search)
 ```
 
 ---
 
 ## 🎓 Usage
 
-1. Launch application
-2. **First time:** Acknowledge ethical guidelines
-3. Configure AI backend (Settings → AI Backend)
-4. Use AI features responsibly
-5. All usage monitored for safety
+### Basic Workflow
+
+1. **Launch** MBox Explorer
+2. **Open** an MBOX file (File → Open or ⌘O)
+3. **Browse** emails in the list view
+4. **Ask AI** - Click "Ask AI" in sidebar for natural language queries
+
+### Ask AI Tips
+
+- **Statistics questions**: "How many emails?", "Who are the top senders?"
+- **Content search**: "Find emails about [topic]"
+- **Summaries**: "Summarize the main themes"
+- **Follow-ups**: "Tell me more about that" (uses conversation memory)
+
+### Indexing (Optional but Recommended)
+
+Click "Index Emails" for:
+- Faster searches on large archives
+- Semantic search (finds conceptually related emails)
+- Better relevance ranking
+
+Without indexing, basic text search still works.
 
 ---
 
-## ⚖️ Legal & Ethics
+## 🔧 Configuration
 
-### Terms:
-- MIT License for code
-- **Ethical AI Terms of Service** for usage
-- Privacy-first design
-- Open source transparency
+### RAG Pipeline Settings
 
-### Prohibited Uses:
-See [ETHICAL_AI_TERMS_OF_SERVICE.md](./ETHICAL_AI_TERMS_OF_SERVICE.md) for complete list.
+Access via gear icon (⚙️) in Ask AI view:
 
-**Summary:** Don't use for illegal, harmful, or unethical purposes. Violations logged and reported.
+- **Conversation Memory**: Enable/disable, set history length
+- **Custom System Prompt**: Modify AI instructions
+- **Debug Mode**: See full prompts sent to AI
+
+### Temperature Settings
+
+Access via AI Settings:
+
+- **Q&A Temperature** (0.0-1.0): Lower = more factual
+- **Summary Temperature**: For email summaries
+- **Creative Temperature**: For open-ended tasks
+
+---
+
+## 🔒 Security & Ethics
+
+### Ethical AI Guardian
+
+All AI operations are monitored for:
+- ✅ Legal compliance
+- ✅ Ethical use
+- ✅ Safety
+- ✅ Privacy protection
+
+### Data Privacy
+
+- **Local processing**: Ollama/MLX run entirely on your Mac
+- **No cloud required**: Cloud AI is optional
+- **Your data stays yours**: Emails never leave your device unless you choose cloud AI
 
 ---
 
 ## 🛠️ Development
 
 **Author:** Jordan Koch ([@kochj23](https://github.com/kochj23))
-**Built with:** SwiftUI, Modern macOS APIs
-**AI Architecture:** Multi-backend with ethical safeguards
+
+**Built with:**
+- SwiftUI
+- SQLite (FTS5 + Vector storage)
+- Ollama API
+- Native macOS APIs
+
+**Architecture:**
+- MVVM pattern
+- Native RAG pipeline
+- Multi-backend AI support
+- Ethical safeguards
 
 ---
 
 ## 📊 Version History
 
-**Latest:** Enhanced Edition (Jan 2026)
+### v2.0 - RAG Edition (January 30, 2026)
+- Native RAG pipeline implementation
+- Ask AI interface with conversation memory
+- Smart question routing
+- Debug panel for prompt inspection
+- Export conversations
+- Direct search fallback (no indexing required)
+- Temperature controls
+- Custom system prompts
+
+### v1.5 - Cloud AI Edition (January 26, 2026)
 - Added 5 cloud AI providers
 - Added ethical safeguards
-- Added enhanced features
-- Production-ready
+- AI backend status menu
+- Auto-fallback system
+
+### v1.0 - Initial Release
+- MBOX file parsing
+- Email browsing and search
+- Export capabilities
+- Basic AI integration
 
 ---
 
-## 🆘 Support & Resources
+## 🆘 Support
 
-### App Support:
-- GitHub Issues: [Report bugs](https://github.com/kochj23/MBox Explorer/issues)
+### App Support
+- GitHub Issues: [Report bugs](https://github.com/kochj23/MBox-Explorer/issues)
 - Documentation: See project files
 
-### Crisis Resources:
+### Crisis Resources
 - **988** - Suicide Prevention Lifeline
 - **741741** - Crisis Text Line (text HOME)
 - **1-800-799-7233** - Domestic Violence Hotline
@@ -176,6 +357,6 @@ MIT License - See LICENSE file
 
 ---
 
-**MBox Explorer - Powerful AI with responsible safeguards**
+**MBox Explorer - AI-Powered Email Archive Analysis**
 
 © 2026 Jordan Koch. All rights reserved.

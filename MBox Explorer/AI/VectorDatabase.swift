@@ -334,6 +334,57 @@ class VectorDatabase: ObservableObject {
         isIndexed = false
         totalDocuments = 0
     }
+
+    /// Direct search through emails without requiring indexing
+    /// This is a fallback when emails haven't been indexed yet
+    func directSearch(query: String, emails: [Email], limit: Int = 20) -> [SearchResult] {
+        let queryTerms = query.lowercased().split(separator: " ").map { String($0) }
+
+        var scoredResults: [(email: Email, score: Int)] = []
+
+        for email in emails {
+            var score = 0
+            let searchableText = "\(email.from) \(email.subject) \(email.body)".lowercased()
+
+            for term in queryTerms {
+                // Count occurrences of each term
+                let occurrences = searchableText.components(separatedBy: term).count - 1
+                score += occurrences
+
+                // Bonus for subject match
+                if email.subject.lowercased().contains(term) {
+                    score += 5
+                }
+
+                // Bonus for sender match
+                if email.from.lowercased().contains(term) {
+                    score += 3
+                }
+            }
+
+            if score > 0 {
+                scoredResults.append((email: email, score: score))
+            }
+        }
+
+        // Sort by score and take top results
+        let topResults = scoredResults
+            .sorted { $0.score > $1.score }
+            .prefix(limit)
+
+        return topResults.map { item in
+            let snippet = String(item.email.body.prefix(300))
+            return SearchResult(
+                emailId: item.email.messageId ?? item.email.id.uuidString,
+                content: item.email.body,
+                from: item.email.from,
+                subject: item.email.subject,
+                date: item.email.date,
+                snippet: snippet,
+                score: Double(item.score)
+            )
+        }
+    }
 }
 
 struct SearchResult: Identifiable {

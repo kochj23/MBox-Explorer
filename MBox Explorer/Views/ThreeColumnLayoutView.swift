@@ -28,29 +28,43 @@ struct ThreeColumnLayoutView: View {
 
                 Divider()
 
-                // Column 2: Email List
-                if selectedView == .attachments {
+                // Column 2 & 3: Content based on selected view
+                if selectedView == .ask {
+                    // Ask AI takes full remaining width (no preview pane)
+                    AskView(viewModel: viewModel)
+                        .frame(maxWidth: .infinity)
+                } else if selectedView == .network {
+                    // Network visualization takes full remaining width
+                    NetworkVisualizationView(emails: viewModel.emails)
+                        .frame(maxWidth: .infinity)
+                } else if selectedView == .attachments {
                     AttachmentsView(viewModel: viewModel)
                         .frame(width: max(300, geometry.size.width - 250 - previewWidth - 2))
+
+                    Divider()
+
+                    EmailPreviewPane(viewModel: viewModel, width: $previewWidth)
+                        .frame(width: previewWidth)
                 } else if selectedView == .analytics {
                     AnalyticsView(viewModel: viewModel)
-                        .frame(width: max(300, geometry.size.width - 250 - previewWidth - 2))
+                        .frame(maxWidth: .infinity)
                 } else if selectedView == .operations {
                     MboxOperationsView(viewModel: viewModel)
-                        .frame(width: max(300, geometry.size.width - 250 - previewWidth - 2))
+                        .frame(maxWidth: .infinity)
                 } else {
+                    // Default: Email list with preview pane
                     EmailListView(
                         viewModel: viewModel,
                         selectedView: selectedView
                     )
                     .frame(width: max(300, geometry.size.width - 250 - previewWidth - 2))
+
+                    Divider()
+
+                    // Column 3: Email Preview
+                    EmailPreviewPane(viewModel: viewModel, width: $previewWidth)
+                        .frame(width: previewWidth)
                 }
-
-                Divider()
-
-                // Column 3: Email Preview
-                EmailPreviewPane(viewModel: viewModel, width: $previewWidth)
-                    .frame(width: previewWidth)
             }
         }
     }
