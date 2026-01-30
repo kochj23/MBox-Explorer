@@ -13,6 +13,10 @@
 import Foundation
 import SQLite3
 
+/// SQLite transient destructor - tells SQLite to copy string data immediately
+/// This is critical for Swift strings which may be deallocated after the call
+private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
 /// Local vector database for semantic search
 class VectorDatabase: ObservableObject {
     @Published var isIndexed = false
@@ -196,24 +200,27 @@ class VectorDatabase: ObservableObject {
 
             var statement: OpaquePointer?
             if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
-                sqlite3_bind_text(statement, 1, email.id.uuidString, -1, nil)
-                sqlite3_bind_text(statement, 2, email.messageId, -1, nil)
-                sqlite3_bind_text(statement, 3, email.body, -1, nil)
+                // CRITICAL: Use SQLITE_TRANSIENT for all text bindings
+                // Swift strings are temporary and may be deallocated after this call
+                // SQLITE_TRANSIENT tells SQLite to make its own copy immediately
+                sqlite3_bind_text(statement, 1, email.id.uuidString, -1, SQLITE_TRANSIENT)
+                sqlite3_bind_text(statement, 2, email.messageId, -1, SQLITE_TRANSIENT)
+                sqlite3_bind_text(statement, 3, email.body, -1, SQLITE_TRANSIENT)
 
                 // Store embedding as BLOB
                 if let embedding = embedding {
                     let data = embedding.withUnsafeBytes { Data($0) }
                     _ = data.withUnsafeBytes { bytes in
-                        sqlite3_bind_blob(statement, 4, bytes.baseAddress, Int32(data.count), nil)
+                        sqlite3_bind_blob(statement, 4, bytes.baseAddress, Int32(data.count), SQLITE_TRANSIENT)
                     }
                 } else {
                     sqlite3_bind_null(statement, 4)
                 }
 
-                sqlite3_bind_text(statement, 5, email.from, -1, nil)
-                sqlite3_bind_text(statement, 6, email.subject, -1, nil)
-                sqlite3_bind_text(statement, 7, email.date, -1, nil)
-                sqlite3_bind_text(statement, 8, metadataJSON, -1, nil)
+                sqlite3_bind_text(statement, 5, email.from, -1, SQLITE_TRANSIENT)
+                sqlite3_bind_text(statement, 6, email.subject, -1, SQLITE_TRANSIENT)
+                sqlite3_bind_text(statement, 7, email.date, -1, SQLITE_TRANSIENT)
+                sqlite3_bind_text(statement, 8, metadataJSON, -1, SQLITE_TRANSIENT)
 
                 if sqlite3_step(statement) != SQLITE_DONE {
                     print("Error inserting email")
@@ -339,7 +346,7 @@ class VectorDatabase: ObservableObject {
 
             var statement: OpaquePointer?
             if sqlite3_prepare_v2(db, searchSQL, -1, &statement, nil) == SQLITE_OK {
-                sqlite3_bind_text(statement, 1, query, -1, nil)
+                sqlite3_bind_text(statement, 1, query, -1, SQLITE_TRANSIENT)
 
                 while sqlite3_step(statement) == SQLITE_ROW {
                     guard let emailIdPtr = sqlite3_column_text(statement, 0),
