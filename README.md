@@ -11,11 +11,34 @@
 
 ---
 
-## ✨ Latest Update: January 30, 2026
+## ✨ Latest Update: v2.2 - January 30, 2026
 
-### 🎉 Major Enhancements:
+### 🎉 12 New Features in v2.2:
 
-#### 🤖 Native RAG Pipeline (NEW)
+#### 📊 Productivity & Analysis
+- **Search History** - Recent and saved searches with persistence
+- **Email Statistics Dashboard** - Comprehensive analytics with Charts
+- **Sentiment Dashboard** - Analyze email tone using NaturalLanguage
+- **Email Diff View** - Compare emails side-by-side with highlighting
+
+#### 🔍 System Integration
+- **Spotlight Integration** - Find emails via macOS system search
+- **Quick Look Preview** - Space bar preview (native macOS)
+- **Notification Center** - Reminders and follow-ups
+
+#### 🤖 AI Features
+- **Smart Reply Suggestions** - AI-powered replies with tone options
+- **Meeting/Event Extractor** - Extract calendar events with EventKit
+
+#### 📤 Batch & Export
+- **Batch Operations Toolbar** - Multi-select tag, star, export, print
+- **Contact Exporter** - Export to vCard, CSV, or Address Book
+
+---
+
+### 🎉 Previous v2.x Features:
+
+#### 🤖 Native RAG Pipeline
 - **Retrieval-Augmented Generation** built entirely in Swift
 - **Vector database** with SQLite + FTS5 full-text search
 - **Semantic search** via Ollama embeddings
@@ -556,6 +579,20 @@ All AI operations are monitored for:
 ---
 
 ## 📊 Version History
+
+### v2.2 - Advanced Features Edition (January 30, 2026)
+- **12 New Features** for enhanced productivity:
+  - **Search History** - Recent and saved searches with persistence
+  - **Email Statistics Dashboard** - Comprehensive analytics with Charts visualizations
+  - **Spotlight Integration** - Find emails via macOS system search
+  - **Quick Look Preview** - Space bar preview for emails (native macOS Quick Look)
+  - **Batch Operations Toolbar** - Multi-select tag, star, export, print operations
+  - **Sentiment Dashboard** - Email sentiment analysis using NaturalLanguage framework
+  - **Smart Reply Suggestions** - AI-powered reply generation with tone options
+  - **Meeting/Event Extractor** - Extract calendar events from emails with EventKit integration
+  - **Notification Center Integration** - Reminders and follow-up notifications
+  - **Email Diff View** - Compare emails side-by-side with diff highlighting
+  - **Contact Exporter** - Export contacts to vCard, CSV, or Address Book
 
 ### v2.1 - Multi-Provider Embeddings (January 30, 2026)
 - **4 Embedding Providers**: Ollama, MLX, OpenAI, Sentence Transformers

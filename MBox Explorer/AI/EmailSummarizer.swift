@@ -21,7 +21,7 @@ class EmailSummarizer: ObservableObject {
     }
 
     /// Summarize a single email
-    func summarizeEmail(_ email: Email) async -> EmailSummary {
+    func summarizeEmail(_ email: Email) async -> BasicEmailSummary {
         isProcessing = true
         defer { isProcessing = false }
 
@@ -30,7 +30,7 @@ class EmailSummarizer: ObservableObject {
         let actionItems = extractActionItems(from: email.body)
         let keyPoints = extractKeyPoints(from: email.body)
 
-        return EmailSummary(
+        return BasicEmailSummary(
             email: email,
             summary: summary,
             actionItems: actionItems,
@@ -40,7 +40,7 @@ class EmailSummarizer: ObservableObject {
     }
 
     /// Summarize an email thread
-    func summarizeThread(_ emails: [Email]) async -> ThreadSummary {
+    func summarizeThread(_ emails: [Email]) async -> BasicThreadSummary {
         isProcessing = true
         defer { isProcessing = false }
 
@@ -55,7 +55,7 @@ class EmailSummarizer: ObservableObject {
         let dateStrings = emails.map { $0.date }
         let dateRange = (dateStrings.first ?? "", dateStrings.last ?? "")
 
-        return ThreadSummary(
+        return BasicThreadSummary(
             threadSubject: emails.first?.subject ?? "Unknown",
             summary: summary,
             participants: Array(participants),
@@ -66,7 +66,7 @@ class EmailSummarizer: ObservableObject {
     }
 
     /// Generate daily digest
-    func generateDailyDigest(emails: [Email], date: Date) async -> DailyDigest {
+    func generateDailyDigest(emails: [Email], date: Date) async -> BasicDailyDigest {
         let emailsForDay = emails.filter { email in
             guard let emailDate = email.dateObject else { return false }
             return Calendar.current.isDate(emailDate, inSameDayAs: date)
@@ -86,7 +86,7 @@ class EmailSummarizer: ObservableObject {
             return results
         }
 
-        return DailyDigest(
+        return BasicDailyDigest(
             date: date,
             emailCount: emailsForDay.count,
             topSenders: topSenders(from: emailsForDay, count: 5),
@@ -187,7 +187,7 @@ class EmailSummarizer: ObservableObject {
 
 // MARK: - Data Models
 
-struct EmailSummary: Identifiable {
+struct BasicEmailSummary: Identifiable {
     let id = UUID()
     let email: Email
     let summary: String
@@ -196,7 +196,7 @@ struct EmailSummary: Identifiable {
     let sentiment: EmailSentiment
 }
 
-struct ThreadSummary: Identifiable {
+struct BasicThreadSummary: Identifiable {
     let id = UUID()
     let threadSubject: String
     let summary: String
@@ -206,7 +206,7 @@ struct ThreadSummary: Identifiable {
     let keyDecisions: [String]
 }
 
-struct DailyDigest: Identifiable {
+struct BasicDailyDigest: Identifiable {
     let id = UUID()
     let date: Date
     let emailCount: Int
