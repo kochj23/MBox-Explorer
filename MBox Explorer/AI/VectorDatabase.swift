@@ -102,6 +102,24 @@ class VectorDatabase: ObservableObject {
             content=email_vectors,
             content_rowid=rowid
         );
+
+        -- Triggers to keep FTS5 index in sync with email_vectors table
+        CREATE TRIGGER IF NOT EXISTS email_vectors_ai AFTER INSERT ON email_vectors BEGIN
+            INSERT INTO email_fts(rowid, content, from_address, subject)
+            VALUES (NEW.rowid, NEW.content, NEW.from_address, NEW.subject);
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS email_vectors_ad AFTER DELETE ON email_vectors BEGIN
+            INSERT INTO email_fts(email_fts, rowid, content, from_address, subject)
+            VALUES ('delete', OLD.rowid, OLD.content, OLD.from_address, OLD.subject);
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS email_vectors_au AFTER UPDATE ON email_vectors BEGIN
+            INSERT INTO email_fts(email_fts, rowid, content, from_address, subject)
+            VALUES ('delete', OLD.rowid, OLD.content, OLD.from_address, OLD.subject);
+            INSERT INTO email_fts(rowid, content, from_address, subject)
+            VALUES (NEW.rowid, NEW.content, NEW.from_address, NEW.subject);
+        END;
         """
 
         var error: UnsafeMutablePointer<CChar>?
@@ -109,6 +127,22 @@ class VectorDatabase: ObservableObject {
             let errorMessage = String(cString: error!)
             print("Error creating tables: \(errorMessage)")
             sqlite3_free(error)
+        }
+    }
+
+    /// Rebuild FTS5 index from email_vectors table
+    private func rebuildFTSIndex() {
+        dbQueue.sync {
+            let rebuildSQL = "INSERT INTO email_fts(email_fts) VALUES('rebuild');"
+            var error: UnsafeMutablePointer<CChar>?
+            if sqlite3_exec(db, rebuildSQL, nil, nil, &error) != SQLITE_OK {
+                if let error = error {
+                    print("FTS rebuild error: \(String(cString: error))")
+                    sqlite3_free(error)
+                }
+            } else {
+                print("FTS index rebuilt successfully")
+            }
         }
     }
 
@@ -183,6 +217,9 @@ class VectorDatabase: ObservableObject {
                 }
             }
         }
+
+        // Rebuild FTS index to ensure all content is searchable
+        rebuildFTSIndex()
 
         await MainActor.run {
             self.isIndexed = true
