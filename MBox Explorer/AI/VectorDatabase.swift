@@ -220,25 +220,35 @@ class VectorDatabase: ObservableObject {
         var statement: OpaquePointer?
         if sqlite3_prepare_v2(db, fetchSQL, -1, &statement, nil) == SQLITE_OK {
             while sqlite3_step(statement) == SQLITE_ROW {
-                let id = String(cString: sqlite3_column_text(statement, 0))
-                let emailId = String(cString: sqlite3_column_text(statement, 1))
-                let content = String(cString: sqlite3_column_text(statement, 2))
-                let fromAddress = String(cString: sqlite3_column_text(statement, 3))
-                let subject = String(cString: sqlite3_column_text(statement, 4))
-                let dateString = String(cString: sqlite3_column_text(statement, 5))
-
-                // Deserialize embedding BLOB
-                if let blobPointer = sqlite3_column_blob(statement, 6) {
-                    let blobSize = sqlite3_column_bytes(statement, 6)
-                    let data = Data(bytes: blobPointer, count: Int(blobSize))
-
-                    let embedding = data.withUnsafeBytes { buffer -> [Float] in
-                        let floatBuffer = buffer.bindMemory(to: Float.self)
-                        return Array(floatBuffer)
-                    }
-
-                    emailData.append((id: emailId, from: fromAddress, subject: subject, date: dateString, content: content, embedding: embedding))
+                // Safely extract text columns with null checks
+                guard let idPtr = sqlite3_column_text(statement, 0),
+                      let emailIdPtr = sqlite3_column_text(statement, 1),
+                      let contentPtr = sqlite3_column_text(statement, 2),
+                      let fromPtr = sqlite3_column_text(statement, 3),
+                      let subjectPtr = sqlite3_column_text(statement, 4),
+                      let datePtr = sqlite3_column_text(statement, 5) else {
+                    continue
                 }
+
+                let id = String(cString: idPtr)
+                let emailId = String(cString: emailIdPtr)
+                let content = String(cString: contentPtr)
+                let fromAddress = String(cString: fromPtr)
+                let subject = String(cString: subjectPtr)
+                let dateString = String(cString: datePtr)
+
+                // Deserialize embedding BLOB - copy data immediately before next sqlite3_step
+                let blobSize = sqlite3_column_bytes(statement, 6)
+                guard blobSize > 0, let blobPointer = sqlite3_column_blob(statement, 6) else {
+                    continue
+                }
+
+                // Create embedding array directly from blob pointer (copy happens here)
+                let floatCount = Int(blobSize) / MemoryLayout<Float>.size
+                var embedding = [Float](repeating: 0, count: floatCount)
+                memcpy(&embedding, blobPointer, Int(blobSize))
+
+                emailData.append((id: emailId, from: fromAddress, subject: subject, date: dateString, content: content, embedding: embedding))
             }
         }
         sqlite3_finalize(statement)
