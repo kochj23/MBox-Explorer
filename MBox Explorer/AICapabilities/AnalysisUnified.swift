@@ -301,13 +301,13 @@ struct TrendDataPoint {
 }
 
 struct TrendAnalysis {
-    let direction: TrendDirection
+    let direction: AnalysisTrendDirection
     let velocity: Double
     let seasonality: Bool
     let forecast: String
 }
 
-enum TrendDirection {
+enum AnalysisTrendDirection {
     case upward
     case downward
     case stable

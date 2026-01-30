@@ -45,7 +45,17 @@ class MboxViewModel: ObservableObject {
     @Published var showingRedactionTool: Bool = false
     @Published var showingThemeSettings: Bool = false
     @Published var layoutMode: WindowStateManager.LayoutMode = WindowStateManager.shared.loadLayoutMode()
+    @Published var showOpenPanel: Bool = false
+    @Published var showExportPanel: Bool = false
+    @Published var currentView: ViewMode = .list
+    @Published var isSearching: Bool = false
+    @Published var showSettings: Bool = false
+    @Published var showAISettings: Bool = false
     var loadStartTime: Date?
+
+    enum ViewMode {
+        case list, ask, timeline, heatmap, network, attachments, duplicates
+    }
 
     // Alert manager (injected from ContentView)
     var alertManager: AlertManager?

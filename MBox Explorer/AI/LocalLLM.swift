@@ -106,6 +106,8 @@ struct RAGResult {
 
 /// Local LLM manager using AI Backend (Ollama or MLX) with RAG Pipeline
 class LocalLLM: ObservableObject {
+    static let shared = LocalLLM()
+
     @Published var isAvailable = false
     @Published var isProcessing = false
     @Published var lastResponse = ""

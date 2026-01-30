@@ -298,20 +298,20 @@ struct ScanResultsTabView: View {
                 VStack(spacing: 0) {
                     // Summary
                     HStack(spacing: 20) {
-                        StatBadge(
+                        RedactionStatBadge(
                             icon: "envelope",
                             label: "Emails Scanned",
                             value: "\(viewModel.emails.count)"
                         )
 
-                        StatBadge(
+                        RedactionStatBadge(
                             icon: "exclamationmark.triangle.fill",
                             label: "PII Detected",
                             value: "\(totalDetections)",
                             color: .orange
                         )
 
-                        StatBadge(
+                        RedactionStatBadge(
                             icon: "checkmark.shield.fill",
                             label: "Clean Emails",
                             value: "\(viewModel.emails.count - scanResults.count)",
@@ -424,7 +424,7 @@ struct ScanResultsTabView: View {
     }
 }
 
-struct StatBadge: View {
+struct RedactionStatBadge: View {
     let icon: String
     let label: String
     let value: String

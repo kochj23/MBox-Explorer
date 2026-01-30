@@ -7,6 +7,7 @@
 //  Date: 2025-12-03
 //  Updated: 2025-01-17 - Added Ollama embeddings support
 //  Updated: 2026-01-30 - Added multi-provider embedding support (MLX, OpenAI, sentence-transformers)
+//  Updated: 2026-01-30 - Fixed SQLite concurrency crash with serial queue
 //
 
 import Foundation
@@ -24,6 +25,9 @@ class VectorDatabase: ObservableObject {
     private var db: OpaquePointer?
     private let dbPath: String
     private let embeddingManager = EmbeddingManager.shared
+
+    /// Serial queue for SQLite operations - SQLite is NOT thread-safe
+    private let dbQueue = DispatchQueue(label: "com.mboxexplorer.vectordb", qos: .userInitiated)
 
     init() {
         let documentsPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -106,8 +110,10 @@ class VectorDatabase: ObservableObject {
 
     /// Index emails for semantic search with embeddings
     func indexEmails(_ emails: [Email], progressCallback: @escaping (Double) -> Void) async {
-        isIndexed = false
-        totalDocuments = 0
+        await MainActor.run {
+            isIndexed = false
+            totalDocuments = 0
+        }
 
         // Refresh embedding status
         await refreshEmbeddingStatus()
@@ -121,6 +127,27 @@ class VectorDatabase: ObservableObject {
         var processedCount = 0
 
         for batch in batches {
+            // Pre-compute metadata on main context to avoid concurrent string access
+            let emailDataForIndexing: [(email: Email, bodyLength: Int, metadataJSON: String)] = batch.map { email in
+                // Safely compute body length and metadata JSON upfront
+                let bodyLength = email.body.count
+                let metadataDict: [String: Any] = [
+                    "from": email.from,
+                    "subject": email.subject,
+                    "date": email.date,
+                    "message_id": email.messageId ?? "",
+                    "body_length": bodyLength
+                ]
+                let metadataJSON: String
+                if let jsonData = try? JSONSerialization.data(withJSONObject: metadataDict, options: []),
+                   let jsonString = String(data: jsonData, encoding: .utf8) {
+                    metadataJSON = jsonString
+                } else {
+                    metadataJSON = "{}"
+                }
+                return (email: email, bodyLength: bodyLength, metadataJSON: metadataJSON)
+            }
+
             // Generate embeddings for batch if embedding provider available
             var embeddings: [[Float]] = []
 
@@ -139,10 +166,10 @@ class VectorDatabase: ObservableObject {
                 }
             }
 
-            // Store emails with embeddings
-            for (index, email) in batch.enumerated() {
+            // Store emails with embeddings - SERIALLY on dbQueue
+            for (index, emailData) in emailDataForIndexing.enumerated() {
                 let embedding = embeddings.count > index ? embeddings[index] : nil
-                await indexEmail(email, embedding: embedding)
+                indexEmailSync(emailData.email, embedding: embedding, metadataJSON: emailData.metadataJSON)
 
                 processedCount += 1
                 let progress = Double(processedCount) / Double(emails.count)
@@ -159,47 +186,41 @@ class VectorDatabase: ObservableObject {
         }
     }
 
-    private func indexEmail(_ email: Email, embedding: [Float]?) async {
-        let insertSQL = """
-        INSERT OR REPLACE INTO email_vectors (id, email_id, content, embedding, from_address, subject, date, metadata)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        """
+    /// Synchronously index an email on the serial dbQueue - THREAD SAFE
+    private func indexEmailSync(_ email: Email, embedding: [Float]?, metadataJSON: String) {
+        dbQueue.sync {
+            let insertSQL = """
+            INSERT OR REPLACE INTO email_vectors (id, email_id, content, embedding, from_address, subject, date, metadata)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            """
 
-        var statement: OpaquePointer?
-        if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
-            sqlite3_bind_text(statement, 1, email.id.uuidString, -1, nil)
-            sqlite3_bind_text(statement, 2, email.messageId, -1, nil)
-            sqlite3_bind_text(statement, 3, email.body, -1, nil)
+            var statement: OpaquePointer?
+            if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
+                sqlite3_bind_text(statement, 1, email.id.uuidString, -1, nil)
+                sqlite3_bind_text(statement, 2, email.messageId, -1, nil)
+                sqlite3_bind_text(statement, 3, email.body, -1, nil)
 
-            // Store embedding as BLOB
-            if let embedding = embedding {
-                let data = embedding.withUnsafeBytes { Data($0) }
-                data.withUnsafeBytes { bytes in
-                    sqlite3_bind_blob(statement, 4, bytes.baseAddress, Int32(data.count), nil)
+                // Store embedding as BLOB
+                if let embedding = embedding {
+                    let data = embedding.withUnsafeBytes { Data($0) }
+                    _ = data.withUnsafeBytes { bytes in
+                        sqlite3_bind_blob(statement, 4, bytes.baseAddress, Int32(data.count), nil)
+                    }
+                } else {
+                    sqlite3_bind_null(statement, 4)
                 }
-            } else {
-                sqlite3_bind_null(statement, 4)
-            }
 
-            sqlite3_bind_text(statement, 5, email.from, -1, nil)
-            sqlite3_bind_text(statement, 6, email.subject, -1, nil)
-            sqlite3_bind_text(statement, 7, email.date, -1, nil)
+                sqlite3_bind_text(statement, 5, email.from, -1, nil)
+                sqlite3_bind_text(statement, 6, email.subject, -1, nil)
+                sqlite3_bind_text(statement, 7, email.date, -1, nil)
+                sqlite3_bind_text(statement, 8, metadataJSON, -1, nil)
 
-            // Store metadata as JSON
-            let metadataJSON: String
-            if let jsonData = try? JSONSerialization.data(withJSONObject: email.metadata, options: []),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                metadataJSON = jsonString
-            } else {
-                metadataJSON = "{}"
+                if sqlite3_step(statement) != SQLITE_DONE {
+                    print("Error inserting email")
+                }
             }
-            sqlite3_bind_text(statement, 8, metadataJSON, -1, nil)
-
-            if sqlite3_step(statement) != SQLITE_DONE {
-                print("Error inserting email")
-            }
+            sqlite3_finalize(statement)
         }
-        sqlite3_finalize(statement)
     }
 
     /// Search emails semantically or with FTS5
@@ -225,50 +246,53 @@ class VectorDatabase: ObservableObject {
         // Generate query embedding using active provider
         let queryEmbedding = try await embeddingManager.generateEmbedding(for: query)
 
-        // Fetch all email embeddings from database
-        var emailData: [(id: String, from: String, subject: String, date: String, content: String, embedding: [Float])] = []
+        // Fetch all email embeddings from database - on serial queue
+        let emailData: [(id: String, from: String, subject: String, date: String, content: String, embedding: [Float])] = dbQueue.sync {
+            var data: [(id: String, from: String, subject: String, date: String, content: String, embedding: [Float])] = []
 
-        let fetchSQL = """
-        SELECT id, email_id, content, from_address, subject, date, embedding
-        FROM email_vectors
-        WHERE embedding IS NOT NULL;
-        """
+            let fetchSQL = """
+            SELECT id, email_id, content, from_address, subject, date, embedding
+            FROM email_vectors
+            WHERE embedding IS NOT NULL;
+            """
 
-        var statement: OpaquePointer?
-        if sqlite3_prepare_v2(db, fetchSQL, -1, &statement, nil) == SQLITE_OK {
-            while sqlite3_step(statement) == SQLITE_ROW {
-                // Safely extract text columns with null checks
-                guard let idPtr = sqlite3_column_text(statement, 0),
-                      let emailIdPtr = sqlite3_column_text(statement, 1),
-                      let contentPtr = sqlite3_column_text(statement, 2),
-                      let fromPtr = sqlite3_column_text(statement, 3),
-                      let subjectPtr = sqlite3_column_text(statement, 4),
-                      let datePtr = sqlite3_column_text(statement, 5) else {
-                    continue
+            var statement: OpaquePointer?
+            if sqlite3_prepare_v2(db, fetchSQL, -1, &statement, nil) == SQLITE_OK {
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    // Safely extract text columns with null checks
+                    guard let idPtr = sqlite3_column_text(statement, 0),
+                          let emailIdPtr = sqlite3_column_text(statement, 1),
+                          let contentPtr = sqlite3_column_text(statement, 2),
+                          let fromPtr = sqlite3_column_text(statement, 3),
+                          let subjectPtr = sqlite3_column_text(statement, 4),
+                          let datePtr = sqlite3_column_text(statement, 5) else {
+                        continue
+                    }
+
+                    let id = String(cString: idPtr)
+                    let emailId = String(cString: emailIdPtr)
+                    let content = String(cString: contentPtr)
+                    let fromAddress = String(cString: fromPtr)
+                    let subject = String(cString: subjectPtr)
+                    let dateString = String(cString: datePtr)
+
+                    // Deserialize embedding BLOB - copy data immediately before next sqlite3_step
+                    let blobSize = sqlite3_column_bytes(statement, 6)
+                    guard blobSize > 0, let blobPointer = sqlite3_column_blob(statement, 6) else {
+                        continue
+                    }
+
+                    // Create embedding array directly from blob pointer (copy happens here)
+                    let floatCount = Int(blobSize) / MemoryLayout<Float>.size
+                    var embedding = [Float](repeating: 0, count: floatCount)
+                    memcpy(&embedding, blobPointer, Int(blobSize))
+
+                    data.append((id: emailId, from: fromAddress, subject: subject, date: dateString, content: content, embedding: embedding))
                 }
-
-                let id = String(cString: idPtr)
-                let emailId = String(cString: emailIdPtr)
-                let content = String(cString: contentPtr)
-                let fromAddress = String(cString: fromPtr)
-                let subject = String(cString: subjectPtr)
-                let dateString = String(cString: datePtr)
-
-                // Deserialize embedding BLOB - copy data immediately before next sqlite3_step
-                let blobSize = sqlite3_column_bytes(statement, 6)
-                guard blobSize > 0, let blobPointer = sqlite3_column_blob(statement, 6) else {
-                    continue
-                }
-
-                // Create embedding array directly from blob pointer (copy happens here)
-                let floatCount = Int(blobSize) / MemoryLayout<Float>.size
-                var embedding = [Float](repeating: 0, count: floatCount)
-                memcpy(&embedding, blobPointer, Int(blobSize))
-
-                emailData.append((id: emailId, from: fromAddress, subject: subject, date: dateString, content: content, embedding: embedding))
             }
+            sqlite3_finalize(statement)
+            return data
         }
-        sqlite3_finalize(statement)
 
         // Calculate cosine similarity for each email
         var scoredResults: [(result: SearchResult, score: Float)] = []
@@ -301,44 +325,55 @@ class VectorDatabase: ObservableObject {
 
     /// Keyword search using FTS5 (fallback)
     private func keywordSearch(query: String) async -> [SearchResult] {
-        var results: [SearchResult] = []
+        return dbQueue.sync {
+            var results: [SearchResult] = []
 
-        let searchSQL = """
-        SELECT email_id, content, from_address, subject, date,
-               snippet(email_fts, -1, '<mark>', '</mark>', '...', 32) as snippet
-        FROM email_fts
-        WHERE email_fts MATCH ?
-        ORDER BY rank
-        LIMIT 20;
-        """
+            let searchSQL = """
+            SELECT email_id, content, from_address, subject, date,
+                   snippet(email_fts, -1, '<mark>', '</mark>', '...', 32) as snippet
+            FROM email_fts
+            WHERE email_fts MATCH ?
+            ORDER BY rank
+            LIMIT 20;
+            """
 
-        var statement: OpaquePointer?
-        if sqlite3_prepare_v2(db, searchSQL, -1, &statement, nil) == SQLITE_OK {
-            sqlite3_bind_text(statement, 1, query, -1, nil)
+            var statement: OpaquePointer?
+            if sqlite3_prepare_v2(db, searchSQL, -1, &statement, nil) == SQLITE_OK {
+                sqlite3_bind_text(statement, 1, query, -1, nil)
 
-            while sqlite3_step(statement) == SQLITE_ROW {
-                let emailId = String(cString: sqlite3_column_text(statement, 0))
-                let content = String(cString: sqlite3_column_text(statement, 1))
-                let fromAddress = String(cString: sqlite3_column_text(statement, 2))
-                let subject = String(cString: sqlite3_column_text(statement, 3))
-                let dateString = String(cString: sqlite3_column_text(statement, 4))
-                let snippet = String(cString: sqlite3_column_text(statement, 5))
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    guard let emailIdPtr = sqlite3_column_text(statement, 0),
+                          let contentPtr = sqlite3_column_text(statement, 1),
+                          let fromPtr = sqlite3_column_text(statement, 2),
+                          let subjectPtr = sqlite3_column_text(statement, 3),
+                          let datePtr = sqlite3_column_text(statement, 4),
+                          let snippetPtr = sqlite3_column_text(statement, 5) else {
+                        continue
+                    }
 
-                let result = SearchResult(
-                    emailId: emailId,
-                    content: content,
-                    from: fromAddress,
-                    subject: subject,
-                    date: dateString,
-                    snippet: snippet,
-                    score: 1.0
-                )
-                results.append(result)
+                    let emailId = String(cString: emailIdPtr)
+                    let content = String(cString: contentPtr)
+                    let fromAddress = String(cString: fromPtr)
+                    let subject = String(cString: subjectPtr)
+                    let dateString = String(cString: datePtr)
+                    let snippet = String(cString: snippetPtr)
+
+                    let result = SearchResult(
+                        emailId: emailId,
+                        content: content,
+                        from: fromAddress,
+                        subject: subject,
+                        date: dateString,
+                        snippet: snippet,
+                        score: 1.0
+                    )
+                    results.append(result)
+                }
             }
-        }
-        sqlite3_finalize(statement)
+            sqlite3_finalize(statement)
 
-        return results
+            return results
+        }
     }
 
     /// Calculate cosine similarity between two vectors
@@ -356,8 +391,10 @@ class VectorDatabase: ObservableObject {
 
     /// Clear database
     func clearIndex() {
-        let deleteSQL = "DELETE FROM email_vectors;"
-        sqlite3_exec(db, deleteSQL, nil, nil, nil)
+        dbQueue.sync {
+            let deleteSQL = "DELETE FROM email_vectors;"
+            sqlite3_exec(db, deleteSQL, nil, nil, nil)
+        }
         isIndexed = false
         totalDocuments = 0
     }

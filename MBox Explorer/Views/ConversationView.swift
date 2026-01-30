@@ -644,7 +644,7 @@ struct ConversationView: View {
                         // Trending Topics
                         if !briefing.trendingTopics.isEmpty {
                             briefingSection(title: "Trending Topics", icon: "arrow.up.right") {
-                                FlowLayout(spacing: 8) {
+                                ConversationFlowLayout(spacing: 8) {
                                     ForEach(briefing.trendingTopics, id: \.self) { topic in
                                         Text(topic)
                                             .font(.caption)
@@ -947,7 +947,7 @@ enum ConversationFeature: String, CaseIterable {
 
 // MARK: - Flow Layout (for tags)
 
-struct FlowLayout: Layout {
+struct ConversationFlowLayout: Layout {
     var spacing: CGFloat = 8
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
