@@ -272,36 +272,202 @@ xcodebuild -scheme "MBox Explorer" -configuration Release build
 cp -R build/Release/*.app ~/Applications/
 ```
 
-### AI Backend Setup (Recommended)
+### Dependencies Installation
 
-**Option 1: Ollama (Recommended - easiest)**
+#### Prerequisites
+
 ```bash
-# Install Ollama for local, private AI
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Verify Homebrew installation
+brew --version
+```
+
+---
+
+#### Option 1: Ollama (Recommended - Local & Free)
+
+Ollama provides both LLM and embedding capabilities locally on your Mac.
+
+```bash
+# Install Ollama
 brew install ollama
+
+# Start Ollama service (runs in background)
 ollama serve
 
-# Pull models for RAG
-ollama pull mistral:latest        # For chat/Q&A
-ollama pull nomic-embed-text      # For embeddings (semantic search)
+# Or start Ollama as a background service that auto-starts on login
+brew services start ollama
 ```
 
-**Option 2: MLX (Apple Silicon - fastest)**
+**Pull Required Models:**
 ```bash
-# Built-in! Just select MLX in Settings → AI → Embedding Provider
-# Models download automatically on first use
+# LLM Models (for chat/Q&A) - choose one or more:
+ollama pull mistral:latest          # 7B params, good balance of speed/quality
+ollama pull llama3.2:latest         # Meta's latest, very capable
+ollama pull gemma2:2b               # Smaller, faster
+ollama pull phi3:latest             # Microsoft's efficient model
+
+# Embedding Models (for semantic search) - choose one:
+ollama pull nomic-embed-text        # Recommended - 768 dimensions, good quality
+ollama pull all-minilm              # Smaller - 384 dimensions, faster
+ollama pull mxbai-embed-large       # Larger - 1024 dimensions, best quality
 ```
 
-**Option 3: OpenAI (Cloud - best quality)**
+**Verify Ollama is working:**
 ```bash
-# Get API key from platform.openai.com
-# Enter key in Settings → AI → Cloud API Keys → OpenAI
+# Check Ollama is running
+curl http://localhost:11434/api/tags
+
+# Test embedding generation
+curl http://localhost:11434/api/embeddings -d '{"model": "nomic-embed-text", "prompt": "Hello"}'
 ```
 
-**Option 4: Sentence Transformers (Most flexible)**
+---
+
+#### Option 2: MLX (Apple Silicon - Fastest)
+
+MLX runs natively on Apple Silicon (M1/M2/M3/M4) with no external dependencies.
+
 ```bash
-# Requires Python 3.8+
+# No installation required!
+# MLX is built into MBox Explorer
+
+# Just select "MLX" in:
+# Settings → AI → Embedding Provider
+
+# Models download automatically on first use (~100-500MB per model)
+# Stored in: ~/Library/Application Support/MBoxExplorer/MLXModels/
+```
+
+**Available MLX Embedding Models:**
+- `all-MiniLM-L6-v2` (384 dimensions) - Default, fast
+- `nomic-embed-text-v1.5` (768 dimensions) - Better quality
+- `bge-small-en-v1.5` (384 dimensions) - Alternative
+- `bge-base-en-v1.5` (768 dimensions) - Best quality
+
+---
+
+#### Option 3: OpenAI (Cloud - Best Quality)
+
+OpenAI provides the highest quality embeddings but requires an API key and costs money.
+
+```bash
+# 1. Get an API key:
+#    - Go to https://platform.openai.com/
+#    - Sign in or create account
+#    - Navigate to API Keys section
+#    - Create new secret key
+#    - Copy the key (starts with sk-)
+
+# 2. Enter key in MBox Explorer:
+#    Settings → AI → Cloud API Keys → OpenAI
+
+# 3. Select OpenAI in:
+#    Settings → AI → Embedding Provider
+```
+
+**Pricing (as of 2024):**
+| Model | Dimensions | Cost per 1M tokens |
+|-------|------------|-------------------|
+| text-embedding-3-small | 1536 | $0.02 |
+| text-embedding-3-large | 3072 | $0.13 |
+| text-embedding-ada-002 | 1536 | $0.10 (legacy) |
+
+**Estimate:** ~250,000 emails = ~$0.50-$5.00 depending on email length and model.
+
+---
+
+#### Option 4: Sentence Transformers (Python - Most Flexible)
+
+Sentence Transformers offers the widest model selection via Python.
+
+**Step 1: Install Python (if not already installed)**
+```bash
+# Check if Python 3 is installed
+python3 --version
+
+# If not installed, install via Homebrew:
+brew install python@3.11
+
+# Or install via official installer:
+# https://www.python.org/downloads/
+```
+
+**Step 2: Install sentence-transformers**
+```bash
+# Using pip (recommended)
+pip3 install sentence-transformers
+
+# Or using pip with user flag (if permission issues)
+pip3 install --user sentence-transformers
+
+# Or using virtual environment (cleanest)
+python3 -m venv ~/mbox-env
+source ~/mbox-env/bin/activate
 pip install sentence-transformers
-# Select Sentence Transformers in Settings → AI → Embedding Provider
+```
+
+**Step 3: Verify Installation**
+```bash
+# Test that sentence-transformers works
+python3 -c "from sentence_transformers import SentenceTransformer; print('OK')"
+```
+
+**Step 4: Configure in MBox Explorer**
+```bash
+# 1. Set Python path in Settings if using non-standard location:
+#    Settings → AI → Sentence Transformers → Python Path
+#    Default: /usr/bin/python3
+#    Homebrew: /opt/homebrew/bin/python3
+#    Virtual env: ~/mbox-env/bin/python
+
+# 2. Select Sentence Transformers in:
+#    Settings → AI → Embedding Provider
+```
+
+**Available Models (auto-downloaded on first use):**
+| Model | Dimensions | Size | Quality |
+|-------|------------|------|---------|
+| all-MiniLM-L6-v2 | 384 | 80MB | Good |
+| all-mpnet-base-v2 | 768 | 420MB | Better |
+| paraphrase-MiniLM-L6-v2 | 384 | 80MB | Good for paraphrase |
+| multi-qa-MiniLM-L6-cos-v1 | 384 | 80MB | Optimized for Q&A |
+
+---
+
+#### Troubleshooting Dependencies
+
+**Ollama not connecting:**
+```bash
+# Check if Ollama is running
+ps aux | grep ollama
+
+# Restart Ollama
+brew services restart ollama
+# Or manually:
+killall ollama && ollama serve
+```
+
+**Python/pip not found:**
+```bash
+# Add Homebrew Python to PATH
+echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**sentence-transformers import error:**
+```bash
+# Install with all dependencies
+pip3 install sentence-transformers torch transformers
+```
+
+**MLX models not downloading:**
+```bash
+# Check internet connection
+# Models are downloaded from huggingface.co
+# Check disk space in ~/Library/Application Support/MBoxExplorer/
 ```
 
 ---
