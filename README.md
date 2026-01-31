@@ -5,13 +5,22 @@
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-Production-success)
+![Version](https://img.shields.io/badge/version-2.3.0-success)
 ![AI](https://img.shields.io/badge/AI-RAG%20Pipeline-purple)
 ![Ethics](https://img.shields.io/badge/Ethics-Protected-green)
 
 ---
 
-## ✨ Latest Update: v2.2 - January 30, 2026
+## ✨ Latest Update: v2.3 - January 30, 2026
+
+### 🔧 RAG Pipeline Reliability Improvements (v2.3)
+
+- **Memory-safe SQLite bindings** - Fixed SQLITE_TRANSIENT for all string bindings preventing crashes
+- **FTS5 auto-sync triggers** - Full-text search index automatically syncs with vector database
+- **Smart three-tier search** - Semantic → FTS keywords → Sample fallback ensures results always found
+- **Keyword extraction** - Stop-word filtering for natural language queries to FTS5
+- **Extended timeouts** - 3 minute request / 10 minute resource timeout for large RAG queries
+- **Robust JOIN queries** - FTS5 external content tables properly joined for complete data retrieval
 
 ### 🎉 12 New Features in v2.2:
 
@@ -579,6 +588,19 @@ All AI operations are monitored for:
 ---
 
 ## 📊 Version History
+
+### v2.3 - RAG Reliability Edition (January 30, 2026)
+- **Critical bug fixes** for RAG pipeline reliability:
+  - Fixed memory corruption crash (EXC_BAD_ACCESS) with SQLITE_TRANSIENT bindings
+  - Fixed FTS5 index not syncing with email_vectors table (added triggers)
+  - Fixed FTS5 queries returning NULL data (added proper JOINs)
+  - Fixed RAG returning "0 sources" for natural language queries
+- **Smart three-tier search fallback**:
+  - 1st: Semantic search via embeddings
+  - 2nd: FTS5 keyword search with stop-word extraction
+  - 3rd: Sample of recent emails when search terms don't match
+- **Extended timeouts**: 3 minute request / 10 minute resource for large contexts
+- **Improved keyword extraction**: Filters common stop words for better FTS5 matches
 
 ### v2.2 - Advanced Features Edition (January 30, 2026)
 - **12 New Features** for enhanced productivity:

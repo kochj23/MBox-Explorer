@@ -30,10 +30,10 @@ class OllamaClient: ObservableObject {
         self.currentLLMModel = UserDefaults.standard.string(forKey: "ollamaLLMModel") ?? "llama2"
         self.currentEmbeddingModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") ?? "nomic-embed-text"
 
-        // Configure URLSession with timeout
+        // Configure URLSession with timeout (increased for RAG queries with large context)
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 120
-        config.timeoutIntervalForResource = 300
+        config.timeoutIntervalForRequest = 180  // 3 minutes for RAG processing
+        config.timeoutIntervalForResource = 600 // 10 minutes for large operations
         self.session = URLSession(configuration: config)
 
         // Check connection on init
