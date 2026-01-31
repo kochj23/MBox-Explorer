@@ -56,6 +56,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
     case mlx = "MLX"
     case openai = "OpenAI"
     case sentenceTransformers = "Sentence Transformers"
+    case tinyChat = "TinyChat"
+    case openWebUI = "OpenWebUI"
     case none = "None (Keyword Search Only)"
 
     var id: String { rawValue }
@@ -70,6 +72,10 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "Cloud embeddings via OpenAI API (paid, high quality)"
         case .sentenceTransformers:
             return "Python sentence-transformers (free, flexible)"
+        case .tinyChat:
+            return "TinyChat by Jason Cox - OpenAI-compatible (local/cloud)"
+        case .openWebUI:
+            return "OpenWebUI - Self-hosted AI platform (local)"
         case .none:
             return "No semantic search - keyword matching only"
         }
@@ -85,7 +91,22 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "Requires OpenAI API key"
         case .sentenceTransformers:
             return "pip install sentence-transformers"
+        case .tinyChat:
+            return "docker run -d -p 8000:8000 jasonacox/tinychat:latest"
+        case .openWebUI:
+            return "docker run -d -p 8080:8080 ghcr.io/open-webui/open-webui:main"
         case .none:
+            return nil
+        }
+    }
+
+    var attribution: String? {
+        switch self {
+        case .tinyChat:
+            return "TinyChat by Jason Cox (https://github.com/jasonacox/tinychat)"
+        case .openWebUI:
+            return "OpenWebUI Community Project (https://github.com/open-webui/open-webui)"
+        default:
             return nil
         }
     }
@@ -111,6 +132,8 @@ class EmbeddingManager: ObservableObject {
     private var mlxProvider: MLXEmbeddingProvider?
     private var openaiProvider: OpenAIEmbeddingProvider?
     private var pythonProvider: SentenceTransformerProvider?
+    private var tinyChatProvider: TinyChatEmbeddingProvider?
+    private var openWebUIProvider: OpenWebUIEmbeddingProvider?
 
     private var activeProvider: EmbeddingProvider?
 
@@ -123,6 +146,8 @@ class EmbeddingManager: ObservableObject {
         mlxProvider = MLXEmbeddingProvider()
         openaiProvider = OpenAIEmbeddingProvider()
         pythonProvider = SentenceTransformerProvider()
+        tinyChatProvider = TinyChatEmbeddingProvider()
+        openWebUIProvider = OpenWebUIEmbeddingProvider()
 
         Task {
             await updateActiveProvider()
@@ -149,6 +174,12 @@ class EmbeddingManager: ObservableObject {
         case .sentenceTransformers:
             await pythonProvider?.checkAvailability()
             provider = pythonProvider
+        case .tinyChat:
+            await tinyChatProvider?.checkAvailability()
+            provider = tinyChatProvider
+        case .openWebUI:
+            await openWebUIProvider?.checkAvailability()
+            provider = openWebUIProvider
         case .none:
             provider = nil
         }
@@ -167,6 +198,11 @@ class EmbeddingManager: ObservableObject {
             }
         }
     }
+
+    // MARK: - Provider Access
+
+    var tinyChat: TinyChatEmbeddingProvider? { tinyChatProvider }
+    var openWebUI: OpenWebUIEmbeddingProvider? { openWebUIProvider }
 
     func generateEmbedding(for text: String) async throws -> [Float] {
         guard let provider = activeProvider, provider.isAvailable else {
