@@ -87,18 +87,58 @@ struct AISettingsView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
 
+                        Picker("LLM Backend", selection: $aiBackend.selectedBackend) {
+                            ForEach(AIBackend.allCases, id: \.self) { backend in
+                                HStack {
+                                    Image(systemName: backend.icon)
+                                    Text(backend.rawValue)
+                                }
+                                .tag(backend)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .onChange(of: aiBackend.selectedBackend) { _ in
+                            Task {
+                                await aiBackend.checkBackendAvailability()
+                            }
+                        }
+
                         HStack {
                             Circle()
                                 .fill(aiBackend.activeBackend != nil ? Color.green : Color.red)
                                 .frame(width: 8, height: 8)
-                            Text(aiBackend.activeBackend?.rawValue ?? "No backend available")
+                            Text("Active: \(aiBackend.activeBackend?.rawValue ?? "None")")
                                 .font(.caption)
                                 .foregroundColor(aiBackend.activeBackend != nil ? .green : .red)
                         }
 
-                        Text("Available backends are auto-detected. Configure each below.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        // Show availability status for each backend
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Image(systemName: aiBackend.isOllamaAvailable ? "checkmark.circle.fill" : "xmark.circle")
+                                    .foregroundColor(aiBackend.isOllamaAvailable ? .green : .gray)
+                                Text("Ollama")
+                                    .font(.caption)
+                            }
+                            HStack {
+                                Image(systemName: aiBackend.isTinyChatAvailable ? "checkmark.circle.fill" : "xmark.circle")
+                                    .foregroundColor(aiBackend.isTinyChatAvailable ? .green : .gray)
+                                Text("TinyChat")
+                                    .font(.caption)
+                            }
+                            HStack {
+                                Image(systemName: aiBackend.isOpenWebUIAvailable ? "checkmark.circle.fill" : "xmark.circle")
+                                    .foregroundColor(aiBackend.isOpenWebUIAvailable ? .green : .gray)
+                                Text("OpenWebUI")
+                                    .font(.caption)
+                            }
+                            HStack {
+                                Image(systemName: aiBackend.isMLXAvailable ? "checkmark.circle.fill" : "xmark.circle")
+                                    .foregroundColor(aiBackend.isMLXAvailable ? .green : .gray)
+                                Text("MLX Toolkit")
+                                    .font(.caption)
+                            }
+                        }
                     }
                     .padding(.vertical, 8)
                 }
