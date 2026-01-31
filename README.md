@@ -270,13 +270,72 @@ USER QUESTION: [query]
 |---------|------|------|----------|
 | Ollama | Local | Free | LLM + Embeddings |
 | MLX | Local | Free | Apple Silicon optimized LLM |
-| TinyLLM | Local | Free | Lightweight LLM |
+| **TinyChat** | Local | Free | Fast chatbot with OpenAI-compatible API |
+| **TinyLLM** | Local | Free | Lightweight LLM server |
 | OpenWebUI | Self-hosted | Free | Web interface |
 | OpenAI | Cloud | Paid | GPT-4o |
 | Google Cloud | Cloud | Paid | Vertex AI |
 | Azure | Cloud | Paid | Cognitive Services |
 | AWS | Cloud | Paid | Bedrock |
 | IBM Watson | Cloud | Paid | NLU |
+
+---
+
+### TinyChat & TinyLLM by Jason Cox
+
+MBox Explorer proudly supports [**TinyChat**](https://github.com/jasonacox/tinychat) and [**TinyLLM**](https://github.com/jasonacox/TinyLLM) - two excellent open-source projects by [Jason Cox](https://github.com/jasonacox).
+
+#### Why TinyChat?
+
+**TinyChat** is a lightweight, fast chatbot interface with an OpenAI-compatible API. It's perfect for:
+- **Quick local inference** without heavy dependencies
+- **Privacy-first AI** - all processing stays on your machine
+- **Easy setup** - minimal configuration needed
+- **OpenAI API compatibility** - works seamlessly with existing tools
+
+#### Why TinyLLM?
+
+**TinyLLM** is a minimalist LLM server that provides:
+- **Lightweight deployment** - runs on modest hardware
+- **OpenAI-compatible endpoints** - drop-in replacement
+- **Local-first architecture** - your data never leaves your device
+- **Active development** - regularly updated with new features
+
+#### Installation
+
+```bash
+# TinyChat - Fast chatbot interface
+git clone https://github.com/jasonacox/tinychat.git
+cd tinychat
+pip install -r requirements.txt
+python server.py  # Starts on localhost:8000
+
+# TinyLLM - Lightweight LLM server
+git clone https://github.com/jasonacox/TinyLLM.git
+cd TinyLLM
+pip install -r requirements.txt
+python server.py  # Starts on localhost:8000
+```
+
+#### Configuration in MBox Explorer
+
+1. Start TinyChat or TinyLLM server
+2. Open MBox Explorer → Settings (⌘⌥A)
+3. Select "TinyChat" or "TinyLLM" as your AI Backend
+4. Default endpoint: `http://localhost:8000`
+5. Start using AI features!
+
+#### Features Supported
+
+| Feature | TinyChat | TinyLLM |
+|---------|----------|---------|
+| Text Generation | ✅ | ✅ |
+| Embeddings | ✅ | ✅ |
+| Streaming Responses | ✅ | ✅ |
+| OpenAI API Compatibility | ✅ | ✅ |
+| Local Processing | ✅ | ✅ |
+
+**Attribution:** TinyChat and TinyLLM are created by [Jason Cox](https://github.com/jasonacox). We're grateful for his excellent work making local AI accessible to everyone.
 
 #### Embedding Providers (Semantic Search)
 
