@@ -9,16 +9,13 @@
 /* Begin PBXBuildFile section */
 		0060E523835F69E77DC40F8D /* HypotheticalAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4FE314B120E4916E4FEA7A /* HypotheticalAnalyzer.swift */; };
 		050AE07D9F0290A9C9B59841 /* CommitmentTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408098289A40C753C412475A /* CommitmentTracker.swift */; };
-		EMB001010000000000000001 /* EmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002010000000000000001 /* EmbeddingProvider.swift */; };
-		EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */; };
-		EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002030000000000000001 /* MLXEmbeddingProvider.swift */; };
-		EMB001040000000000000001 /* OpenAIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */; };
-		EMB001050000000000000001 /* SentenceTransformerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002050000000000000001 /* SentenceTransformerProvider.swift */; };
 		0ACC5F34C57FEAFED5D7DF30 /* DecisionArchaeologist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */; };
 		1154255057D856054D457D57 /* ImageGenerationUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */; };
 		12DE38BA3A71B50A678A12B3 /* PersonaChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6531667EE7C788EA76F5A0F /* PersonaChat.swift */; };
+		162EA02AA9581D8F680F992B /* TinyChatEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */; };
 		21C49790555A4EC12B1343FD /* VoiceConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEE96C78F48CEB6C7304C75 /* VoiceConversation.swift */; };
 		29A4A2C7786A5F418C391848 /* RelationshipMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B3C2D9205F703C1F972B28 /* RelationshipMapper.swift */; };
+		31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */; };
 		35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */; };
 		36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */; };
 		3D6775E92896C02CF56EEFC2 /* SmartForwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73151335A5C4EA6609FAC1C8 /* SmartForwarder.swift */; };
@@ -75,6 +72,11 @@
 		D8904F77CE2555AEAAD0E03C /* AskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA6206E86CAEFE924E9D19C /* AskView.swift */; };
 		DE6CF6C10136C8796C843526 /* DraftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C416248D332727979824ABF /* DraftGenerator.swift */; };
 		E4A2C652D0EE51C645582730 /* SentimentAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */; };
+		EMB001010000000000000001 /* EmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002010000000000000001 /* EmbeddingProvider.swift */; };
+		EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */; };
+		EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002030000000000000001 /* MLXEmbeddingProvider.swift */; };
+		EMB001040000000000000001 /* OpenAIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */; };
+		EMB001050000000000000001 /* SentenceTransformerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002050000000000000001 /* SentenceTransformerProvider.swift */; };
 		F9C2F929F356DB18CE9FBA36 /* VectorDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533E5F905952EC4B14E8BD9 /* VectorDatabase.swift */; };
 		MB0000010000000000000001 /* MBox_ExplorerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB0000020000000000000001 /* MBox_ExplorerApp.swift */; };
 		MB0000030000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB0000040000000000000001 /* ContentView.swift */; };
@@ -125,68 +127,33 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		NF200001000000000000001 /* ThreadSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThreadSummarizer.swift; path = "AI/Features/ThreadSummarizer.swift"; sourceTree = "<group>"; };
-		NF200002000000000000001 /* ActionItemExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ActionItemExtractor.swift; path = "AI/Features/ActionItemExtractor.swift"; sourceTree = "<group>"; };
-		NF200003000000000000001 /* PersonProfileGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PersonProfileGenerator.swift; path = "AI/Features/PersonProfileGenerator.swift"; sourceTree = "<group>"; };
-		NF200004000000000000001 /* TopicClustering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TopicClustering.swift; path = "AI/Features/TopicClustering.swift"; sourceTree = "<group>"; };
-		NF200005000000000000001 /* AttachmentSearcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AttachmentSearcher.swift; path = "AI/Features/AttachmentSearcher.swift"; sourceTree = "<group>"; };
-		NF200006000000000000001 /* NaturalLanguageFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NaturalLanguageFilter.swift; path = "AI/Features/NaturalLanguageFilter.swift"; sourceTree = "<group>"; };
-		NF200007000000000000001 /* SimilarEmailFinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SimilarEmailFinder.swift; path = "AI/Features/SimilarEmailFinder.swift"; sourceTree = "<group>"; };
-		NF200008000000000000001 /* ThreatDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThreatDetector.swift; path = "AI/Features/ThreatDetector.swift"; sourceTree = "<group>"; };
-		NF200009000000000000001 /* EmailForensics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailForensics.swift; path = "AI/Features/EmailForensics.swift"; sourceTree = "<group>"; };
-		NF200010000000000000001 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineView.swift; path = "Features/TimelineView.swift"; sourceTree = "<group>"; };
-		NF200011000000000000001 /* HeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeatmapView.swift; path = "Features/HeatmapView.swift"; sourceTree = "<group>"; };
-		NF200012000000000000001 /* WordCloudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WordCloudView.swift; path = "Features/WordCloudView.swift"; sourceTree = "<group>"; };
-		NF200013000000000000001 /* TagsCollectionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TagsCollectionsView.swift; path = "Features/TagsCollectionsView.swift"; sourceTree = "<group>"; };
-		NF200014000000000000001 /* CommandPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandPaletteView.swift; path = "Features/CommandPaletteView.swift"; sourceTree = "<group>"; };
-		NF200015000000000000001 /* TagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagManager.swift; sourceTree = "<group>"; };
-		NF200016000000000000001 /* MultiFormatImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFormatImporter.swift; sourceTree = "<group>"; };
-		NF200017000000000000001 /* MailboxMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxMerger.swift; sourceTree = "<group>"; };
-		NF200018000000000000001 /* BackgroundIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundIndexer.swift; sourceTree = "<group>"; };
-		NF200019000000000000001 /* MultiWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiWindowManager.swift; sourceTree = "<group>"; };
-		NF200020000000000000001 /* RichExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichExporter.swift; sourceTree = "<group>"; };
-		NF200022000000000000001 /* SearchHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHistory.swift; sourceTree = "<group>"; };
-		NF200023000000000000001 /* EmailStatisticsDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailStatisticsDashboard.swift; path = "Features/EmailStatisticsDashboard.swift"; sourceTree = "<group>"; };
-		NF200024000000000000001 /* SpotlightIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIntegration.swift; sourceTree = "<group>"; };
-		NF200025000000000000001 /* BatchOperationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BatchOperationsView.swift; path = "Features/BatchOperationsView.swift"; sourceTree = "<group>"; };
-		NF200026000000000000001 /* SentimentDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SentimentDashboard.swift; path = "AI/Features/SentimentDashboard.swift"; sourceTree = "<group>"; };
-		NF200027000000000000001 /* SmartReplySuggestions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartReplySuggestions.swift; path = "AI/Features/SmartReplySuggestions.swift"; sourceTree = "<group>"; };
-		NF200028000000000000001 /* MeetingEventExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MeetingEventExtractor.swift; path = "AI/Features/MeetingEventExtractor.swift"; sourceTree = "<group>"; };
-		NF200029000000000000001 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
-		NF200030000000000000001 /* EmailDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailDiffView.swift; path = "Features/EmailDiffView.swift"; sourceTree = "<group>"; };
-		NF200031000000000000001 /* ContactExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactExporter.swift; sourceTree = "<group>"; };
-		NF200032000000000000001 /* QuickLookPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookPreview.swift; sourceTree = "<group>"; };
+		079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenWebUIEmbeddingProvider.swift; path = AI/Embeddings/OpenWebUIEmbeddingProvider.swift; sourceTree = "<group>"; };
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
-		25ACFE0E46E831D381EB3E35 /* EmailSearchAgent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmailSearchAgent.swift; path = "AI/Integration/EmailSearchAgent.swift"; sourceTree = "<group>"; };
-		EMB002010000000000000001 /* EmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmbeddingProvider.swift; path = "AI/Embeddings/EmbeddingProvider.swift"; sourceTree = "<group>"; };
-		EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OllamaEmbeddingProvider.swift; path = "AI/Embeddings/OllamaEmbeddingProvider.swift"; sourceTree = "<group>"; };
-		EMB002030000000000000001 /* MLXEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MLXEmbeddingProvider.swift; path = "AI/Embeddings/MLXEmbeddingProvider.swift"; sourceTree = "<group>"; };
-		EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenAIEmbeddingProvider.swift; path = "AI/Embeddings/OpenAIEmbeddingProvider.swift"; sourceTree = "<group>"; };
-		EMB002050000000000000001 /* SentenceTransformerProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentenceTransformerProvider.swift; path = "AI/Embeddings/SentenceTransformerProvider.swift"; sourceTree = "<group>"; };
+		25ACFE0E46E831D381EB3E35 /* EmailSearchAgent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmailSearchAgent.swift; path = AI/Integration/EmailSearchAgent.swift; sourceTree = "<group>"; };
 		2610D3EFB2D5D23FD826606E /* LocalLLM.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/LocalLLM.swift; sourceTree = "<group>"; };
 		31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AISettingsView.swift; sourceTree = "<group>"; };
-		32B46A71F0106A905F6218BA /* TimeTravelEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TimeTravelEngine.swift; path = "AI/Advanced/TimeTravelEngine.swift"; sourceTree = "<group>"; };
-		33C069D93706A1E5E158C2D2 /* ConversationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationView.swift; path = "Views/ConversationView.swift"; sourceTree = "<group>"; };
+		32B46A71F0106A905F6218BA /* TimeTravelEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TimeTravelEngine.swift; path = AI/Advanced/TimeTravelEngine.swift; sourceTree = "<group>"; };
+		33C069D93706A1E5E158C2D2 /* ConversationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationView.swift; path = Views/ConversationView.swift; sourceTree = "<group>"; };
 		3533E5F905952EC4B14E8BD9 /* VectorDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/VectorDatabase.swift; sourceTree = "<group>"; };
 		36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AI/AIBackendManager.swift; sourceTree = "<group>"; };
 		38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/OllamaClient.swift; sourceTree = "<group>"; };
-		3B07F30ECCC00A122F53B06D /* SmartSuggestions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartSuggestions.swift; path = "AI/Intelligence/SmartSuggestions.swift"; sourceTree = "<group>"; };
-		3CFA614AC3BD8853D16DB6E9 /* ConversationDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationDatabase.swift; path = "AI/Conversation/ConversationDatabase.swift"; sourceTree = "<group>"; };
-		408098289A40C753C412475A /* CommitmentTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CommitmentTracker.swift; path = "AI/Analysis/CommitmentTracker.swift"; sourceTree = "<group>"; };
+		3B07F30ECCC00A122F53B06D /* SmartSuggestions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartSuggestions.swift; path = AI/Intelligence/SmartSuggestions.swift; sourceTree = "<group>"; };
+		3CFA614AC3BD8853D16DB6E9 /* ConversationDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationDatabase.swift; path = AI/Conversation/ConversationDatabase.swift; sourceTree = "<group>"; };
+		408098289A40C753C412475A /* CommitmentTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CommitmentTracker.swift; path = AI/Analysis/CommitmentTracker.swift; sourceTree = "<group>"; };
 		44FADA0642D6D75AFE52040D /* AnalysisUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AnalysisUnified.swift; path = AICapabilities/AnalysisUnified.swift; sourceTree = "<group>"; };
 		4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/EmailSummarizer.swift; sourceTree = "<group>"; };
 		569BF452BCAD60FF219195F5 /* SecurityUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecurityUnified.swift; path = AICapabilities/SecurityUnified.swift; sourceTree = "<group>"; };
-		577366331045422A9C7E3502 /* PatternDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PatternDetector.swift; path = "AI/Intelligence/PatternDetector.swift"; sourceTree = "<group>"; };
-		6BAFBA37ED985C5CC8BF5BB8 /* DailyBriefingEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyBriefingEngine.swift; path = "AI/Intelligence/DailyBriefingEngine.swift"; sourceTree = "<group>"; };
-		6CEE96C78F48CEB6C7304C75 /* VoiceConversation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceConversation.swift; path = "AI/Advanced/VoiceConversation.swift"; sourceTree = "<group>"; };
-		6F4FE314B120E4916E4FEA7A /* HypotheticalAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypotheticalAnalyzer.swift; path = "AI/Advanced/HypotheticalAnalyzer.swift"; sourceTree = "<group>"; };
-		73151335A5C4EA6609FAC1C8 /* SmartForwarder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartForwarder.swift; path = "AI/Integration/SmartForwarder.swift"; sourceTree = "<group>"; };
-		747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DecisionArchaeologist.swift; path = "AI/Analysis/DecisionArchaeologist.swift"; sourceTree = "<group>"; };
-		7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentimentAnalyzer.swift; path = "AI/Analysis/SentimentAnalyzer.swift"; sourceTree = "<group>"; };
-		7C416248D332727979824ABF /* DraftGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DraftGenerator.swift; path = "AI/Integration/DraftGenerator.swift"; sourceTree = "<group>"; };
+		577366331045422A9C7E3502 /* PatternDetector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PatternDetector.swift; path = AI/Intelligence/PatternDetector.swift; sourceTree = "<group>"; };
+		6BAFBA37ED985C5CC8BF5BB8 /* DailyBriefingEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyBriefingEngine.swift; path = AI/Intelligence/DailyBriefingEngine.swift; sourceTree = "<group>"; };
+		6CEE96C78F48CEB6C7304C75 /* VoiceConversation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceConversation.swift; path = AI/Advanced/VoiceConversation.swift; sourceTree = "<group>"; };
+		6F4FE314B120E4916E4FEA7A /* HypotheticalAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypotheticalAnalyzer.swift; path = AI/Advanced/HypotheticalAnalyzer.swift; sourceTree = "<group>"; };
+		73151335A5C4EA6609FAC1C8 /* SmartForwarder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartForwarder.swift; path = AI/Integration/SmartForwarder.swift; sourceTree = "<group>"; };
+		747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DecisionArchaeologist.swift; path = AI/Analysis/DecisionArchaeologist.swift; sourceTree = "<group>"; };
+		7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentimentAnalyzer.swift; path = AI/Analysis/SentimentAnalyzer.swift; sourceTree = "<group>"; };
+		7C416248D332727979824ABF /* DraftGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DraftGenerator.swift; path = AI/Integration/DraftGenerator.swift; sourceTree = "<group>"; };
 		87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkVisualizationView.swift; sourceTree = "<group>"; };
 		9A989BC566E5181DAB386111 /* AutoTagger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/AutoTagger.swift; sourceTree = "<group>"; };
-		B6531667EE7C788EA76F5A0F /* PersonaChat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PersonaChat.swift; path = "AI/Advanced/PersonaChat.swift"; sourceTree = "<group>"; };
+		B6531667EE7C788EA76F5A0F /* PersonaChat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PersonaChat.swift; path = AI/Advanced/PersonaChat.swift; sourceTree = "<group>"; };
 		C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceUnified.swift; path = AICapabilities/VoiceUnified.swift; sourceTree = "<group>"; };
 		C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnifiedAICapabilities.swift; path = AICapabilities/UnifiedAICapabilities.swift; sourceTree = "<group>"; };
 		D004E8BC2EB1AA8900304FC0 /* AlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
@@ -198,7 +165,7 @@
 		D004E8C72EB1B4CC00304FC0 /* JSONExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONExporter.swift; sourceTree = "<group>"; };
 		D004E8C82EB1B4CC00304FC0 /* MarkdownExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
 		D004E8CC2EB1B4E200304FC0 /* WindowStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowStateManager.swift; sourceTree = "<group>"; };
-		D01A68F1AFCB3C03DB4465E1 /* ConversationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationManager.swift; path = "AI/Conversation/ConversationManager.swift"; sourceTree = "<group>"; };
+		D01A68F1AFCB3C03DB4465E1 /* ConversationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationManager.swift; path = AI/Conversation/ConversationManager.swift; sourceTree = "<group>"; };
 		D078755E2EB1B9FB00C75A43 /* AttachmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentsView.swift; sourceTree = "<group>"; };
 		D078755F2EB1B9FB00C75A43 /* DuplicatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesView.swift; sourceTree = "<group>"; };
 		D07875602EB1B9FB00C75A43 /* KeyboardNavigationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardNavigationModifier.swift; sourceTree = "<group>"; };
@@ -221,9 +188,15 @@
 		D07875842EB1C4C100C75A43 /* PIIRedactor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PIIRedactor.swift; sourceTree = "<group>"; };
 		D07875852EB1C4C100C75A43 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		D07875882EB1C54C00C75A43 /* ThreeColumnLayoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeColumnLayoutView.swift; sourceTree = "<group>"; };
-		D25730EB8C5F369113033564 /* ConversationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationModels.swift; path = "AI/Conversation/ConversationModels.swift"; sourceTree = "<group>"; };
-		D5B3C2D9205F703C1F972B28 /* RelationshipMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RelationshipMapper.swift; path = "AI/Analysis/RelationshipMapper.swift"; sourceTree = "<group>"; };
+		D25730EB8C5F369113033564 /* ConversationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationModels.swift; path = AI/Conversation/ConversationModels.swift; sourceTree = "<group>"; };
+		D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TinyChatEmbeddingProvider.swift; path = AI/Embeddings/TinyChatEmbeddingProvider.swift; sourceTree = "<group>"; };
+		D5B3C2D9205F703C1F972B28 /* RelationshipMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RelationshipMapper.swift; path = AI/Analysis/RelationshipMapper.swift; sourceTree = "<group>"; };
 		D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ImageGenerationUnified.swift; path = AICapabilities/ImageGenerationUnified.swift; sourceTree = "<group>"; };
+		EMB002010000000000000001 /* EmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmbeddingProvider.swift; path = AI/Embeddings/EmbeddingProvider.swift; sourceTree = "<group>"; };
+		EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OllamaEmbeddingProvider.swift; path = AI/Embeddings/OllamaEmbeddingProvider.swift; sourceTree = "<group>"; };
+		EMB002030000000000000001 /* MLXEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MLXEmbeddingProvider.swift; path = AI/Embeddings/MLXEmbeddingProvider.swift; sourceTree = "<group>"; };
+		EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenAIEmbeddingProvider.swift; path = AI/Embeddings/OpenAIEmbeddingProvider.swift; sourceTree = "<group>"; };
+		EMB002050000000000000001 /* SentenceTransformerProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentenceTransformerProvider.swift; path = AI/Embeddings/SentenceTransformerProvider.swift; sourceTree = "<group>"; };
 		MB0000020000000000000001 /* MBox_ExplorerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBox_ExplorerApp.swift; sourceTree = "<group>"; };
 		MB0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		MB0000060000000000000001 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
@@ -241,6 +214,37 @@
 		MB0000480000000000000001 /* RecentFilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentFilesManager.swift; sourceTree = "<group>"; };
 		MB0000500000000000000001 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModernDesign.swift; sourceTree = "<group>"; };
+		NF200001000000000000001 /* ThreadSummarizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThreadSummarizer.swift; path = AI/Features/ThreadSummarizer.swift; sourceTree = "<group>"; };
+		NF200002000000000000001 /* ActionItemExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ActionItemExtractor.swift; path = AI/Features/ActionItemExtractor.swift; sourceTree = "<group>"; };
+		NF200003000000000000001 /* PersonProfileGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PersonProfileGenerator.swift; path = AI/Features/PersonProfileGenerator.swift; sourceTree = "<group>"; };
+		NF200004000000000000001 /* TopicClustering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TopicClustering.swift; path = AI/Features/TopicClustering.swift; sourceTree = "<group>"; };
+		NF200005000000000000001 /* AttachmentSearcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AttachmentSearcher.swift; path = AI/Features/AttachmentSearcher.swift; sourceTree = "<group>"; };
+		NF200006000000000000001 /* NaturalLanguageFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NaturalLanguageFilter.swift; path = AI/Features/NaturalLanguageFilter.swift; sourceTree = "<group>"; };
+		NF200007000000000000001 /* SimilarEmailFinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SimilarEmailFinder.swift; path = AI/Features/SimilarEmailFinder.swift; sourceTree = "<group>"; };
+		NF200008000000000000001 /* ThreatDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ThreatDetector.swift; path = AI/Features/ThreatDetector.swift; sourceTree = "<group>"; };
+		NF200009000000000000001 /* EmailForensics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailForensics.swift; path = AI/Features/EmailForensics.swift; sourceTree = "<group>"; };
+		NF200010000000000000001 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TimelineView.swift; path = Features/TimelineView.swift; sourceTree = "<group>"; };
+		NF200011000000000000001 /* HeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HeatmapView.swift; path = Features/HeatmapView.swift; sourceTree = "<group>"; };
+		NF200012000000000000001 /* WordCloudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WordCloudView.swift; path = Features/WordCloudView.swift; sourceTree = "<group>"; };
+		NF200013000000000000001 /* TagsCollectionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TagsCollectionsView.swift; path = Features/TagsCollectionsView.swift; sourceTree = "<group>"; };
+		NF200014000000000000001 /* CommandPaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CommandPaletteView.swift; path = Features/CommandPaletteView.swift; sourceTree = "<group>"; };
+		NF200015000000000000001 /* TagManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagManager.swift; sourceTree = "<group>"; };
+		NF200016000000000000001 /* MultiFormatImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiFormatImporter.swift; sourceTree = "<group>"; };
+		NF200017000000000000001 /* MailboxMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailboxMerger.swift; sourceTree = "<group>"; };
+		NF200018000000000000001 /* BackgroundIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundIndexer.swift; sourceTree = "<group>"; };
+		NF200019000000000000001 /* MultiWindowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiWindowManager.swift; sourceTree = "<group>"; };
+		NF200020000000000000001 /* RichExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichExporter.swift; sourceTree = "<group>"; };
+		NF200022000000000000001 /* SearchHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHistory.swift; sourceTree = "<group>"; };
+		NF200023000000000000001 /* EmailStatisticsDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailStatisticsDashboard.swift; path = Features/EmailStatisticsDashboard.swift; sourceTree = "<group>"; };
+		NF200024000000000000001 /* SpotlightIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotlightIntegration.swift; sourceTree = "<group>"; };
+		NF200025000000000000001 /* BatchOperationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BatchOperationsView.swift; path = Features/BatchOperationsView.swift; sourceTree = "<group>"; };
+		NF200026000000000000001 /* SentimentDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SentimentDashboard.swift; path = AI/Features/SentimentDashboard.swift; sourceTree = "<group>"; };
+		NF200027000000000000001 /* SmartReplySuggestions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartReplySuggestions.swift; path = AI/Features/SmartReplySuggestions.swift; sourceTree = "<group>"; };
+		NF200028000000000000001 /* MeetingEventExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MeetingEventExtractor.swift; path = AI/Features/MeetingEventExtractor.swift; sourceTree = "<group>"; };
+		NF200029000000000000001 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		NF200030000000000000001 /* EmailDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailDiffView.swift; path = Features/EmailDiffView.swift; sourceTree = "<group>"; };
+		NF200031000000000000001 /* ContactExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactExporter.swift; sourceTree = "<group>"; };
+		NF200032000000000000001 /* QuickLookPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookPreview.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -272,61 +276,6 @@
 				NF300000000000000000001 /* Features */,
 			);
 			name = AI;
-			sourceTree = "<group>";
-		};
-		EMB003000000000000000001 /* Embeddings */ = {
-			isa = PBXGroup;
-			children = (
-				EMB002010000000000000001 /* EmbeddingProvider.swift */,
-				EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */,
-				EMB002030000000000000001 /* MLXEmbeddingProvider.swift */,
-				EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */,
-				EMB002050000000000000001 /* SentenceTransformerProvider.swift */,
-			);
-			name = Embeddings;
-			sourceTree = "<group>";
-		};
-		NF300000000000000000001 /* Features */ = {
-			isa = PBXGroup;
-			children = (
-				NF200001000000000000001 /* ThreadSummarizer.swift */,
-				NF200002000000000000001 /* ActionItemExtractor.swift */,
-				NF200003000000000000001 /* PersonProfileGenerator.swift */,
-				NF200004000000000000001 /* TopicClustering.swift */,
-				NF200005000000000000001 /* AttachmentSearcher.swift */,
-				NF200006000000000000001 /* NaturalLanguageFilter.swift */,
-				NF200007000000000000001 /* SimilarEmailFinder.swift */,
-				NF200008000000000000001 /* ThreatDetector.swift */,
-				NF200009000000000000001 /* EmailForensics.swift */,
-				NF200026000000000000001 /* SentimentDashboard.swift */,
-				NF200027000000000000001 /* SmartReplySuggestions.swift */,
-				NF200028000000000000001 /* MeetingEventExtractor.swift */,
-			);
-			name = Features;
-			sourceTree = "<group>";
-		};
-		NF300001000000000000001 /* ViewFeatures */ = {
-			isa = PBXGroup;
-			children = (
-				NF200010000000000000001 /* TimelineView.swift */,
-				NF200011000000000000001 /* HeatmapView.swift */,
-				NF200012000000000000001 /* WordCloudView.swift */,
-				NF200013000000000000001 /* TagsCollectionsView.swift */,
-				NF200014000000000000001 /* CommandPaletteView.swift */,
-				NF200023000000000000001 /* EmailStatisticsDashboard.swift */,
-				NF200025000000000000001 /* BatchOperationsView.swift */,
-				NF200030000000000000001 /* EmailDiffView.swift */,
-			);
-			name = Features;
-			sourceTree = "<group>";
-		};
-		NF300002000000000000001 /* Importers */ = {
-			isa = PBXGroup;
-			children = (
-				NF200016000000000000001 /* MultiFormatImporter.swift */,
-			);
-			name = Importers;
-			path = Importers;
 			sourceTree = "<group>";
 		};
 		56D930EA56AFE7611177F548 /* Analysis */ = {
@@ -392,6 +341,20 @@
 			name = Intelligence;
 			sourceTree = "<group>";
 		};
+		EMB003000000000000000001 /* Embeddings */ = {
+			isa = PBXGroup;
+			children = (
+				EMB002010000000000000001 /* EmbeddingProvider.swift */,
+				EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */,
+				EMB002030000000000000001 /* MLXEmbeddingProvider.swift */,
+				EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */,
+				EMB002050000000000000001 /* SentenceTransformerProvider.swift */,
+				D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */,
+				079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */,
+			);
+			name = Embeddings;
+			sourceTree = "<group>";
+		};
 		F151225335B055EE327A55C3 /* Advanced */ = {
 			isa = PBXGroup;
 			children = (
@@ -441,7 +404,7 @@
 		MB0000320000000000000001 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				NF300001000000000000001 /* ViewFeatures */,
+				NF300001000000000000001 /* Features */,
 				D07875882EB1C54C00C75A43 /* ThreeColumnLayoutView.swift */,
 				D07875822EB1C4AE00C75A43 /* DragDropModifier.swift */,
 				D07875802EB1C45300C75A43 /* ThemeSettingsView.swift */,
@@ -497,18 +460,6 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		NF300003000000000000001 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				NF200024000000000000001 /* SpotlightIntegration.swift */,
-				NF200029000000000000001 /* NotificationService.swift */,
-				NF200031000000000000001 /* ContactExporter.swift */,
-				NF200032000000000000001 /* QuickLookPreview.swift */,
-			);
-			name = Services;
-			path = Services;
-			sourceTree = "<group>";
-		};
 		MB0000350000000000000001 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -537,6 +488,61 @@
 				MB0000240000000000000001 /* ExportEngine.swift */,
 			);
 			path = Exporters;
+			sourceTree = "<group>";
+		};
+		NF300000000000000000001 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				NF200001000000000000001 /* ThreadSummarizer.swift */,
+				NF200002000000000000001 /* ActionItemExtractor.swift */,
+				NF200003000000000000001 /* PersonProfileGenerator.swift */,
+				NF200004000000000000001 /* TopicClustering.swift */,
+				NF200005000000000000001 /* AttachmentSearcher.swift */,
+				NF200006000000000000001 /* NaturalLanguageFilter.swift */,
+				NF200007000000000000001 /* SimilarEmailFinder.swift */,
+				NF200008000000000000001 /* ThreatDetector.swift */,
+				NF200009000000000000001 /* EmailForensics.swift */,
+				NF200026000000000000001 /* SentimentDashboard.swift */,
+				NF200027000000000000001 /* SmartReplySuggestions.swift */,
+				NF200028000000000000001 /* MeetingEventExtractor.swift */,
+			);
+			name = Features;
+			sourceTree = "<group>";
+		};
+		NF300001000000000000001 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				NF200010000000000000001 /* TimelineView.swift */,
+				NF200011000000000000001 /* HeatmapView.swift */,
+				NF200012000000000000001 /* WordCloudView.swift */,
+				NF200013000000000000001 /* TagsCollectionsView.swift */,
+				NF200014000000000000001 /* CommandPaletteView.swift */,
+				NF200023000000000000001 /* EmailStatisticsDashboard.swift */,
+				NF200025000000000000001 /* BatchOperationsView.swift */,
+				NF200030000000000000001 /* EmailDiffView.swift */,
+			);
+			name = Features;
+			sourceTree = "<group>";
+		};
+		NF300002000000000000001 /* Importers */ = {
+			isa = PBXGroup;
+			children = (
+				NF200016000000000000001 /* MultiFormatImporter.swift */,
+			);
+			name = Importers;
+			path = Importers;
+			sourceTree = "<group>";
+		};
+		NF300003000000000000001 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				NF200024000000000000001 /* SpotlightIntegration.swift */,
+				NF200029000000000000001 /* NotificationService.swift */,
+				NF200031000000000000001 /* ContactExporter.swift */,
+				NF200032000000000000001 /* QuickLookPreview.swift */,
+			);
+			name = Services;
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -732,6 +738,8 @@
 				NF100030000000000000001 /* EmailDiffView.swift in Sources */,
 				NF100031000000000000001 /* ContactExporter.swift in Sources */,
 				NF100032000000000000001 /* QuickLookPreview.swift in Sources */,
+				162EA02AA9581D8F680F992B /* TinyChatEmbeddingProvider.swift in Sources */,
+				31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
