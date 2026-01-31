@@ -311,7 +311,8 @@ class AIBackendManager: ObservableObject {
     private func checkMLXAvailability() async -> Bool {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: pythonPath)
-        task.arguments = ["-c", "import mlx.core as mx; print('OK')"]
+        // Check for both mlx.core and mlx_lm (needed for text generation)
+        task.arguments = ["-c", "import mlx.core; import mlx_lm; print('OK')"]
 
         let pipe = Pipe()
         task.standardOutput = pipe
@@ -433,9 +434,8 @@ class AIBackendManager: ObservableObject {
         temperature: Float,
         maxTokens: Int
     ) async throws -> String {
-        guard !mlxScriptPath.isEmpty else {
-            throw AIBackendError.mlxScriptNotConfigured
-        }
+        // MLX uses inline Python script with mlx_lm package
+        // No custom script path needed - uses pythonPath setting
 
         // Build combined prompt
         var fullPrompt = ""
