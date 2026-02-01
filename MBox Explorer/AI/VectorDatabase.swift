@@ -530,14 +530,20 @@ class VectorDatabase: ObservableObject {
         return dotProduct / (magnitudeA * magnitudeB)
     }
 
-    /// Clear database
+    /// Clear database - call this when loading a new MBOX file to prevent cross-contamination
     func clearIndex() {
         dbQueue.sync {
             let deleteSQL = "DELETE FROM email_vectors;"
             sqlite3_exec(db, deleteSQL, nil, nil, nil)
+            // FTS5 table is cleared automatically via the email_vectors_ad trigger
+            print("[VectorDatabase] Index cleared - all emails removed from vector database")
         }
-        isIndexed = false
-        totalDocuments = 0
+        // Update published properties on main thread
+        DispatchQueue.main.async {
+            self.isIndexed = false
+            self.totalDocuments = 0
+            self.indexProgress = 0.0
+        }
     }
 
     /// Direct search through emails without requiring indexing
