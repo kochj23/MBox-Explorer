@@ -5,7 +5,7 @@
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-2.3.0-success)
+![Version](https://img.shields.io/badge/version-2.2.1-success)
 ![AI](https://img.shields.io/badge/AI-RAG%20Pipeline-purple)
 ![Ethics](https://img.shields.io/badge/Ethics-Protected-green)
 
@@ -245,6 +245,10 @@ USER QUESTION: [query]
 ## 🎯 Features
 
 ### Ask AI Interface
+
+![Ask AI Feature](screenshots/ask-ai-feature.png)
+
+*The Ask AI interface showing natural language queries with source citations and conversation memory*
 
 - **Natural language queries** - Ask questions about your emails in plain English
 - **Source citations** - See which emails were used to generate answers
