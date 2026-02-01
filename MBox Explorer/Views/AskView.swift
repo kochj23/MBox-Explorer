@@ -42,6 +42,15 @@ struct AskView: View {
         .sheet(isPresented: $showSettingsSheet) {
             RAGSettingsSheet(llm: llm, isPresented: $showSettingsSheet)
         }
+        .onChange(of: viewModel.currentFileURL) { oldValue, newValue in
+            // Clear the RAG index when a new MBOX file is loaded to prevent cross-contamination
+            if newValue != nil && newValue != oldValue {
+                vectorDB.clearIndex()
+                queryHistory.removeAll()
+                currentRAGResult = nil
+                llm.clearConversation()
+            }
+        }
     }
 
     // MARK: - Main Chat View
@@ -175,6 +184,8 @@ struct AskView: View {
     private var indexButton: some View {
         Button(action: {
             Task {
+                // Clear any existing index first to prevent cross-contamination from previous MBOX files
+                vectorDB.clearIndex()
                 await vectorDB.indexEmails(viewModel.emails) { _ in }
             }
         }) {
