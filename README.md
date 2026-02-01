@@ -2,6 +2,8 @@
 
 **AI-Powered Email Archive Analysis with Native RAG Pipeline**
 
+![Ask AI Feature](screenshots/ask-ai-feature.png)
+
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -245,10 +247,6 @@ USER QUESTION: [query]
 ## 🎯 Features
 
 ### Ask AI Interface
-
-![Ask AI Feature](screenshots/ask-ai-feature.png)
-
-*The Ask AI interface showing natural language queries with source citations and conversation memory*
 
 - **Natural language queries** - Ask questions about your emails in plain English
 - **Source citations** - See which emails were used to generate answers
