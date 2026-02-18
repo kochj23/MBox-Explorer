@@ -776,3 +776,17 @@ MIT License - See LICENSE file
 **MBox Explorer - AI-Powered Email Archive Analysis**
 
 © 2026 Jordan Koch. All rights reserved.
+
+---
+
+## More Apps by Jordan Koch
+
+| App | Description |
+|-----|-------------|
+| [MailSummary](https://github.com/kochj23/MailSummary) | AI-powered email categorization and summarization |
+| [ExcelExplorer](https://github.com/kochj23/ExcelExplorer) | Native macOS Excel/CSV file viewer |
+| [RsyncGUI](https://github.com/kochj23/RsyncGUI) | Native macOS GUI for rsync file synchronization |
+| [TopGUI](https://github.com/kochj23/TopGUI) | macOS system monitor with real-time metrics |
+| [DotSync](https://github.com/kochj23/DotSync) | Configuration file synchronization across machines |
+
+> **[View all projects](https://github.com/kochj23?tab=repositories)**
