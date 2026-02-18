@@ -1,0 +1,3 @@
+theme: jekyll-theme-cayman
+title: "MBox-Explorer"
+description: "Advanced macOS email archive viewer with AI-powered search, summarization, and RAG export. Query emails in natural language with built-in LLM."
