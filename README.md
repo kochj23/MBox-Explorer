@@ -790,3 +790,7 @@ MIT License - See LICENSE file
 | [DotSync](https://github.com/kochj23/DotSync) | Configuration file synchronization across machines |
 
 > **[View all projects](https://github.com/kochj23?tab=repositories)**
+
+---
+
+> **Disclaimer:** This is a personal project created on my own time. It is not affiliated with, endorsed by, or representative of my employer.
