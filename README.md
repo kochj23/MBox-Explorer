@@ -1,5 +1,7 @@
 # MBox Explorer
 
+![Build](https://github.com/kochj23/MBox-Explorer/actions/workflows/build.yml/badge.svg)
+
 **AI-Powered Email Archive Analysis with Native RAG Pipeline**
 
 ![Ask AI Feature](screenshots/ask-ai-feature.png)
