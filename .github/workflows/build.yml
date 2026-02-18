@@ -1,0 +1,41 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    
+    - name: Build
+      run: |
+        XCODEPROJ=$(find . -name "*.xcodeproj" -maxdepth 2 | head -1)
+        if [ -z "$XCODEPROJ" ]; then
+          echo "No Xcode project found"
+          exit 1
+        fi
+        
+        SCHEME=$(xcodebuild -list -project "$XCODEPROJ" 2>/dev/null | awk '/Schemes:/{found=1; next} found && NF{print; exit}' | xargs)
+        if [ -z "$SCHEME" ]; then
+          SCHEME=$(basename "$XCODEPROJ" .xcodeproj)
+        fi
+        
+        echo "Building scheme: $SCHEME"
+        xcodebuild build \
+          -project "$XCODEPROJ" \
+          -scheme "$SCHEME" \
+          -destination 'platform=macOS' \
+          CODE_SIGNING_ALLOWED=NO \
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=NO \
+          | tail -20
