@@ -4,16 +4,47 @@
 
 ![Ask AI Feature](screenshots/ask-ai-feature.png)
 
+## Download
+
+Download the latest release: [MBox Explorer v2.2.1](https://github.com/kochj23/MBox-Explorer/releases/latest)
+
+Or build from source (see below).
+
+---
+
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-2.2.1-success)
+![Version](https://img.shields.io/badge/version-2.4.0-success)
+![Widget](https://img.shields.io/badge/Widget-WidgetKit-orange)
 ![AI](https://img.shields.io/badge/AI-RAG%20Pipeline-purple)
 ![Ethics](https://img.shields.io/badge/Ethics-Protected-green)
 
 ---
 
-## ✨ Latest Update: v2.3 - January 30, 2026
+## ✨ Latest Update: v2.4 - February 4, 2026
+
+### 📱 macOS Widget (v2.4)
+
+New **WidgetKit widget** for macOS Notification Center:
+
+- **Three Widget Sizes**: Small, Medium, and Large
+- **Email Statistics**: Total emails, threads, date range at a glance
+- **Top Senders**: See who emails you most frequently
+- **Recent Searches**: Quick access to your recent queries
+- **Quick Search Action**: Jump directly to search in the app
+- **Auto-Sync**: Widget updates automatically when you load new mbox files
+- **App Group Sharing**: Secure data sharing via `group.com.jkoch.mboxexplorer`
+
+**Widget Features by Size:**
+
+| Size | Features |
+|------|----------|
+| Small | Email count, loaded file name |
+| Medium | Stats + Top 3 senders |
+| Large | Stats + Top senders + Recent searches + Quick search button |
+
+---
 
 ### 🔧 RAG Pipeline Reliability Improvements (v2.3)
 
@@ -245,6 +276,8 @@ USER QUESTION: [query]
 ---
 
 ## 🎯 Features
+
+Perfect for **enterprise email migration**, compliance review, legal discovery, and archiving old mailboxes.
 
 ### Ask AI Interface
 
@@ -649,6 +682,15 @@ All AI operations are monitored for:
 ---
 
 ## 📊 Version History
+
+### v2.4 - Widget Edition (February 4, 2026)
+- **macOS WidgetKit Widget** - View email stats from Notification Center
+  - Small widget: Email count and loaded file
+  - Medium widget: Stats + Top 3 senders
+  - Large widget: Stats + Senders + Recent queries + Quick search
+- **App Group Data Sharing** - Secure data sync between app and widget
+- **Auto-Sync on Load** - Widget updates when mbox files are loaded
+- **SharedDataManager** - Unified data management for widget integration
 
 ### v2.3 - RAG Reliability Edition (January 30, 2026)
 - **Critical bug fixes** for RAG pipeline reliability:
