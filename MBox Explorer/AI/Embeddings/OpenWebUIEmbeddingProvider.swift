@@ -12,6 +12,7 @@
 //
 
 import Foundation
+import Security
 
 /// OpenWebUI embedding provider using OpenAI-compatible embeddings API
 /// OpenWebUI: https://github.com/open-webui/open-webui
@@ -37,6 +38,58 @@ class OpenWebUIEmbeddingProvider: EmbeddingProvider, ObservableObject {
     private var baseURL: String
     private var availableModels: [String] = ["text-embedding-ada-002", "nomic-embed-text"]
 
+    // MARK: - Keychain Helpers
+
+    private static let keychainService = "com.jordankoch.MBoxExplorer"
+    private static let keychainAccount = "OpenWebUIEmbedding_APIKey"
+
+    private func saveAPIKeyToKeychain(_ key: String) {
+        guard let data = key.data(using: .utf8) else { return }
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: Self.keychainAccount,
+            kSecAttrService as String: Self.keychainService
+        ]
+        // Delete existing item first
+        SecItemDelete(query as CFDictionary)
+        // Add new item
+        var addQuery = query
+        addQuery[kSecValueData as String] = data
+        SecItemAdd(addQuery as CFDictionary, nil)
+    }
+
+    private func loadAPIKeyFromKeychain() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: Self.keychainAccount,
+            kSecAttrService as String: Self.keychainService,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func deleteAPIKeyFromKeychain() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: Self.keychainAccount,
+            kSecAttrService as String: Self.keychainService
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+
+    /// Migrate API key from UserDefaults to Keychain (one-time migration)
+    private func migrateAPIKeyToKeychain() {
+        if let legacyKey = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_APIKey"), !legacyKey.isEmpty {
+            saveAPIKeyToKeychain(legacyKey)
+            UserDefaults.standard.removeObject(forKey: "OpenWebUIEmbedding_APIKey")
+            NSLog("[OpenWebUI] Migrated API key from UserDefaults to Keychain")
+        }
+    }
+
     init(baseURL: String = "http://localhost:8080") {
         self.baseURL = baseURL
 
@@ -47,7 +100,12 @@ class OpenWebUIEmbeddingProvider: EmbeddingProvider, ObservableObject {
         if let savedModel = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_Model") {
             self.selectedModel = savedModel
         }
-        if let savedKey = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_APIKey") {
+
+        // Migrate API key from UserDefaults to Keychain if needed
+        migrateAPIKeyToKeychain()
+
+        // Load API key from Keychain
+        if let savedKey = loadAPIKeyFromKeychain() {
             self.apiKey = savedKey
         }
     }
@@ -307,7 +365,11 @@ class OpenWebUIEmbeddingProvider: EmbeddingProvider, ObservableObject {
 
     func setAPIKey(_ key: String) {
         apiKey = key
-        UserDefaults.standard.set(key, forKey: "OpenWebUIEmbedding_APIKey")
+        if key.isEmpty {
+            deleteAPIKeyFromKeychain()
+        } else {
+            saveAPIKeyToKeychain(key)
+        }
     }
 
     var models: [String] { availableModels }
