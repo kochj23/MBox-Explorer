@@ -842,13 +842,18 @@ class ConversationDatabase: ObservableObject {
         """
 
         if let topic = topic {
-            sql += " WHERE topic LIKE '%\(topic)%'"
+            sql += " WHERE topic LIKE ?"
         }
 
         sql += " ORDER BY decision_date DESC;"
 
         var statement: OpaquePointer?
         if sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK {
+            // Bind the topic parameter if provided (parameterized query prevents SQL injection)
+            if let topic = topic {
+                let searchPattern = "%\(topic)%"
+                sqlite3_bind_text(statement, 1, (searchPattern as NSString).utf8String, -1, nil)
+            }
             while sqlite3_step(statement) == SQLITE_ROW {
                 let id = UUID(uuidString: String(cString: sqlite3_column_text(statement, 0))) ?? UUID()
                 let topic = String(cString: sqlite3_column_text(statement, 1))
