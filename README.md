@@ -663,6 +663,11 @@ All AI operations are monitored for:
 - **No cloud required**: Cloud AI is optional
 - **Your data stays yours**: Emails never leave your device unless you choose cloud AI
 
+### Security Hardening (February 2026)
+
+- **SQL Injection Prevention** -- All database queries in ConversationDatabase now use parameterized bindings instead of string interpolation
+- **API Key Protection** -- OpenWebUI API key migrated from plaintext storage to macOS Keychain
+
 ---
 
 ## 🛠️ Development
