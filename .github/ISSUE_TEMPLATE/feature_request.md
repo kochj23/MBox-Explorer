@@ -1,18 +1,27 @@
 ---
 name: Feature Request
 about: Suggest a new feature
-title: '[FEATURE] '
+title: '[Feature] '
 labels: enhancement
+assignees: kochj23
 ---
 
-**Is your feature request related to a problem?**
-A clear description of the problem.
+## Description
+A clear description of the feature you'd like.
 
-**Describe the solution you'd like**
-What you want to happen.
+## Use Case
+Why would this feature be useful? What problem does it solve?
 
-**Alternatives considered**
-Any alternative solutions you've considered.
+## Proposed Solution
+How do you think this could be implemented?
 
-**Additional context**
-Any other context or screenshots.
+## Alternatives Considered
+Any alternative solutions or features you've considered.
+
+## Additional Context
+Any other context, screenshots, or mockups.
+
+## Security Considerations
+- [ ] This feature handles user data
+- [ ] This feature requires network access
+- [ ] This feature interacts with the file system
