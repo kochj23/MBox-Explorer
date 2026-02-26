@@ -1,26 +1,42 @@
 # Security Policy
 
+## Supported Versions
+
+| Version | Supported |
+|---------|-----------|
+| 2.2.x   | Yes       |
+| < 2.0   | No        |
+
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability, please report it responsibly:
 
-1. **Do NOT open a public issue**
-2. Email: kochj@digitalnoise.net
-3. Include steps to reproduce and impact assessment
+1. **Do NOT open a public GitHub issue**
+2. Email: kochj23 (via GitHub)
+3. Include: description, steps to reproduce, potential impact
 
-## Response Timeline
+We aim to respond within 48 hours and provide a fix within 7 days for critical issues.
 
-- Acknowledgment within 48 hours
-- Status update within 7 days
-- Fix or mitigation plan within 30 days
+## Security Features
 
-## Supported Versions
+- **Local Processing**: All email parsing and AI analysis runs on-device
+- **No Cloud Upload**: Email data never leaves your machine
+- **Read-Only Access**: MBox files are read, never modified
+- **No Telemetry**: Zero analytics, crash reporting, or usage tracking
+- **Keychain Storage**: Any API keys stored in macOS Keychain
 
-Only the latest release is supported with security updates.
+## Data Privacy
 
-## Security Best Practices
+MBox Explorer processes potentially sensitive email archives. We take this seriously:
 
-This project follows security best practices:
-- No hardcoded credentials
-- Dependencies regularly audited
-- MIT License with no warranty
+- Email content is parsed in-memory and never cached to disk beyond the session
+- AI search queries are processed locally via Ollama/MLX
+- No email metadata is transmitted anywhere
+- RAG exports are saved only where you specify
+
+## Best Practices
+
+- Never hardcode credentials or API keys
+- Report suspicious behavior immediately
+- Keep dependencies updated
+- Review all code changes for security implications

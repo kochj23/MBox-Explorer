@@ -1,29 +1,38 @@
 ---
 name: Bug Report
-about: Report a bug to help improve the project
-title: '[BUG] '
+about: Report a bug to help us improve
+title: '[Bug] '
 labels: bug
+assignees: kochj23
 ---
 
-**Describe the bug**
-A clear description of what the bug is.
+## Description
+A clear description of the bug.
 
-**To Reproduce**
-Steps to reproduce:
-1. 
-2. 
-3. 
+## Steps to Reproduce
+1. Go to '...'
+2. Click on '...'
+3. See error
 
-**Expected behavior**
+## Expected Behavior
 What you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots.
+## Actual Behavior
+What actually happened.
 
-**Environment:**
-- macOS version: 
-- App version: 
-- Hardware: [e.g., M1 MacBook Pro]
+## Environment
+- macOS version:
+- MBox Explorer version:
+- MBox file size:
+- Number of emails in archive:
 
-**Additional context**
+## Screenshots
+If applicable, add screenshots to help explain the problem.
+
+## Additional Context
 Any other context about the problem.
+
+## Security Assessment
+- [ ] This bug has security implications
+- [ ] This bug exposes sensitive data
+- [ ] This bug affects data integrity

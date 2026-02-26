@@ -1,4 +1,4 @@
-# Contributing to MBox-Explorer
+# Contributing to MBox Explorer
 
 Thank you for your interest in contributing! We welcome contributions from the community.
 
@@ -35,7 +35,7 @@ Thank you for your interest in contributing! We welcome contributions from the c
 ```bash
 git clone https://github.com/kochj23/MBox-Explorer.git
 cd MBox-Explorer
-open *.xcodeproj
+open "MBox Explorer.xcodeproj"
 ```
 
 ## Code Standards
@@ -51,10 +51,7 @@ open *.xcodeproj
 - **Never commit credentials, API keys, or secrets**
 - Report security vulnerabilities privately (see [SECURITY.md](SECURITY.md))
 - Follow OWASP security best practices
-
-## Code of Conduct
-
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold this code.
+- Be especially careful with email data handling — never log email content
 
 ## License
 
