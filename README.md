@@ -2,7 +2,7 @@
 
 ![Build](https://github.com/kochj23/MBox-Explorer/actions/workflows/build.yml/badge.svg)
 
-**AI-Powered Email Archive Analysis with Native RAG Pipeline**
+**AI-Powered Email Archive Analysis with Native RAG (Retrieval-Augmented Generation) Pipeline**
 
 ![Ask AI Feature](screenshots/ask-ai-feature.png)
 
@@ -35,7 +35,7 @@ New **WidgetKit widget** for macOS Notification Center:
 - **Top Senders**: See who emails you most frequently
 - **Recent Searches**: Quick access to your recent queries
 - **Quick Search Action**: Jump directly to search in the app
-- **Auto-Sync**: Widget updates automatically when you load new mbox files
+- **Auto-Sync**: Widget updates automatically when you load new mbox (mailbox format) files
 - **App Group Sharing**: Secure data sharing via `group.com.jkoch.mboxexplorer`
 
 **Widget Features by Size:**
@@ -51,7 +51,7 @@ New **WidgetKit widget** for macOS Notification Center:
 ### 🔧 RAG Pipeline Reliability Improvements (v2.3)
 
 - **Memory-safe SQLite bindings** - Fixed SQLITE_TRANSIENT for all string bindings preventing crashes
-- **FTS5 auto-sync triggers** - Full-text search index automatically syncs with vector database
+- **FTS5 (Full-Text Search 5) auto-sync triggers** - Full-text search index automatically syncs with vector database
 - **Smart three-tier search** - Semantic → FTS keywords → Sample fallback ensures results always found
 - **Keyword extraction** - Stop-word filtering for natural language queries to FTS5
 - **Extended timeouts** - 3 minute request / 10 minute resource timeout for large RAG queries
@@ -76,7 +76,7 @@ New **WidgetKit widget** for macOS Notification Center:
 
 #### 📤 Batch & Export
 - **Batch Operations Toolbar** - Multi-select tag, star, export, print
-- **Contact Exporter** - Export to vCard, CSV, or Address Book
+- **Contact Exporter** - Export to vCard (Virtual Contact File), CSV (Comma-Separated Values), or Address Book
 
 ---
 
@@ -102,14 +102,14 @@ New **WidgetKit widget** for macOS Notification Center:
 - **Google Cloud AI** - Vertex AI, Vision, Speech
 - **Microsoft Azure** - Cognitive Services
 - **AWS AI Services** - Bedrock, Rekognition, Polly
-- **IBM Watson** - NLU, Speech, Discovery
+- **IBM Watson** - NLU (Natural Language Understanding), Speech, Discovery
 
 #### 🛡️ Ethical AI Safeguards
 - Comprehensive content monitoring
 - Prohibited use detection (100+ patterns)
 - Automatic blocking of illegal/harmful content
 - Crisis resource referrals
-- Legal compliance (CSAM reporting, etc.)
+- Legal compliance (CSAM (Child Sexual Abuse Material) reporting, etc.)
 
 ---
 
@@ -149,7 +149,7 @@ MBox Explorer includes a **native RAG (Retrieval-Augmented Generation) pipeline*
 |---------|----------------|
 | Storage | SQLite database (`~/Library/Application Support/MBoxExplorer/vectors.db`) |
 | Full-text search | FTS5 with ranking |
-| Vector storage | Float arrays as BLOBs |
+| Vector storage | Float arrays as BLOBs (Binary Large Objects) |
 | Indexing | Batch processing with progress |
 
 ### 2. Embedding Generation
@@ -161,7 +161,7 @@ MBox Explorer supports **4 embedding providers** - choose based on your needs:
 | Provider | Cost | Privacy | Speed | Quality | Setup |
 |----------|------|---------|-------|---------|-------|
 | **Ollama** | Free | 100% Local | Fast | Good | `brew install ollama && ollama pull nomic-embed-text` |
-| **MLX** | Free | 100% Local | Very Fast | Good | Built-in (Apple Silicon only) |
+| **MLX (Machine Learning eXtensions)** | Free | 100% Local | Very Fast | Good | Built-in (Apple Silicon only) |
 | **OpenAI** | $0.02/1M tokens | Cloud | Fast | Excellent | API key required |
 | **Sentence Transformers** | Free | 100% Local | Medium | Excellent | `pip install sentence-transformers` |
 
@@ -242,7 +242,7 @@ The pipeline automatically detects question types and optimizes context:
 
 ### 5. Context Augmentation
 
-The prompt sent to the LLM includes:
+The prompt sent to the LLM (Large Language Model) includes:
 
 ```
 MAILBOX STATISTICS:
@@ -387,7 +387,7 @@ python server.py  # Starts on localhost:8000
 
 ## 📦 Installation
 
-### From DMG
+### From DMG (Disk Image)
 ```bash
 open MBox-Explorer-latest.dmg
 # Drag to Applications
@@ -665,7 +665,7 @@ All AI operations are monitored for:
 
 ### Security Hardening (February 2026)
 
-- **SQL Injection Prevention** -- All database queries in ConversationDatabase now use parameterized bindings instead of string interpolation
+- **SQL (Structured Query Language) Injection Prevention** -- All database queries in ConversationDatabase now use parameterized bindings instead of string interpolation
 - **API Key Protection** -- OpenWebUI API key migrated from plaintext storage to macOS Keychain
 
 ---
@@ -681,7 +681,7 @@ All AI operations are monitored for:
 - Native macOS APIs
 
 **Architecture:**
-- MVVM pattern
+- MVVM (Model-View-ViewModel) pattern
 - Native RAG pipeline
 - Multi-backend AI support
 - Ethical safeguards
