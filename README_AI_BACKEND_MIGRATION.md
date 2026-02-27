@@ -106,7 +106,7 @@ This directory contains a complete AI backend migration system with support for 
 ✅ **MBox Explorer** - Fully migrated (BUILD SUCCESS)
 ✅ **GTNW** - Core migrated (functional)
 ⏳ **NMAPScanner** - Prepared for migration
-⏭️ **DisneyGPT×3** - N/A (WebView apps)
+⏭️ **[Private Projects]** - N/A (WebView apps)
 
 ### Documentation:
 ✅ 8 comprehensive documents (77KB)
