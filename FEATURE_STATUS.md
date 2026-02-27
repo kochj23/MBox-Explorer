@@ -207,7 +207,7 @@ Implement all features from IMPLEMENTATION_GUIDE.md in order of priority.
 
 ## 🔧 How to Use the Implementation Guide
 
-1. **Open**: `/Users/kochj/Desktop/xcode/MBox Explorer/IMPLEMENTATION_GUIDE.md`
+1. **Open**: `~/Desktop/xcode/MBox Explorer/IMPLEMENTATION_GUIDE.md`
 
 2. **Choose a Feature**: Pick from "Ready to Implement" section
 
