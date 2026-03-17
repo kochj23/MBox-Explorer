@@ -112,6 +112,9 @@ class MboxViewModel: ObservableObject {
             showingProgressSheet = false
             statusMessage = "Loaded \(emails.count) emails, \(threads.count) threads"
 
+            // Sync data to widget
+            syncWidgetData()
+
             // Clear status after 3 seconds
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             statusMessage = ""
@@ -529,5 +532,23 @@ class MboxViewModel: ObservableObject {
         let totalThreads: Int
         let dateRange: String
         let topSenders: [(String, Int)]
+    }
+
+    // MARK: - Widget Integration
+
+    /// Syncs current email data to the widget via App Group
+    func syncWidgetData() {
+        SharedDataManager.shared.updateFromStats(
+            totalEmails: emails.count,
+            totalThreads: threads.count,
+            dateRange: dateRangeString,
+            topSenders: topSenders(limit: 5),
+            loadedFileName: currentFileURL?.lastPathComponent
+        )
+    }
+
+    /// Adds a search query to widget's recent queries
+    func addSearchToWidget(_ query: String) {
+        SharedDataManager.shared.addRecentQuery(query)
     }
 }

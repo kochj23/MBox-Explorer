@@ -124,6 +124,8 @@
 		NF100030000000000000001 /* EmailDiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NF200030000000000000001 /* EmailDiffView.swift */; };
 		NF100031000000000000001 /* ContactExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = NF200031000000000000001 /* ContactExporter.swift */; };
 		NF100032000000000000001 /* QuickLookPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = NF200032000000000000001 /* QuickLookPreview.swift */; };
+		WD100001000000000000001 /* WidgetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = WD200001000000000000001 /* WidgetData.swift */; };
+		WD100002000000000000001 /* SharedDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = WD200002000000000000001 /* SharedDataManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -245,6 +247,8 @@
 		NF200030000000000000001 /* EmailDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EmailDiffView.swift; path = Features/EmailDiffView.swift; sourceTree = "<group>"; };
 		NF200031000000000000001 /* ContactExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactExporter.swift; sourceTree = "<group>"; };
 		NF200032000000000000001 /* QuickLookPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookPreview.swift; sourceTree = "<group>"; };
+		WD200001000000000000001 /* WidgetData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetData.swift; sourceTree = "<group>"; };
+		WD200002000000000000001 /* SharedDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -384,6 +388,7 @@
 				MB0000360000000000000001 /* Exporters */,
 				NF300002000000000000001 /* Importers */,
 				NF300003000000000000001 /* Services */,
+				WD300001000000000000001 /* Shared */,
 				MB0000260000000000000001 /* Assets.xcassets */,
 				54503A623328C982A327062B /* AI */,
 				C7A270A06C6F2802B6C6D7B9 /* AI */,
@@ -391,6 +396,16 @@
 				B6AE4F6F079CBEA5FF43DBD7 /* AICapabilities */,
 			);
 			path = "MBox Explorer";
+			sourceTree = "<group>";
+		};
+		WD300001000000000000001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				WD200001000000000000001 /* WidgetData.swift */,
+				WD200002000000000000001 /* SharedDataManager.swift */,
+			);
+			name = Shared;
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		MB0000310000000000000001 /* Products */ = {
@@ -740,6 +755,8 @@
 				NF100032000000000000001 /* QuickLookPreview.swift in Sources */,
 				162EA02AA9581D8F680F992B /* TinyChatEmbeddingProvider.swift in Sources */,
 				31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */,
+				WD100001000000000000001 /* WidgetData.swift in Sources */,
+				WD100002000000000000001 /* SharedDataManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -875,7 +892,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = "MBox Explorer/MBox_Explorer.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -905,7 +922,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = "MBox Explorer/MBox_Explorer.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
