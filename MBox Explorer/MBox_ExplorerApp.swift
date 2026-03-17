@@ -176,7 +176,7 @@ class RecentFilesViewModel: ObservableObject {
     }
 
     init() {
-        NovaAPIServer.shared.start()
+        Task { @MainActor in NovaAPIServer.shared.start() }
         loadRecent()
     }
 
