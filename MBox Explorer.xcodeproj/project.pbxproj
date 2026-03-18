@@ -18,20 +18,25 @@
 		31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */; };
 		35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */; };
 		36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */; };
+		372BFD5E200ECAE22DE0FCBF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */; };
 		3D6775E92896C02CF56EEFC2 /* SmartForwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73151335A5C4EA6609FAC1C8 /* SmartForwarder.swift */; };
 		3E4788AFC7EA7101FEC886D5 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01A68F1AFCB3C03DB4465E1 /* ConversationManager.swift */; };
 		3F172172EF7831896FC85D57 /* SecurityUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569BF452BCAD60FF219195F5 /* SecurityUnified.swift */; };
+		4E76AF3E47E31834D7BEC201 /* SharedDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB7BD6003D6AE2044130D80 /* SharedDataManager.swift */; };
 		61396430326536392D316239382D346637352D386133342D /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */; };
 		614E01BD25B3A78A49DAF070 /* UnifiedAICapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */; };
 		6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610D3EFB2D5D23FD826606E /* LocalLLM.swift */; };
+		67E296B39CB2628E3A2CE16C /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 715C422C0916234B2233911C /* Cocoa.framework */; };
 		7EC7E7955FB707BAE5BA53F9 /* EmailSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */; };
 		8238508A80546774B50AD050 /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33C069D93706A1E5E158C2D2 /* ConversationView.swift */; };
 		848B971FABD30CB498F9655A /* SmartSuggestions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B07F30ECCC00A122F53B06D /* SmartSuggestions.swift */; };
+		8B85640DD5FFDF5C74261917 /* MBoxExplorerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D32F6CD61ACBEADE2914689 /* MBoxExplorerWidget.swift */; };
 		8FBC74D4C0911513AFD780F6 /* ConversationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D25730EB8C5F369113033564 /* ConversationModels.swift */; };
 		9D789864CBC22747C3237435 /* ConversationDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CFA614AC3BD8853D16DB6E9 /* ConversationDatabase.swift */; };
 		9D912BB0388A479C026C1802 /* VoiceUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */; };
 		A8C1E5AF5E6FB76BE85A6A79 /* TimeTravelEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B46A71F0106A905F6218BA /* TimeTravelEngine.swift */; };
 		A9149DF9944F63BE246AB2EF /* EmailSearchAgent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25ACFE0E46E831D381EB3E35 /* EmailSearchAgent.swift */; };
+		B61AC515BBE5523E15A8AE5F /* WidgetData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BA4837DCC71ECBD7554866 /* WidgetData.swift */; };
 		BA654320B8AE457B9A856B6A /* NetworkVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */; };
 		BD768E39B961495776874418 /* ModernDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = MD29EAC0C1C9846AF64C0DB3 /* ModernDesign.swift */; };
 		BF708C1D81193E80840A69AA /* AnalysisUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FADA0642D6D75AFE52040D /* AnalysisUnified.swift */; };
@@ -73,6 +78,7 @@
 		DE6CF6C10136C8796C843526 /* DraftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C416248D332727979824ABF /* DraftGenerator.swift */; };
 		E4A2C652D0EE51C645582730 /* SentimentAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */; };
 		E573DEB54B7EF36B8D867E6B /* NovaAPIServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7293E3CDEBC8AE4091F8ABC5 /* NovaAPIServer.swift */; };
+		E8CEF1C0C22D223F3665AE40 /* MBox Explorer Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 93353036E959F4AF619A7F93 /* MBox Explorer Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EMB001010000000000000001 /* EmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002010000000000000001 /* EmbeddingProvider.swift */; };
 		EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */; };
 		EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002030000000000000001 /* MLXEmbeddingProvider.swift */; };
@@ -129,8 +135,34 @@
 		WD100002000000000000001 /* SharedDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = WD200002000000000000001 /* SharedDataManager.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		778391D7EA4CAD6FE3EC38E0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = MB0000410000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73C4D07ECA4682B5EFB27DF0;
+			remoteInfo = "MBox Explorer Widget";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F5380F36F4BA4BD21D17F09C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E8CEF1C0C22D223F3665AE40 /* MBox Explorer Widget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenWebUIEmbeddingProvider.swift; path = AI/Embeddings/OpenWebUIEmbeddingProvider.swift; sourceTree = "<group>"; };
+		115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "MBox Explorer Widget/Assets.xcassets"; sourceTree = "<group>"; };
+		1D32F6CD61ACBEADE2914689 /* MBoxExplorerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MBoxExplorerWidget.swift; sourceTree = "<group>"; };
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
 		25ACFE0E46E831D381EB3E35 /* EmailSearchAgent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmailSearchAgent.swift; path = AI/Integration/EmailSearchAgent.swift; sourceTree = "<group>"; };
 		2610D3EFB2D5D23FD826606E /* LocalLLM.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/LocalLLM.swift; sourceTree = "<group>"; };
@@ -150,13 +182,16 @@
 		6BAFBA37ED985C5CC8BF5BB8 /* DailyBriefingEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DailyBriefingEngine.swift; path = AI/Intelligence/DailyBriefingEngine.swift; sourceTree = "<group>"; };
 		6CEE96C78F48CEB6C7304C75 /* VoiceConversation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceConversation.swift; path = AI/Advanced/VoiceConversation.swift; sourceTree = "<group>"; };
 		6F4FE314B120E4916E4FEA7A /* HypotheticalAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HypotheticalAnalyzer.swift; path = AI/Advanced/HypotheticalAnalyzer.swift; sourceTree = "<group>"; };
+		715C422C0916234B2233911C /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		7293E3CDEBC8AE4091F8ABC5 /* NovaAPIServer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Volumes/Data/xcode/MBox Explorer/MBox Explorer/NovaAPIServer.swift"; sourceTree = "<absolute>"; };
 		73151335A5C4EA6609FAC1C8 /* SmartForwarder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartForwarder.swift; path = AI/Integration/SmartForwarder.swift; sourceTree = "<group>"; };
 		747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DecisionArchaeologist.swift; path = AI/Analysis/DecisionArchaeologist.swift; sourceTree = "<group>"; };
 		7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentimentAnalyzer.swift; path = AI/Analysis/SentimentAnalyzer.swift; sourceTree = "<group>"; };
 		7C416248D332727979824ABF /* DraftGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DraftGenerator.swift; path = AI/Integration/DraftGenerator.swift; sourceTree = "<group>"; };
 		87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkVisualizationView.swift; sourceTree = "<group>"; };
+		93353036E959F4AF619A7F93 /* MBox Explorer Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = "MBox Explorer Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A989BC566E5181DAB386111 /* AutoTagger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/AutoTagger.swift; sourceTree = "<group>"; };
+		9CB7BD6003D6AE2044130D80 /* SharedDataManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedDataManager.swift; sourceTree = "<group>"; };
 		B6531667EE7C788EA76F5A0F /* PersonaChat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PersonaChat.swift; path = AI/Advanced/PersonaChat.swift; sourceTree = "<group>"; };
 		C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceUnified.swift; path = AICapabilities/VoiceUnified.swift; sourceTree = "<group>"; };
 		C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnifiedAICapabilities.swift; path = AICapabilities/UnifiedAICapabilities.swift; sourceTree = "<group>"; };
@@ -195,6 +230,7 @@
 		D25730EB8C5F369113033564 /* ConversationModels.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationModels.swift; path = AI/Conversation/ConversationModels.swift; sourceTree = "<group>"; };
 		D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TinyChatEmbeddingProvider.swift; path = AI/Embeddings/TinyChatEmbeddingProvider.swift; sourceTree = "<group>"; };
 		D5B3C2D9205F703C1F972B28 /* RelationshipMapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RelationshipMapper.swift; path = AI/Analysis/RelationshipMapper.swift; sourceTree = "<group>"; };
+		D6BA4837DCC71ECBD7554866 /* WidgetData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetData.swift; sourceTree = "<group>"; };
 		D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ImageGenerationUnified.swift; path = AICapabilities/ImageGenerationUnified.swift; sourceTree = "<group>"; };
 		EMB002010000000000000001 /* EmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EmbeddingProvider.swift; path = AI/Embeddings/EmbeddingProvider.swift; sourceTree = "<group>"; };
 		EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OllamaEmbeddingProvider.swift; path = AI/Embeddings/OllamaEmbeddingProvider.swift; sourceTree = "<group>"; };
@@ -254,6 +290,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AE7009EDE389B96771AD3298 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				67E296B39CB2628E3A2CE16C /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		MB0000280000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -307,6 +351,26 @@
 			name = Conversation;
 			sourceTree = "<group>";
 		};
+		A188BA29419027B19436A1F4 /* MBox Explorer Widget */ = {
+			isa = PBXGroup;
+			children = (
+				1D32F6CD61ACBEADE2914689 /* MBoxExplorerWidget.swift */,
+				D6BA4837DCC71ECBD7554866 /* WidgetData.swift */,
+				9CB7BD6003D6AE2044130D80 /* SharedDataManager.swift */,
+				115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */,
+			);
+			name = "MBox Explorer Widget";
+			path = "MBox Explorer Widget";
+			sourceTree = "<group>";
+		};
+		A7443040A6E7DF98D56D58BC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CC974A7311A16EC93186FEEC /* OS X */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		ACD84A2E903D00EEA83ED620 /* Integration */ = {
 			isa = PBXGroup;
 			children = (
@@ -335,6 +399,14 @@
 			);
 			name = AI;
 			path = "MBox Explorer/AI";
+			sourceTree = "<group>";
+		};
+		CC974A7311A16EC93186FEEC /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				715C422C0916234B2233911C /* Cocoa.framework */,
+			);
+			name = "OS X";
 			sourceTree = "<group>";
 		};
 		D87970D6F05B3258CDDD530B /* Intelligence */ = {
@@ -376,6 +448,8 @@
 			children = (
 				MB0000300000000000000001 /* MBox Explorer */,
 				MB0000310000000000000001 /* Products */,
+				A7443040A6E7DF98D56D58BC /* Frameworks */,
+				A188BA29419027B19436A1F4 /* MBox Explorer Widget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -405,6 +479,7 @@
 			isa = PBXGroup;
 			children = (
 				MB0000270000000000000001 /* MBox Explorer.app */,
+				93353036E959F4AF619A7F93 /* MBox Explorer Widget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -566,6 +641,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		73C4D07ECA4682B5EFB27DF0 /* MBox Explorer Widget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D30DBF4B15338B77A16CADDD /* Build configuration list for PBXNativeTarget "MBox Explorer Widget" */;
+			buildPhases = (
+				511BCC543C5481F37D83F296 /* Sources */,
+				AE7009EDE389B96771AD3298 /* Frameworks */,
+				9C2347B07C82DA000743C36B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MBox Explorer Widget";
+			productName = "MBox Explorer Widget";
+			productReference = 93353036E959F4AF619A7F93 /* MBox Explorer Widget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		MB0000370000000000000001 /* MBox Explorer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = MB0000380000000000000001 /* Build configuration list for PBXNativeTarget "MBox Explorer" */;
@@ -573,10 +665,12 @@
 				MB0000390000000000000001 /* Sources */,
 				MB0000280000000000000001 /* Frameworks */,
 				MB0000400000000000000001 /* Resources */,
+				F5380F36F4BA4BD21D17F09C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C7B190F9F382762C3F14EFF9 /* PBXTargetDependency */,
 			);
 			name = "MBox Explorer";
 			packageProductDependencies = (
@@ -622,11 +716,20 @@
 			projectRoot = "";
 			targets = (
 				MB0000370000000000000001 /* MBox Explorer */,
+				73C4D07ECA4682B5EFB27DF0 /* MBox Explorer Widget */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		9C2347B07C82DA000743C36B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				372BFD5E200ECAE22DE0FCBF /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		MB0000400000000000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -638,6 +741,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		511BCC543C5481F37D83F296 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B85640DD5FFDF5C74261917 /* MBoxExplorerWidget.swift in Sources */,
+				B61AC515BBE5523E15A8AE5F /* WidgetData.swift in Sources */,
+				4E76AF3E47E31834D7BEC201 /* SharedDataManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		MB0000390000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -766,7 +879,76 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C7B190F9F382762C3F14EFF9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "MBox Explorer Widget";
+			target = 73C4D07ECA4682B5EFB27DF0 /* MBox Explorer Widget */;
+			targetProxy = 778391D7EA4CAD6FE3EC38E0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		66FB98D6336A3EAB342E50D8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "MBox Explorer Widget/MBox_Explorer_Widget.entitlements";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "MBox Explorer Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "MBox Explorer Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 Jordan Koch. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 2.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.digitalnoise.MBox-Explorer.widget";
+				PRODUCT_NAME = "MBox Explorer Widget";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		DF9851D586655A6348A11603 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "MBox Explorer Widget/MBox_Explorer_Widget.entitlements";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "MBox Explorer Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "MBox Explorer Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 Jordan Koch. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 2.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.digitalnoise.MBox-Explorer.widget";
+				PRODUCT_NAME = "MBox Explorer Widget";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
 		MB0000430000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -955,6 +1137,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D30DBF4B15338B77A16CADDD /* Build configuration list for PBXNativeTarget "MBox Explorer Widget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF9851D586655A6348A11603 /* Release */,
+				66FB98D6336A3EAB342E50D8 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		MB0000380000000000000001 /* Build configuration list for PBXNativeTarget "MBox Explorer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

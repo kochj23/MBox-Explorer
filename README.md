@@ -8,7 +8,7 @@
 
 ## Download
 
-Download the latest release: [MBox Explorer v2.2.1](https://github.com/kochj23/MBox-Explorer/releases/latest)
+Download the latest release: [MBox Explorer v2.3.0](https://github.com/kochj23/MBox-Explorer/releases/latest)
 
 Or build from source (see below).
 
@@ -17,14 +17,24 @@ Or build from source (see below).
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-2.4.0-success)
+![Version](https://img.shields.io/badge/version-2.3.0-success)
 ![Widget](https://img.shields.io/badge/Widget-WidgetKit-orange)
 ![AI](https://img.shields.io/badge/AI-RAG%20Pipeline-purple)
 ![Ethics](https://img.shields.io/badge/Ethics-Protected-green)
 
 ---
 
-## ✨ Latest Update: v2.4 - February 4, 2026
+## ✨ Latest Update: v2.3.0 - March 18, 2026
+
+### Widget Extension Now Live (v2.3.0)
+- Widget Extension target properly configured in Xcode project
+- Small/Medium/Large widget sizes now available in macOS Notification Center
+- Live archive stats, recent mailboxes, and message counts at a glance
+- Widget refreshes on import, search, and AI analysis events
+
+---
+
+## v2.4 - February 4, 2026
 
 ### 📱 macOS Widget (v2.4)
 
