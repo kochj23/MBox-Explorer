@@ -11,6 +11,46 @@ import AppKit
 
 @MainActor
 class MboxViewModel: ObservableObject {
+    // MARK: - Consolidated State Structs
+
+    /// Groups filter-related state to reduce SwiftUI diff calculations
+    struct FilterState {
+        var searchText: String = ""
+        var filterSender: String = ""
+        var filterDomain: String = ""
+        var filterSizeMin: Int?
+        var filterSizeMax: Int?
+        var startDate: Date?
+        var endDate: Date?
+        var smartFilters = SmartFilters()
+        var sortField: WindowStateManager.SortField = .date
+        var sortOrder: WindowStateManager.SortOrder = .descending
+    }
+
+    /// Groups display/UI state to reduce SwiftUI diff calculations
+    struct DisplayState {
+        var showingExportOptions = false
+        var showingProgressSheet = false
+        var showingExportProgress = false
+        var showingSmartFilters = false
+        var showingDuplicates = false
+        var showingEmailComparison = false
+        var showingRegexSearch = false
+        var showingRedactionTool = false
+        var showingThemeSettings = false
+        var showOpenPanel = false
+        var showExportPanel = false
+        var showSettings = false
+        var showAISettings = false
+    }
+
+    /// Groups search-related state
+    struct SearchState {
+        var isSearching = false
+        var isLoading = false
+        var statusMessage = ""
+    }
+
     // MARK: - Published Properties
 
     @Published var emails: [Email] = []
@@ -18,40 +58,140 @@ class MboxViewModel: ObservableObject {
     @Published var filteredEmails: [Email] = []
     @Published var selectedEmail: Email?
     @Published var selectedEmails: Set<Email.ID> = []
-    @Published var searchText: String = ""
-    @Published var filterSender: String = ""
-    @Published var filterDomain: String = ""
-    @Published var filterSizeMin: Int?
-    @Published var filterSizeMax: Int?
-    @Published var startDate: Date?
-    @Published var endDate: Date?
-    @Published var showingExportOptions = false
+    @Published var filterState = FilterState()
+    @Published var displayState = DisplayState()
+    @Published var searchState = SearchState()
     @Published var exportOptions = ExportEngine.ExportOptions()
-    @Published var statusMessage: String = ""
-    @Published var isLoading: Bool = false
-    @Published var showingProgressSheet: Bool = false
-    @Published var showingExportProgress: Bool = false
-    @Published var showingSmartFilters: Bool = false
-    @Published var showingDuplicates: Bool = false
-    @Published var smartFilters = SmartFilters()
-    @Published var sortField: WindowStateManager.SortField = .date
-    @Published var sortOrder: WindowStateManager.SortOrder = .descending
     @Published var lastExportURL: URL?
     @Published var currentFileURL: URL?
     @Published var listDensity: WindowStateManager.ListDensity = WindowStateManager.shared.loadListDensity()
-    @Published var showingEmailComparison: Bool = false
     @Published var comparisonEmail: Email?
-    @Published var showingRegexSearch: Bool = false
-    @Published var showingRedactionTool: Bool = false
-    @Published var showingThemeSettings: Bool = false
     @Published var layoutMode: WindowStateManager.LayoutMode = WindowStateManager.shared.loadLayoutMode()
-    @Published var showOpenPanel: Bool = false
-    @Published var showExportPanel: Bool = false
     @Published var currentView: ViewMode = .list
-    @Published var isSearching: Bool = false
-    @Published var showSettings: Bool = false
-    @Published var showAISettings: Bool = false
     var loadStartTime: Date?
+
+    // Backward-compatible computed properties for existing code
+    var searchText: String {
+        get { filterState.searchText }
+        set { filterState.searchText = newValue }
+    }
+    var filterSender: String {
+        get { filterState.filterSender }
+        set { filterState.filterSender = newValue }
+    }
+    var filterDomain: String {
+        get { filterState.filterDomain }
+        set { filterState.filterDomain = newValue }
+    }
+    var filterSizeMin: Int? {
+        get { filterState.filterSizeMin }
+        set { filterState.filterSizeMin = newValue }
+    }
+    var filterSizeMax: Int? {
+        get { filterState.filterSizeMax }
+        set { filterState.filterSizeMax = newValue }
+    }
+    var startDate: Date? {
+        get { filterState.startDate }
+        set { filterState.startDate = newValue }
+    }
+    var endDate: Date? {
+        get { filterState.endDate }
+        set { filterState.endDate = newValue }
+    }
+    var smartFilters: SmartFilters {
+        get { filterState.smartFilters }
+        set { filterState.smartFilters = newValue }
+    }
+    var sortField: WindowStateManager.SortField {
+        get { filterState.sortField }
+        set { filterState.sortField = newValue }
+    }
+    var sortOrder: WindowStateManager.SortOrder {
+        get { filterState.sortOrder }
+        set { filterState.sortOrder = newValue }
+    }
+    var showingExportOptions: Bool {
+        get { displayState.showingExportOptions }
+        set { displayState.showingExportOptions = newValue }
+    }
+    var showingProgressSheet: Bool {
+        get { displayState.showingProgressSheet }
+        set { displayState.showingProgressSheet = newValue }
+    }
+    var showingExportProgress: Bool {
+        get { displayState.showingExportProgress }
+        set { displayState.showingExportProgress = newValue }
+    }
+    var showingSmartFilters: Bool {
+        get { displayState.showingSmartFilters }
+        set { displayState.showingSmartFilters = newValue }
+    }
+    var showingDuplicates: Bool {
+        get { displayState.showingDuplicates }
+        set { displayState.showingDuplicates = newValue }
+    }
+    var showingEmailComparison: Bool {
+        get { displayState.showingEmailComparison }
+        set { displayState.showingEmailComparison = newValue }
+    }
+    var showingRegexSearch: Bool {
+        get { displayState.showingRegexSearch }
+        set { displayState.showingRegexSearch = newValue }
+    }
+    var showingRedactionTool: Bool {
+        get { displayState.showingRedactionTool }
+        set { displayState.showingRedactionTool = newValue }
+    }
+    var showingThemeSettings: Bool {
+        get { displayState.showingThemeSettings }
+        set { displayState.showingThemeSettings = newValue }
+    }
+    var showOpenPanel: Bool {
+        get { displayState.showOpenPanel }
+        set { displayState.showOpenPanel = newValue }
+    }
+    var showExportPanel: Bool {
+        get { displayState.showExportPanel }
+        set { displayState.showExportPanel = newValue }
+    }
+    var showSettings: Bool {
+        get { displayState.showSettings }
+        set { displayState.showSettings = newValue }
+    }
+    var showAISettings: Bool {
+        get { displayState.showAISettings }
+        set { displayState.showAISettings = newValue }
+    }
+    var statusMessage: String {
+        get { searchState.statusMessage }
+        set { searchState.statusMessage = newValue }
+    }
+    var isLoading: Bool {
+        get { searchState.isLoading }
+        set { searchState.isLoading = newValue }
+    }
+    var isSearching: Bool {
+        get { searchState.isSearching }
+        set { searchState.isSearching = newValue }
+    }
+
+    // MARK: - Pre-computed Search Data
+
+    /// Pre-computed lowercase text for fast search (body is expensive to lowercase on each filter)
+    private struct SearchableEmail {
+        let id: UUID
+        let fromLower: String
+        let subjectLower: String
+        let bodyLower: String
+        let toLower: String
+    }
+    private var searchableEmails: [UUID: SearchableEmail] = [:]
+
+    // MARK: - Debounce Support
+
+    private var cancellables = Set<AnyCancellable>()
+    private var filterDebounceTask: Task<Void, Never>?
 
     enum ViewMode {
         case list, ask, timeline, heatmap, network, attachments, duplicates
@@ -97,6 +237,30 @@ class MboxViewModel: ObservableObject {
 
     // MARK: - Methods
 
+    /// Builds pre-computed lowercase text for all emails to speed up search filtering
+    private func buildSearchIndex() {
+        searchableEmails.removeAll(keepingCapacity: true)
+        for email in emails {
+            searchableEmails[email.id] = SearchableEmail(
+                id: email.id,
+                fromLower: email.from.lowercased(),
+                subjectLower: email.subject.lowercased(),
+                bodyLower: email.body.lowercased(),
+                toLower: (email.to ?? "").lowercased()
+            )
+        }
+    }
+
+    /// Debounced filter application — waits 500ms after last call before executing
+    func applyFiltersDebounced() {
+        filterDebounceTask?.cancel()
+        filterDebounceTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
+            guard !Task.isCancelled else { return }
+            applyFilters()
+        }
+    }
+
     func loadMboxFile(url: URL) async {
         isLoading = true
         loadStartTime = Date()
@@ -108,6 +272,7 @@ class MboxViewModel: ObservableObject {
             emails = try await parser.parse(fileURL: url)
             statusMessage = "Detecting threads..."
             threads = parser.detectThreads(emails: emails)
+            buildSearchIndex()
             applyFilters()
             showingProgressSheet = false
             statusMessage = "Loaded \(emails.count) emails, \(threads.count) threads"
@@ -136,25 +301,42 @@ class MboxViewModel: ObservableObject {
     func applyFilters() {
         var results = emails
 
-        // Search text filter
+        // Search text filter — use pre-computed lowercase for performance
         if !searchText.isEmpty {
+            let needle = searchText.lowercased()
             results = results.filter { email in
-                email.from.localizedCaseInsensitiveContains(searchText) ||
-                email.subject.localizedCaseInsensitiveContains(searchText) ||
-                email.body.localizedCaseInsensitiveContains(searchText)
+                if let searchable = searchableEmails[email.id] {
+                    return searchable.fromLower.contains(needle) ||
+                           searchable.subjectLower.contains(needle) ||
+                           searchable.bodyLower.contains(needle)
+                }
+                // Fallback if search index not built
+                return email.from.localizedCaseInsensitiveContains(searchText) ||
+                       email.subject.localizedCaseInsensitiveContains(searchText) ||
+                       email.body.localizedCaseInsensitiveContains(searchText)
             }
         }
 
         // Sender filter
         if !filterSender.isEmpty {
-            results = results.filter { $0.from.localizedCaseInsensitiveContains(filterSender) }
+            let needle = filterSender.lowercased()
+            results = results.filter { email in
+                if let searchable = searchableEmails[email.id] {
+                    return searchable.fromLower.contains(needle)
+                }
+                return email.from.localizedCaseInsensitiveContains(filterSender)
+            }
         }
 
         // Domain filter
         if !filterDomain.isEmpty {
+            let needle = "@\(filterDomain)".lowercased()
             results = results.filter { email in
-                email.from.localizedCaseInsensitiveContains("@\(filterDomain)") ||
-                (email.to?.localizedCaseInsensitiveContains("@\(filterDomain)") ?? false)
+                if let searchable = searchableEmails[email.id] {
+                    return searchable.fromLower.contains(needle) || searchable.toLower.contains(needle)
+                }
+                return email.from.localizedCaseInsensitiveContains("@\(filterDomain)") ||
+                       (email.to?.localizedCaseInsensitiveContains("@\(filterDomain)") ?? false)
             }
         }
 

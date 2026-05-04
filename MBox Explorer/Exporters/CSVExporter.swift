@@ -47,12 +47,24 @@ class CSVExporter {
         try csvContent.write(to: url, atomically: true, encoding: .utf8)
     }
 
-    private static func escapeCSV(_ text: String) -> String {
-        let needsEscape = text.contains(",") || text.contains("\"") || text.contains("\n")
-        if needsEscape {
-            let escaped = text.replacingOccurrences(of: "\"", with: "\"\"")
-            return "\"\(escaped)\""
+    /// Sanitizes a cell value to prevent CSV injection attacks.
+    /// Values starting with =, +, -, @, or | are prepended with a single quote.
+    private static func sanitizeForCSVInjection(_ text: String) -> String {
+        guard let first = text.first else { return text }
+        let dangerousChars: Set<Character> = ["=", "+", "-", "@", "|"]
+        if dangerousChars.contains(first) {
+            return "'" + text
         }
         return text
+    }
+
+    private static func escapeCSV(_ text: String) -> String {
+        let sanitized = sanitizeForCSVInjection(text)
+        let needsEscape = sanitized.contains(",") || sanitized.contains("\"") || sanitized.contains("\n")
+        if needsEscape {
+            let escaped = sanitized.replacingOccurrences(of: "\"", with: "\"\"")
+            return "\"\(escaped)\""
+        }
+        return sanitized
     }
 }

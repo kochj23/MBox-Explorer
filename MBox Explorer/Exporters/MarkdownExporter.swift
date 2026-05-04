@@ -8,6 +8,16 @@
 import Foundation
 
 class MarkdownExporter {
+    /// Sanitizes text to prevent CSV/formula injection when Markdown is imported into spreadsheets.
+    /// Values starting with =, +, -, @, or | are prepended with a single quote.
+    private static func sanitizeForInjection(_ text: String) -> String {
+        guard let first = text.first else { return text }
+        let dangerousChars: Set<Character> = ["=", "+", "-", "@", "|"]
+        if dangerousChars.contains(first) {
+            return "'" + text
+        }
+        return text
+    }
     static func exportToMarkdown(emails: [Email], to url: URL, includeTableOfContents: Bool = true) throws {
         var markdown = "# Email Archive Export\n\n"
         markdown += "**Export Date:** \(Date().formatted())\n\n"
@@ -25,10 +35,10 @@ class MarkdownExporter {
         }
 
         for email in emails {
-            markdown += "## \(email.subject)\n\n"
-            markdown += "**From:** \(email.from)\n\n"
+            markdown += "## \(sanitizeForInjection(email.subject))\n\n"
+            markdown += "**From:** \(sanitizeForInjection(email.from))\n\n"
             if let to = email.to {
-                markdown += "**To:** \(to)\n\n"
+                markdown += "**To:** \(sanitizeForInjection(to))\n\n"
             }
             markdown += "**Date:** \(email.displayDate)\n\n"
 
@@ -62,15 +72,15 @@ class MarkdownExporter {
     }
 
     static func exportThreadToMarkdown(thread: EmailThread, to url: URL) throws {
-        var markdown = "# Email Thread: \(thread.subject)\n\n"
-        markdown += "**Participants:** \(thread.participants.joined(separator: ", "))\n\n"
+        var markdown = "# Email Thread: \(sanitizeForInjection(thread.subject))\n\n"
+        markdown += "**Participants:** \(thread.participants.map { sanitizeForInjection($0) }.joined(separator: ", "))\n\n"
         markdown += "**Messages:** \(thread.count)\n\n"
         markdown += "**Date Range:** \(thread.dateRange)\n\n"
         markdown += "---\n\n"
 
         for (index, email) in thread.emails.enumerated() {
             markdown += "## Message \(index + 1)\n\n"
-            markdown += "**From:** \(email.from)\n\n"
+            markdown += "**From:** \(sanitizeForInjection(email.from))\n\n"
             markdown += "**Date:** \(email.displayDate)\n\n"
             markdown += "```\n\(email.cleanBody)\n```\n\n"
             markdown += "---\n\n"
