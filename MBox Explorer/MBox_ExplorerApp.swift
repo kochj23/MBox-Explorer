@@ -17,6 +17,11 @@ struct MBox_ExplorerApp: App {
                 .environmentObject(recentFilesViewModel)
         }
         .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("About MBox Explorer") { AppVersion.showAboutPanel() }
+                Button(AppVersion.menuLine) {}
+                    .disabled(true)   // informational: version + build date
+            }
             CommandGroup(replacing: .newItem) {
                 Button("Open MBOX File...") {
                     NotificationCenter.default.post(name: .openMboxFile, object: nil)

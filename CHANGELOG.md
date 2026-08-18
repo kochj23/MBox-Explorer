@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Version + build date in the app menu.** The app menu now shows *"Version X (build N) — <date>"*, and the About panel includes the build date (`AppVersion`).
+
+### Changed
+- **Streaming MBOX parser.** `MboxParser` now reads the file line-by-line via a buffered
+  `LineReader` and emits one `Email` per `From ` boundary, so peak memory is ~one message
+  instead of the whole archive (previously the entire file was loaded into a `String` and
+  split twice — multi-GB peak on large mailboxes). Parse progress is now published on the
+  main actor and throttled to whole percents (no more off-main `@Published` writes or a
+  status string rebuilt per email).
+
 ### Fixed
+- **mbox `>From ` quoting.** Body lines of the form `>From …` are now un-escaped and no
+  longer wrongly split a message (the old `\nFrom ` split ignored mbox quoting).
 - **Mailbox is re-parsed on every launch (#2).** Reopening an unchanged archive no
   longer re-runs the full parse over the entire file. A new `MailboxCache` persists the
   parsed `[Email]` to `Application Support/MBoxExplorer/MailboxCache/`, keyed by file
@@ -18,7 +31,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`start`/`stopAccessingSecurityScopedResource`), so a recent-file bookmark can be
   reopened without a fresh prompt if the app sandbox is ever enabled.
 
+### Security
+- **PII-derived stores are owner-only.** `vectors.db` and `conversations.db` (which hold
+  email bodies) and the `MBoxExplorer` app-support folder are now `chmod`ed to `0600`/`0700`
+  via `FilePermissions`, matching the mailbox cache.
+
 ### Tests
+- Added `MboxParserStreamingTests` (multi-message parse, `>From ` unescaping, large-mailbox,
+  Latin-1 fallback, `LineReader` CRLF handling, progress completion) and `FilePermissionsTests`
+  (`0600`/`0700`).
 - Added `MailboxCacheTests` covering all 7 categories: unit (round-trip), integration
   (real parser → cache), **regression** (a reopen performs zero re-parses — guards #2),
   performance (cache hit ≪ parse), edge cases (empty / corrupt cache / changed-file /
