@@ -13,6 +13,7 @@
 		1154255057D856054D457D57 /* ImageGenerationUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B7B96F86F1ADEC6BEC7ABC /* ImageGenerationUnified.swift */; };
 		12DE38BA3A71B50A678A12B3 /* PersonaChat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6531667EE7C788EA76F5A0F /* PersonaChat.swift */; };
 		162EA02AA9581D8F680F992B /* TinyChatEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */; };
+		1AE1AC7FD927F5637E1FE421 /* MailboxCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4190C167ACDA24C8B9C0EEF3 /* MailboxCacheTests.swift */; };
 		21C49790555A4EC12B1343FD /* VoiceConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEE96C78F48CEB6C7304C75 /* VoiceConversation.swift */; };
 		29A4A2C7786A5F418C391848 /* RelationshipMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B3C2D9205F703C1F972B28 /* RelationshipMapper.swift */; };
 		31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */; };
@@ -23,6 +24,7 @@
 		3E4788AFC7EA7101FEC886D5 /* ConversationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D01A68F1AFCB3C03DB4465E1 /* ConversationManager.swift */; };
 		3F172172EF7831896FC85D57 /* SecurityUnified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569BF452BCAD60FF219195F5 /* SecurityUnified.swift */; };
 		4E76AF3E47E31834D7BEC201 /* SharedDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB7BD6003D6AE2044130D80 /* SharedDataManager.swift */; };
+		4E88A1148AA85DD1CCB57AA8 /* MailboxCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 785F48D68F498C5B57D25AFE /* MailboxCache.swift */; };
 		61396430326536392D316239382D346637352D386133342D /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31636134343139632D346639332D346239352D613261612D /* AISettingsView.swift */; };
 		614E01BD25B3A78A49DAF070 /* UnifiedAICapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */; };
 		6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2610D3EFB2D5D23FD826606E /* LocalLLM.swift */; };
@@ -184,6 +186,7 @@
 		3B07F30ECCC00A122F53B06D /* SmartSuggestions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartSuggestions.swift; path = AI/Intelligence/SmartSuggestions.swift; sourceTree = "<group>"; };
 		3CFA614AC3BD8853D16DB6E9 /* ConversationDatabase.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConversationDatabase.swift; path = AI/Conversation/ConversationDatabase.swift; sourceTree = "<group>"; };
 		408098289A40C753C412475A /* CommitmentTracker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CommitmentTracker.swift; path = AI/Analysis/CommitmentTracker.swift; sourceTree = "<group>"; };
+		4190C167ACDA24C8B9C0EEF3 /* MailboxCacheTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MailboxCacheTests.swift; sourceTree = "<group>"; };
 		44FADA0642D6D75AFE52040D /* AnalysisUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AnalysisUnified.swift; path = AICapabilities/AnalysisUnified.swift; sourceTree = "<group>"; };
 		4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AI/EmailSummarizer.swift; sourceTree = "<group>"; };
 		569BF452BCAD60FF219195F5 /* SecurityUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecurityUnified.swift; path = AICapabilities/SecurityUnified.swift; sourceTree = "<group>"; };
@@ -195,6 +198,7 @@
 		7293E3CDEBC8AE4091F8ABC5 /* NovaAPIServer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "/Volumes/Data/xcode/MBox Explorer/MBox Explorer/NovaAPIServer.swift"; sourceTree = "<absolute>"; };
 		73151335A5C4EA6609FAC1C8 /* SmartForwarder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SmartForwarder.swift; path = AI/Integration/SmartForwarder.swift; sourceTree = "<group>"; };
 		747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DecisionArchaeologist.swift; path = AI/Analysis/DecisionArchaeologist.swift; sourceTree = "<group>"; };
+		785F48D68F498C5B57D25AFE /* MailboxCache.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MailboxCache.swift; sourceTree = "<group>"; };
 		7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentimentAnalyzer.swift; path = AI/Analysis/SentimentAnalyzer.swift; sourceTree = "<group>"; };
 		7C416248D332727979824ABF /* DraftGenerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DraftGenerator.swift; path = AI/Integration/DraftGenerator.swift; sourceTree = "<group>"; };
 		87A17940EE91B4170B99259A /* NetworkVisualizationView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NetworkVisualizationView.swift; sourceTree = "<group>"; };
@@ -362,6 +366,7 @@
 			isa = PBXGroup;
 			children = (
 				9E193CEF63B5CDA85E716A1C /* MBox_ExplorerTests.swift */,
+				4190C167ACDA24C8B9C0EEF3 /* MailboxCacheTests.swift */,
 			);
 			name = "MBox ExplorerTests";
 			path = "MBox ExplorerTests";
@@ -587,6 +592,7 @@
 				D004E8CC2EB1B4E200304FC0 /* WindowStateManager.swift */,
 				MB0000220000000000000001 /* TextProcessor.swift */,
 				MB0000480000000000000001 /* RecentFilesManager.swift */,
+				785F48D68F498C5B57D25AFE /* MailboxCache.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -812,6 +818,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8C5D0179E7B34164E371A337 /* MBox_ExplorerTests.swift in Sources */,
+				1AE1AC7FD927F5637E1FE421 /* MailboxCacheTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -938,6 +945,7 @@
 				WD100001000000000000001 /* WidgetData.swift in Sources */,
 				WD100002000000000000001 /* SharedDataManager.swift in Sources */,
 				E573DEB54B7EF36B8D867E6B /* NovaAPIServer.swift in Sources */,
+				4E88A1148AA85DD1CCB57AA8 /* MailboxCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
