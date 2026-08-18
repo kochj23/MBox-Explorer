@@ -20,8 +20,40 @@ private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.sel
 /// Local vector database for semantic search
 class VectorDatabase: ObservableObject {
     @Published var isIndexed = false
+    @Published var isIndexing = false
     @Published var indexProgress: Double = 0.0
     @Published var totalDocuments = 0
+
+    private var indexCancellationRequested = false
+
+    /// Request that an in-progress indexing run stop. Already-indexed emails are
+    /// persisted, so a later run resumes where this one left off.
+    func cancelIndexing() {
+        indexCancellationRequested = true
+    }
+
+    /// email.id values already stored in the vector table (the INSERT OR REPLACE
+    /// primary key), used to skip already-indexed emails on a resume.
+    func indexedIDs() -> Set<String> {
+        var ids = Set<String>()
+        dbQueue.sync {
+            var statement: OpaquePointer?
+            if sqlite3_prepare_v2(db, "SELECT id FROM email_vectors;", -1, &statement, nil) == SQLITE_OK {
+                while sqlite3_step(statement) == SQLITE_ROW {
+                    if let c = sqlite3_column_text(statement, 0) {
+                        ids.insert(String(cString: c))
+                    }
+                }
+            }
+            sqlite3_finalize(statement)
+        }
+        return ids
+    }
+
+    /// Emails that still need indexing (not already in the store) — the resumable work set.
+    static func pendingEmails(_ emails: [Email], alreadyIndexed: Set<String>) -> [Email] {
+        emails.filter { !alreadyIndexed.contains($0.id.uuidString) }
+    }
     @Published var useSemanticSearch = false
     @Published var embeddingProvider: String = "None"
     @Published var embeddingDimension: Int = 0
@@ -151,7 +183,9 @@ class VectorDatabase: ObservableObject {
 
     /// Index emails for semantic search with embeddings
     func indexEmails(_ emails: [Email], progressCallback: @escaping (Double) -> Void) async {
+        indexCancellationRequested = false
         await MainActor.run {
+            isIndexing = true
             isIndexed = false
             totalDocuments = 0
         }
@@ -159,15 +193,31 @@ class VectorDatabase: ObservableObject {
         // Refresh embedding status
         await refreshEmbeddingStatus()
 
+        // #5 Resumable: only index emails that aren't already in the store, so a
+        // cancelled or partial run picks up where it left off on the next call.
+        let pending = Self.pendingEmails(emails, alreadyIndexed: indexedIDs())
+        if pending.isEmpty {
+            await MainActor.run {
+                self.isIndexing = false
+                self.isIndexed = true
+                self.indexProgress = 1.0
+                self.totalDocuments = emails.count
+                progressCallback(1.0)
+            }
+            return
+        }
+
         // Process in batches for efficiency
         let batchSize = 20
-        let batches = stride(from: 0, to: emails.count, by: batchSize).map {
-            Array(emails[$0..<min($0 + batchSize, emails.count)])
+        let batches = stride(from: 0, to: pending.count, by: batchSize).map {
+            Array(pending[$0..<min($0 + batchSize, pending.count)])
         }
 
         var processedCount = 0
+        var cancelled = false
 
         for batch in batches {
+            if indexCancellationRequested { cancelled = true; break }
             // Pre-compute metadata on main context to avoid concurrent string access
             let emailDataForIndexing: [(email: Email, bodyLength: Int, metadataJSON: String)] = batch.map { email in
                 // Safely compute body length and metadata JSON upfront
@@ -209,11 +259,12 @@ class VectorDatabase: ObservableObject {
 
             // Store emails with embeddings - SERIALLY on dbQueue
             for (index, emailData) in emailDataForIndexing.enumerated() {
+                if indexCancellationRequested { cancelled = true; break }
                 let embedding = embeddings.count > index ? embeddings[index] : nil
                 indexEmailSync(emailData.email, embedding: embedding, metadataJSON: emailData.metadataJSON)
 
                 processedCount += 1
-                let progress = Double(processedCount) / Double(emails.count)
+                let progress = Double(processedCount) / Double(pending.count)
                 await MainActor.run {
                     self.indexProgress = progress
                     progressCallback(progress)
@@ -225,7 +276,8 @@ class VectorDatabase: ObservableObject {
         rebuildFTSIndex()
 
         await MainActor.run {
-            self.isIndexed = true
+            self.isIndexing = false
+            self.isIndexed = !cancelled
             self.totalDocuments = emails.count
         }
     }
