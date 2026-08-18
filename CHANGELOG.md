@@ -9,8 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Version + build date in the app menu.** The app menu now shows *"Version X (build N) — <date>"*, and the About panel includes the build date (`AppVersion`).
+- **Reopen last archive on launch (#4).** On by default (instant thanks to the parse cache), with a **File → "Reopen Last Archive on Launch"** toggle to turn it off.
 
 ### Changed
+- **Resumable & cancellable semantic indexing (#5).** "Index Emails" now skips emails
+  already in the store, so a cancelled or partial run resumes where it left off instead
+  of starting over. `VectorDatabase.cancelIndexing()` stops an in-progress run, and an
+  `isIndexing` state is published for the UI.
 - **Streaming MBOX parser.** `MboxParser` now reads the file line-by-line via a buffered
   `LineReader` and emits one `Email` per `From ` boundary, so peak memory is ~one message
   instead of the whole archive (previously the entire file was loaded into a `String` and
@@ -37,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   via `FilePermissions`, matching the mailbox cache.
 
 ### Tests
+- Added `AutoReopenTests` (launch reopen decision: disabled / empty / most-recent / skips
+  missing) and `IndexingResumeTests` (resumable work-set selection).
 - Added `MboxParserStreamingTests` (multi-message parse, `>From ` unescaping, large-mailbox,
   Latin-1 fallback, `LineReader` CRLF handling, progress completion) and `FilePermissionsTests`
   (`0600`/`0700`).

@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct MBox_ExplorerApp: App {
     @StateObject private var recentFilesViewModel = RecentFilesViewModel()
+    @AppStorage(AutoReopen.defaultsKey) private var autoReopen = true
 
     var body: some Scene {
         WindowGroup {
@@ -54,6 +55,10 @@ struct MBox_ExplorerApp: App {
                         }
                     }
                 }
+
+                Divider()
+
+                Toggle("Reopen Last Archive on Launch", isOn: $autoReopen)
             }
 
             CommandMenu("Export") {

@@ -41,6 +41,12 @@ struct ContentView: View {
                 }
                 .onAppear {
                     viewModel.alertManager = alertManager
+                    // #4: reopen the last archive on launch (instant thanks to the parse cache).
+                    if viewModel.emails.isEmpty,
+                       let url = AutoReopen.fileToReopen(enabled: AutoReopen.isEnabled,
+                                                         recent: RecentFilesManager.shared.recentFiles) {
+                        loadMboxFile(url)
+                    }
                 }
                 .fileDropTarget { url in
                     loadMboxFile(url)
