@@ -2,7 +2,13 @@
 //  MboxParser.swift
 //  MBox Explorer
 //
-//  MBOX file parser with thread detection
+//  Streaming MBOX parser with thread detection.
+//
+//  Reads the file line-by-line via a buffered FileHandle reader and emits one
+//  Email per "From " boundary, so peak memory is ~one message rather than the
+//  whole archive (important for multi-GB mailboxes). Honors mbox ">From "
+//  quoting, and publishes progress on the main actor (throttled to whole
+//  percents) so SwiftUI bindings never mutate off the main thread.
 //
 
 import Foundation
@@ -18,61 +24,81 @@ class MboxParser: ObservableObject {
         cancellationRequested = true
     }
 
-    /// Parse MBOX file and return emails
-    func parse(fileURL: URL) async throws -> [Email] {
-        isLoading = true
-        cancellationRequested = false
-        progress = 0.0
-        status = "Reading file..."
-
-        defer {
-            isLoading = false
-        }
-
-        guard FileManager.default.fileExists(atPath: fileURL.path) else {
-            throw MboxError.fileNotFound
-        }
-
-        // Read file
-        let content: String
-        do {
-            content = try String(contentsOf: fileURL, encoding: .utf8)
-        } catch {
-            // Try with ISO Latin 1 as fallback
-            content = try String(contentsOf: fileURL, encoding: .isoLatin1)
-        }
-
-        status = "Parsing emails..."
-
-        // Split by "From " separator
-        let chunks = content.components(separatedBy: "\nFrom ")
-            .filter { !$0.isEmpty }
-
-        let totalChunks = chunks.count
-        var emails: [Email] = []
-
-        for (index, chunk) in chunks.enumerated() {
-            if cancellationRequested {
-                throw MboxError.cancelled
-            }
-
-            progress = Double(index) / Double(totalChunks)
-            status = "Parsing email \(index + 1) of \(totalChunks)..."
-
-            if let email = parseEmail(chunk: chunk) {
-                emails.append(email)
-            }
-        }
-
-        status = "Completed"
-        progress = 1.0
-
-        return emails
+    @MainActor
+    private func publish(_ progress: Double, _ status: String, loading: Bool? = nil) {
+        self.progress = progress
+        self.status = status
+        if let loading { self.isLoading = loading }
     }
 
-    private func parseEmail(chunk: String) -> Email? {
-        let lines = chunk.components(separatedBy: "\n")
+    /// Parse an MBOX file and return its emails.
+    func parse(fileURL: URL) async throws -> [Email] {
+        cancellationRequested = false
+        await publish(0.0, "Reading file...", loading: true)
 
+        do {
+            guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                throw MboxError.fileNotFound
+            }
+            let fileSize = (try? FileManager.default.attributesOfItem(atPath: fileURL.path)[.size] as? Int) ?? 0
+            guard let handle = try? FileHandle(forReadingFrom: fileURL) else {
+                throw MboxError.fileNotFound
+            }
+            defer { try? handle.close() }
+
+            let reader = LineReader(handle: handle)
+            var emails: [Email] = []
+            var current: [String] = []          // lines of the in-progress message
+            var started = false
+            var bytesRead = 0
+            var lastPercent = -1
+
+            while let (line, byteCount) = reader.nextLine() {
+                if cancellationRequested { throw MboxError.cancelled }
+                bytesRead += byteCount
+
+                if Self.isFromSeparator(line) {
+                    if started, let email = parseEmail(lines: current) { emails.append(email) }
+                    current.removeAll(keepingCapacity: true)
+                    started = true                // the "From " envelope line itself is not part of the message
+                } else if started {
+                    current.append(Self.unescapeFrom(line))
+                }
+
+                if fileSize > 0 {
+                    let percent = Int(Double(bytesRead) / Double(fileSize) * 100)
+                    if percent != lastPercent {
+                        lastPercent = percent
+                        await publish(Double(percent) / 100.0, "Parsing… \(percent)%")
+                    }
+                }
+            }
+            // Flush the final message.
+            if started, let email = parseEmail(lines: current) { emails.append(email) }
+
+            await publish(1.0, "Completed", loading: false)
+            return emails
+        } catch {
+            await publish(progress, "", loading: false)
+            throw error
+        }
+    }
+
+    /// A line is an mbox message boundary if it begins with the "From " envelope marker.
+    /// A quoted body line (">From ", ">>From ", …) is NOT a boundary.
+    private static func isFromSeparator(_ line: String) -> Bool {
+        line.hasPrefix("From ")
+    }
+
+    /// Reverse mbox ">From " quoting: a body line of the form `>+From ` had one '>'
+    /// prepended when the mailbox was written; strip it back off.
+    private static func unescapeFrom(_ line: String) -> String {
+        guard line.hasPrefix(">") else { return line }
+        let afterGts = line.drop { $0 == ">" }
+        return afterGts.hasPrefix("From ") ? String(line.dropFirst()) : line
+    }
+
+    private func parseEmail(lines: [String]) -> Email? {
         var from = ""
         var to: String? = nil
         var subject = ""
@@ -110,16 +136,13 @@ class MboxParser: ObservableObject {
 
         let body = bodyLines.joined(separator: "\n")
 
-        // Skip if essential fields are missing
+        // Skip if essential fields are missing.
         guard !from.isEmpty || !subject.isEmpty else {
             return nil
         }
 
-        // Parse date
         let dateObject = parseDate(date)
-
-        // Extract attachments
-        let attachments = extractAttachments(from: chunk)
+        let attachments = extractAttachments(from: lines.joined(separator: "\n"))
 
         return Email(
             from: from,
@@ -249,6 +272,65 @@ class MboxParser: ObservableObject {
         }
 
         return normalized
+    }
+}
+
+/// A memory-bounded, buffered line reader over a FileHandle. Reads the file in
+/// fixed-size blocks and yields one line at a time (delimiter stripped, trailing
+/// CR removed), so a huge file is never loaded into memory all at once.
+final class LineReader {
+    private let handle: FileHandle
+    private var bytes: [UInt8] = []
+    private var pos = 0
+    private var atEOF = false
+    private let chunkSize: Int
+
+    init(handle: FileHandle, chunkSize: Int = 1 << 16) {
+        self.handle = handle
+        self.chunkSize = chunkSize
+        bytes.reserveCapacity(chunkSize * 2)
+    }
+
+    /// Next line and the number of bytes it consumed (including the newline), or
+    /// nil at end of file.
+    func nextLine() -> (line: String, bytes: Int)? {
+        while true {
+            var i = pos
+            while i < bytes.count {
+                if bytes[i] == 0x0A {                // '\n'
+                    let line = decode(bytes[pos..<i])
+                    let consumed = i - pos + 1
+                    pos = i + 1
+                    compactIfNeeded()
+                    return (line, consumed)
+                }
+                i += 1
+            }
+            if atEOF {
+                if pos >= bytes.count { return nil }
+                let line = decode(bytes[pos..<bytes.count])
+                let consumed = bytes.count - pos
+                pos = bytes.count
+                return (line, consumed)
+            }
+            let data = handle.readData(ofLength: chunkSize)
+            if data.isEmpty { atEOF = true } else { bytes.append(contentsOf: data) }
+        }
+    }
+
+    private func compactIfNeeded() {
+        if pos > (1 << 20) {                          // reclaim once >1MB has been consumed
+            bytes.removeFirst(pos)
+            pos = 0
+        }
+    }
+
+    private func decode(_ slice: ArraySlice<UInt8>) -> String {
+        var arr = Array(slice)
+        if arr.last == 0x0D { arr.removeLast() }       // strip trailing '\r' (CRLF files)
+        return String(bytes: arr, encoding: .utf8)
+            ?? String(bytes: arr, encoding: .isoLatin1)
+            ?? ""
     }
 }
 

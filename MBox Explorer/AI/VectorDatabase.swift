@@ -37,6 +37,7 @@ class VectorDatabase: ObservableObject {
         let documentsPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let appFolder = documentsPath.appendingPathComponent("MBoxExplorer", isDirectory: true)
         try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
+        FilePermissions.restrictDirectory(appFolder.path)   // PII: owner-only
 
         dbPath = appFolder.appendingPathComponent("vectors.db").path
         openDatabase()
@@ -74,6 +75,8 @@ class VectorDatabase: ObservableObject {
     private func openDatabase() {
         if sqlite3_open(dbPath, &db) != SQLITE_OK {
             print("Error opening database")
+        } else {
+            FilePermissions.restrictFile(dbPath)   // PII: email bodies — owner-only
         }
     }
 

@@ -29,6 +29,7 @@ class ConversationDatabase: ObservableObject {
         let documentsPath = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let appFolder = documentsPath.appendingPathComponent("MBoxExplorer", isDirectory: true)
         try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
+        FilePermissions.restrictDirectory(appFolder.path)   // PII: owner-only
 
         dbPath = appFolder.appendingPathComponent("conversations.db").path
         openDatabase()
@@ -47,6 +48,8 @@ class ConversationDatabase: ObservableObject {
     private func openDatabase() {
         if sqlite3_open(dbPath, &db) != SQLITE_OK {
             print("Error opening conversation database")
+        } else {
+            FilePermissions.restrictFile(dbPath)   // PII: email-derived content — owner-only
         }
     }
 

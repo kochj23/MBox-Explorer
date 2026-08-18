@@ -72,6 +72,7 @@ graph TD
 | Capability | Details |
 |---|---|
 | Supported formats | MBOX, EML, EMLX, Outlook MSG, Gmail Takeout ZIP |
+| Streaming parser | Reads the file line-by-line and emits one email per `From ` boundary — peak memory ~one message, not the whole archive. Honors mbox `>From ` quoting. |
 | Persistent parse cache | Parsed mailboxes are cached (keyed by path + size + mtime); reopening an unchanged archive is near-instant instead of re-parsing the whole file. Editing/replacing the file invalidates the cache. |
 | Thread detection | Groups emails by Message-ID / In-Reply-To / References |
 | Smart filters | Filter by sender, domain, date range, size, attachments |
