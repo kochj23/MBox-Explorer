@@ -5,6 +5,26 @@ All notable changes to MBox Explorer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Mailbox is re-parsed on every launch (#2).** Reopening an unchanged archive no
+  longer re-runs the full parse over the entire file. A new `MailboxCache` persists the
+  parsed `[Email]` to `Application Support/MBoxExplorer/MailboxCache/`, keyed by file
+  path + size + modification-date, so a reopen loads from cache near-instantly. Editing
+  or replacing the `.mbox` (changing its size/mtime) invalidates the cache and forces a
+  fresh parse. Cache files are written owner-only (`0600`) since bodies are PII.
+- **Security-scoped resource access** is now taken around the mailbox load
+  (`start`/`stopAccessingSecurityScopedResource`), so a recent-file bookmark can be
+  reopened without a fresh prompt if the app sandbox is ever enabled.
+
+### Tests
+- Added `MailboxCacheTests` covering all 7 categories: unit (round-trip), integration
+  (real parser → cache), **regression** (a reopen performs zero re-parses — guards #2),
+  performance (cache hit ≪ parse), edge cases (empty / corrupt cache / changed-file /
+  schema bump / missing), security (`0600` perms, Application Support location), and a
+  `@MainActor` UI/smoke test through `MboxViewModel.loadMboxFile`.
+
 ## [1.0.0] - 2025-01-15
 
 ### 🎉 Initial Release

@@ -72,6 +72,7 @@ graph TD
 | Capability | Details |
 |---|---|
 | Supported formats | MBOX, EML, EMLX, Outlook MSG, Gmail Takeout ZIP |
+| Persistent parse cache | Parsed mailboxes are cached (keyed by path + size + mtime); reopening an unchanged archive is near-instant instead of re-parsing the whole file. Editing/replacing the file invalidates the cache. |
 | Thread detection | Groups emails by Message-ID / In-Reply-To / References |
 | Smart filters | Filter by sender, domain, date range, size, attachments |
 | Duplicate finder | Identifies duplicate messages across archives |
@@ -196,7 +197,9 @@ open "MBox Explorer.xcodeproj"
 
 ## Test Suite
 
-106 tests covering parsing, export, AI pipeline, view model logic, and security.
+106+ tests covering parsing, export, AI pipeline, view model logic, and security — including
+`MailboxCacheTests` (7 categories: unit, integration, regression against the re-parse bug, performance,
+edge cases, security, and a UI/smoke test of the reopen flow).
 
 ```bash
 xcodebuild -scheme "MBox Explorer" -destination "platform=macOS" test

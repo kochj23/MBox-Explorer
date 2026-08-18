@@ -268,8 +268,22 @@ class MboxViewModel: ObservableObject {
         statusMessage = "Loading MBOX file..."
         currentFileURL = url
 
+        // Hold access to the (possibly security-scoped) URL for the whole load.
+        // No-op while the app sandbox is disabled, but required if it's ever enabled
+        // so a recent-file bookmark can be re-read without a fresh prompt.
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+
         do {
-            emails = try await parser.parse(fileURL: url)
+            // Issue #2: reopening an unchanged archive should not re-parse the whole
+            // file. Serve from the persisted cache on a hit; parse + cache on a miss.
+            if let cached = MailboxCache.shared.load(for: url) {
+                emails = cached
+                statusMessage = "Loaded from cache..."
+            } else {
+                emails = try await parser.parse(fileURL: url)
+                MailboxCache.shared.store(emails, for: url)
+            }
             statusMessage = "Detecting threads..."
             threads = parser.detectThreads(emails: emails)
             buildSearchIndex()
