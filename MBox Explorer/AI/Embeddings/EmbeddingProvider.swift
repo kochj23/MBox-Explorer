@@ -58,6 +58,7 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
     case sentenceTransformers = "Sentence Transformers"
     case tinyChat = "TinyChat"
     case openWebUI = "OpenWebUI"
+    case balanced = "Balanced (All Local Models)"
     case none = "None (Keyword Search Only)"
 
     var id: String { rawValue }
@@ -76,6 +77,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "TinyChat by Jason Cox - OpenAI-compatible (local/cloud)"
         case .openWebUI:
             return "OpenWebUI - Self-hosted AI platform (local)"
+        case .balanced:
+            return "Load-balanced across every local Ollama model (bulk indexing fans out)"
         case .none:
             return "No semantic search - keyword matching only"
         }
@@ -95,6 +98,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "docker run -d -p 8000:8000 jasonacox/tinychat:latest"
         case .openWebUI:
             return "docker run -d -p 8080:8080 ghcr.io/open-webui/open-webui:main"
+        case .balanced:
+            return "Enable \"All local models\" in AI Settings and run Ollama with one or more models"
         case .none:
             return nil
         }
@@ -134,6 +139,7 @@ class EmbeddingManager: ObservableObject {
     private var pythonProvider: SentenceTransformerProvider?
     private var tinyChatProvider: TinyChatEmbeddingProvider?
     private var openWebUIProvider: OpenWebUIEmbeddingProvider?
+    private var balancedProvider: BalancedEmbeddingProvider?
 
     private var activeProvider: EmbeddingProvider?
 
@@ -148,6 +154,7 @@ class EmbeddingManager: ObservableObject {
         pythonProvider = SentenceTransformerProvider()
         tinyChatProvider = TinyChatEmbeddingProvider()
         openWebUIProvider = OpenWebUIEmbeddingProvider()
+        balancedProvider = BalancedEmbeddingProvider()
 
         Task {
             await updateActiveProvider()
@@ -180,6 +187,9 @@ class EmbeddingManager: ObservableObject {
         case .openWebUI:
             await openWebUIProvider?.checkAvailability()
             provider = openWebUIProvider
+        case .balanced:
+            await balancedProvider?.checkAvailability()
+            provider = balancedProvider
         case .none:
             provider = nil
         }

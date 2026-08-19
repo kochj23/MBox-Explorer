@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA0000000000000000000001 /* BalancerSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000001 /* BalancerSupport.swift */; };
+		BA0000000000000000000002 /* LLMBackendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000002 /* LLMBackendType.swift */; };
+		BA0000000000000000000003 /* ModelRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000003 /* ModelRegistry.swift */; };
+		BA0000000000000000000004 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000004 /* KeychainStore.swift */; };
+		BA0000000000000000000005 /* OpenRouterProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000005 /* OpenRouterProvider.swift */; };
+		BA0000000000000000000006 /* BalancedLLMManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000006 /* BalancedLLMManager.swift */; };
+		BA0000000000000000000007 /* BalancedSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000007 /* BalancedSummarizer.swift */; };
+		BA0000000000000000000008 /* BalancedEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000008 /* BalancedEmbeddingProvider.swift */; };
+		BA0000000000000000000009 /* LoadBalancerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000009 /* LoadBalancerTests.swift */; };
+		BA0000000000000000000010 /* OpenRouterFailoverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000010 /* OpenRouterFailoverTests.swift */; };
+		BA0000000000000000000011 /* SummarizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0000000000000000000011 /* SummarizationTests.swift */; };
 		0060E523835F69E77DC40F8D /* HypotheticalAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4FE314B120E4916E4FEA7A /* HypotheticalAnalyzer.swift */; };
 		050AE07D9F0290A9C9B59841 /* CommitmentTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408098289A40C753C412475A /* CommitmentTracker.swift */; };
 		0ACC5F34C57FEAFED5D7DF30 /* DecisionArchaeologist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747630C04E4FCF77DDE62867 /* DecisionArchaeologist.swift */; };
@@ -177,6 +188,17 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FE0000000000000000000001 /* BalancerSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/BalancerSupport.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000002 /* LLMBackendType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/LLMBackendType.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000003 /* ModelRegistry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/ModelRegistry.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000004 /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/KeychainStore.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000005 /* OpenRouterProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/OpenRouterProvider.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000006 /* BalancedLLMManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/BalancedLLMManager.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000007 /* BalancedSummarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/BalancedSummarizer.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000008 /* BalancedEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "AI/Balancer/BalancedEmbeddingProvider.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000009 /* LoadBalancerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "LoadBalancerTests.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000010 /* OpenRouterFailoverTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "OpenRouterFailoverTests.swift"; sourceTree = "<group>"; };
+		FE0000000000000000000011 /* SummarizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "SummarizationTests.swift"; sourceTree = "<group>"; };
 		079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenWebUIEmbeddingProvider.swift; path = AI/Embeddings/OpenWebUIEmbeddingProvider.swift; sourceTree = "<group>"; };
 		115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "MBox Explorer Widget/Assets.xcassets"; sourceTree = "<group>"; };
 		1D32F6CD61ACBEADE2914689 /* MBoxExplorerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MBoxExplorerWidget.swift; sourceTree = "<group>"; };
@@ -351,6 +373,14 @@
 				38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */,
 				36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */,
 				4CD59F1BF5CEC75B95A34CBD /* EmailSummarizer.swift */,
+				FE0000000000000000000001 /* BalancerSupport.swift */,
+				FE0000000000000000000002 /* LLMBackendType.swift */,
+				FE0000000000000000000003 /* ModelRegistry.swift */,
+				FE0000000000000000000004 /* KeychainStore.swift */,
+				FE0000000000000000000005 /* OpenRouterProvider.swift */,
+				FE0000000000000000000006 /* BalancedLLMManager.swift */,
+				FE0000000000000000000007 /* BalancedSummarizer.swift */,
+				FE0000000000000000000008 /* BalancedEmbeddingProvider.swift */,
 				9A989BC566E5181DAB386111 /* AutoTagger.swift */,
 				A038E172388D07B9E7EB23ED /* Conversation */,
 				56D930EA56AFE7611177F548 /* Analysis */,
@@ -382,6 +412,9 @@
 				716173C5350B4778BA97F502 /* OptimizationTests.swift */,
 				61A013382254BB6823B1D778 /* AutoReopenTests.swift */,
 				33FC5380624A8AE06E8A82ED /* IndexingResumeTests.swift */,
+				FE0000000000000000000009 /* LoadBalancerTests.swift */,
+				FE0000000000000000000010 /* OpenRouterFailoverTests.swift */,
+				FE0000000000000000000011 /* SummarizationTests.swift */,
 			);
 			name = "MBox ExplorerTests";
 			path = "MBox ExplorerTests";
@@ -840,6 +873,9 @@
 				E8C56921423EB5D65EA45BDC /* OptimizationTests.swift in Sources */,
 				42C221A89FA3959D7F2E02D7 /* AutoReopenTests.swift in Sources */,
 				D9A983AFD1DA9E9C2B7BB264 /* IndexingResumeTests.swift in Sources */,
+				BA0000000000000000000009 /* LoadBalancerTests.swift in Sources */,
+				BA0000000000000000000010 /* OpenRouterFailoverTests.swift in Sources */,
+				BA0000000000000000000011 /* SummarizationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -893,6 +929,14 @@
 				D078756E2EB1C17800C75A43 /* QuickOpenView.swift in Sources */,
 				D078756F2EB1C17800C75A43 /* MboxOperationsView.swift in Sources */,
 				F9C2F929F356DB18CE9FBA36 /* VectorDatabase.swift in Sources */,
+				BA0000000000000000000001 /* BalancerSupport.swift in Sources */,
+				BA0000000000000000000002 /* LLMBackendType.swift in Sources */,
+				BA0000000000000000000003 /* ModelRegistry.swift in Sources */,
+				BA0000000000000000000004 /* KeychainStore.swift in Sources */,
+				BA0000000000000000000005 /* OpenRouterProvider.swift in Sources */,
+				BA0000000000000000000006 /* BalancedLLMManager.swift in Sources */,
+				BA0000000000000000000007 /* BalancedSummarizer.swift in Sources */,
+				BA0000000000000000000008 /* BalancedEmbeddingProvider.swift in Sources */,
 				6410B4804DC11F1C4E12AF26 /* LocalLLM.swift in Sources */,
 				35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */,
 				36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */,

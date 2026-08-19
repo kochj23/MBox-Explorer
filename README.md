@@ -121,6 +121,78 @@ graph TD
 - Person profile generation from email history
 - Daily briefing engine
 
+### Multi-model load balancing
+
+MBox Explorer can spread AI work across **every model available on your machine at
+once** instead of pinning everything to a single backend. Three independent toggles
+in **AI Settings** compose the balancer pool:
+
+| Toggle | Pool contribution |
+|---|---|
+| **All local models** | Every Ollama model + locally-installed MLX models |
+| **All frontier models** | OpenRouter (bring-your-own-key, stored in the Keychain) |
+| **Nova Gateway** *(optional)* | One OpenAI-compatible backend at `127.0.0.1:18792` |
+
+A pure, network-free `LoadBalancer` spreads requests across the healthy pool using a
+round-robin or least-busy policy, and unhealthy backends are gated out automatically.
+
+**Nova is never required.** With zero Nova the app still balances across local Ollama/MLX
+and (if a key is set) OpenRouter. A failed Nova health check simply drops the gateway from
+the pool and the toggle reads *"unavailable"* — everything else keeps working. There is no
+hard dependency on Nova, PostgreSQL, or the gateway.
+
+```mermaid
+graph TD
+    subgraph Toggles["AI Settings — three toggles"]
+        T1[All local models]
+        T2[All frontier models]
+        T3["Nova Gateway (optional)"]
+    end
+
+    subgraph Discovery["ModelRegistry (pure)"]
+        T1 --> O[Ollama /api/tags]
+        T1 --> X[MLX HF-cache scan]
+        T2 --> R[OpenRouter models]
+        T3 --> NG[Nova Gateway model]
+        O --> P[assemblePool -> DiscoveredModel pool]
+        X --> P
+        R --> P
+        NG --> P
+    end
+
+    subgraph Balance["LoadBalancer (pure, network-free)"]
+        P --> HG[Health-gate unhealthy backends]
+        HG --> LB{round-robin / least-busy}
+    end
+
+    LB --> S[Email Summarization]
+    LB --> IDX[Bulk semantic indexing]
+
+    S -.->|no backend| SF[Basic extractive summary]
+    IDX -.->|no backend| KW[Keyword-only, resume-safe]
+```
+
+### AI email summarization
+
+A **Summarize** action in the email detail toolbar sends the selected email (or thread)
+through the balanced model pool and shows a concise 2-3 sentence summary. The request
+construction lives in a pure, unit-tested `SummarizationRequest` builder, and dispatch
+degrades gracefully in three tiers:
+
+1. **Balanced pool** — when any load-balancing toggle is on and a model is reachable.
+2. **Single active backend** — the app's existing Ollama/MLX/etc. selection.
+3. **Basic extraction** — a network-free extractive summary with a clear reason banner,
+   so the feature is never a crash and never a dead end.
+
+**Bulk semantic indexing** can also route through the balancer: selecting the
+**"Balanced (All Local Models)"** embedding provider fans indexing work out across every
+local Ollama model via the same `LoadBalancer`. Resumability is untouched —
+`VectorDatabase.pendingEmails(...)` still drives the resumable work set, so a cancelled or
+partial index picks up exactly where it left off.
+
+> The pure balancer core (`ModelRegistry`, `LoadBalancer`, `OpenRouterProvider`,
+> `OpenAICompatibleRequest`, `KeychainStore`) is shared verbatim with the AIStudio app.
+
 ### Export and Integration
 
 | Format | Options |
