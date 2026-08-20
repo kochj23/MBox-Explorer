@@ -14,6 +14,8 @@ struct AISettingsView: View {
     @StateObject private var ollamaClient = OllamaClient()
     @StateObject private var embeddingManager = EmbeddingManager.shared
     @StateObject private var aiBackend = AIBackendManager.shared
+    @StateObject private var balancer = BalancedLLMManager.shared
+    @State private var openRouterKey: String = ""
 
     @State private var serverURL: String = ""
     @State private var selectedLLMModel: String = ""
@@ -138,6 +140,74 @@ struct AISettingsView: View {
                                 Text("MLX Toolkit")
                                     .font(.caption)
                             }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+
+                // MARK: - Multi-Model Load Balancing
+                GroupBox(label: Label("Multi-Model Load Balancing", systemImage: "square.stack.3d.up")) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Spread AI work across every enabled model. Nova is never required — this works with local models and/or an OpenRouter key alone.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        Toggle("All local models (Ollama + MLX)", isOn: $balancer.useAllLocalModels)
+                            .onChange(of: balancer.useAllLocalModels) { _ in
+                                Task { _ = await balancer.discoverEnabledPool() }
+                            }
+
+                        Toggle("All frontier models (OpenRouter)", isOn: $balancer.enableAllFrontierModels)
+                            .onChange(of: balancer.enableAllFrontierModels) { _ in
+                                Task { _ = await balancer.discoverEnabledPool() }
+                            }
+
+                        Toggle("Nova Gateway (optional)", isOn: $balancer.useNovaGateway)
+                            .onChange(of: balancer.useNovaGateway) { _ in
+                                Task {
+                                    await balancer.refreshNovaGatewayStatus()
+                                    _ = await balancer.discoverEnabledPool()
+                                }
+                            }
+
+                        if balancer.useNovaGateway {
+                            HStack {
+                                Circle()
+                                    .fill(balancer.novaGatewayStatus.isConnected ? Color.green : Color.orange)
+                                    .frame(width: 8, height: 8)
+                                Text(balancer.novaGatewayStatus.isConnected ? "Nova Gateway available" : "Nova Gateway unavailable")
+                                    .font(.caption2)
+                                    .foregroundColor(balancer.novaGatewayStatus.isConnected ? .green : .orange)
+                            }
+                            TextField("Nova Gateway URL", text: $balancer.novaGatewayURL)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .font(.caption)
+                        }
+
+                        if balancer.enableAllFrontierModels {
+                            SecureField("OpenRouter API Key", text: $openRouterKey)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .onChange(of: openRouterKey) { newValue in
+                                    balancer.setOpenRouterAPIKey(newValue)
+                                }
+                            Text(balancer.hasOpenRouterKey ? "Key stored in Keychain" : "No key set — frontier models will be skipped")
+                                .font(.caption2)
+                                .foregroundColor(balancer.hasOpenRouterKey ? .green : .orange)
+                        }
+
+                        Divider()
+
+                        HStack {
+                            Image(systemName: "square.stack.3d.up.fill")
+                                .foregroundColor(balancer.isBalancingEnabled ? .accentColor : .secondary)
+                            Text(balancer.poolStatus)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Button("Refresh Pool") {
+                                Task { _ = await balancer.discoverEnabledPool() }
+                            }
+                            .font(.caption)
                         }
                     }
                     .padding(.vertical, 8)
@@ -428,6 +498,7 @@ struct AISettingsView: View {
         tinyChatURL = UserDefaults.standard.string(forKey: "TinyChatEmbedding_URL") ?? "http://localhost:8000"
         openWebUIURL = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_URL") ?? "http://localhost:8080"
         openWebUIAPIKey = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_APIKey") ?? ""
+        openRouterKey = balancer.openRouterAPIKey() ?? ""
 
         temperature = UserDefaults.standard.float(forKey: "ollamaTemperature")
         if temperature == 0 {

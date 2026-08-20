@@ -8,6 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Multi-model load balancing.** Three persisted toggles in AI Settings (All local
+  models / All frontier models / Nova Gateway) compose a `DiscoveredModel` pool that a
+  pure, network-free `LoadBalancer` spreads work across (round-robin or least-busy), with
+  automatic health-gating of unreachable backends. The balancer core (`ModelRegistry`,
+  `LoadBalancer`, `OpenRouterProvider`, `OpenAICompatibleRequest`, `KeychainStore`) is
+  shared verbatim with AIStudio. **Nova is never a hard requirement** — the app balances
+  across local Ollama/MLX and/or an OpenRouter key with zero Nova; a failed Nova health
+  check just drops the optional gateway and the toggle reads "unavailable".
+- **AI email summarization.** A "Summarize" action in the email detail toolbar routes the
+  selected email (or thread) through the balanced pool and shows a concise summary. The
+  request builder (`SummarizationRequest`) is pure and unit-tested; dispatch degrades
+  gracefully (balanced pool → single active backend → basic extractive summary) and never
+  crashes when no backend is available.
+- **Balanced bulk indexing.** A new "Balanced (All Local Models)" embedding provider fans
+  bulk semantic indexing across every local Ollama model via the load balancer. The
+  resumable indexing path (`VectorDatabase.pendingEmails`) is preserved — a cancelled or
+  partial run still resumes where it left off.
+- **OpenRouter API key** is stored in the macOS Keychain (never UserDefaults).
+- **Network-free balancer test suite** (`LoadBalancerTests`, `OpenRouterFailoverTests`) and
+  summarization tests (`SummarizationTests`) covering request construction and the
+  graceful-no-backend path.
 - **Version + build date in the app menu.** The app menu now shows *"Version X (build N) — <date>"*, and the About panel includes the build date (`AppVersion`).
 - **Reopen last archive on launch (#4).** On by default (instant thanks to the parse cache), with a **File → "Reopen Last Archive on Launch"** toggle to turn it off.
 

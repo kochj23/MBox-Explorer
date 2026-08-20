@@ -13,6 +13,11 @@ struct EmailDetailView: View {
     @State private var showRawSource = false
     @State private var highlightEnabled = true
 
+    @StateObject private var summarizer = BalancedSummarizer()
+    @State private var summaryResult: BalancedSummary?
+    @State private var isSummarizing = false
+    @State private var showingSummary = false
+
     var body: some View {
         if let email = viewModel.selectedEmail {
             ScrollView {
@@ -208,11 +213,26 @@ struct EmailDetailView: View {
                     .disabled(viewModel.filteredEmails.count < 2)
 
                     Button {
+                        summarizeCurrentEmail(email)
+                    } label: {
+                        if isSummarizing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Label("Summarize", systemImage: "text.append")
+                        }
+                    }
+                    .disabled(isSummarizing)
+                    .help("AI summary of this email via the load-balanced model pool")
+
+                    Button {
                         exportCurrentEmail()
                     } label: {
                         Label("Export", systemImage: "square.and.arrow.up")
                     }
                 }
+            }
+            .sheet(isPresented: $showingSummary) {
+                summarySheet
             }
         } else {
             ContentUnavailableView(
@@ -220,6 +240,59 @@ struct EmailDetailView: View {
                 systemImage: "envelope",
                 description: Text("Select an email from the list to view its contents")
             )
+        }
+    }
+
+    @ViewBuilder
+    private var summarySheet: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Label("AI Summary", systemImage: "sparkles")
+                    .font(.headline)
+                Spacer()
+                Button("Done") { showingSummary = false }
+                    .keyboardShortcut(.defaultAction)
+            }
+
+            if let result = summaryResult {
+                if let reason = result.unavailableReason {
+                    Label(reason, systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                ScrollView {
+                    Text(result.summary)
+                        .font(.body)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                HStack {
+                    Image(systemName: result.isFallback ? "cpu" : "checkmark.seal.fill")
+                        .foregroundColor(result.isFallback ? .orange : .green)
+                    Text("Source: \(result.sourceLabel)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                ProgressView("Summarizing…")
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+        .padding()
+        .frame(minWidth: 420, minHeight: 320)
+    }
+
+    private func summarizeCurrentEmail(_ email: Email) {
+        isSummarizing = true
+        summaryResult = nil
+        showingSummary = true
+        Task {
+            let result = await summarizer.summarize(email: email)
+            await MainActor.run {
+                self.summaryResult = result
+                self.isSummarizing = false
+            }
         }
     }
 
