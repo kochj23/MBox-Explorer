@@ -58,6 +58,7 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
     case sentenceTransformers = "Sentence Transformers"
     case tinyChat = "TinyChat"
     case openWebUI = "OpenWebUI"
+    case lmStudio = "LM Studio"
     case balanced = "Balanced (All Local Models)"
     case none = "None (Keyword Search Only)"
 
@@ -77,6 +78,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "TinyChat by Jason Cox - OpenAI-compatible (local/cloud)"
         case .openWebUI:
             return "OpenWebUI - Self-hosted AI platform (local)"
+        case .lmStudio:
+            return "LM Studio local embeddings (OpenAI-compatible, localhost:1234)"
         case .balanced:
             return "Load-balanced across every local Ollama model (bulk indexing fans out)"
         case .none:
@@ -98,6 +101,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "docker run -d -p 8000:8000 jasonacox/tinychat:latest"
         case .openWebUI:
             return "docker run -d -p 8080:8080 ghcr.io/open-webui/open-webui:main"
+        case .lmStudio:
+            return "Download from lmstudio.ai, load a model, and start the local server"
         case .balanced:
             return "Enable \"All local models\" in AI Settings and run Ollama with one or more models"
         case .none:
@@ -111,6 +116,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "TinyChat by Jason Cox (https://github.com/jasonacox/tinychat)"
         case .openWebUI:
             return "OpenWebUI Community Project (https://github.com/open-webui/open-webui)"
+        case .lmStudio:
+            return "LM Studio (https://lmstudio.ai)"
         default:
             return nil
         }
@@ -139,6 +146,7 @@ class EmbeddingManager: ObservableObject {
     private var pythonProvider: SentenceTransformerProvider?
     private var tinyChatProvider: TinyChatEmbeddingProvider?
     private var openWebUIProvider: OpenWebUIEmbeddingProvider?
+    private var lmStudioProvider: LMStudioEmbeddingProvider?
     private var balancedProvider: BalancedEmbeddingProvider?
 
     private var activeProvider: EmbeddingProvider?
@@ -154,6 +162,7 @@ class EmbeddingManager: ObservableObject {
         pythonProvider = SentenceTransformerProvider()
         tinyChatProvider = TinyChatEmbeddingProvider()
         openWebUIProvider = OpenWebUIEmbeddingProvider()
+        lmStudioProvider = LMStudioEmbeddingProvider()
         balancedProvider = BalancedEmbeddingProvider()
 
         Task {
@@ -187,6 +196,9 @@ class EmbeddingManager: ObservableObject {
         case .openWebUI:
             await openWebUIProvider?.checkAvailability()
             provider = openWebUIProvider
+        case .lmStudio:
+            await lmStudioProvider?.checkAvailability()
+            provider = lmStudioProvider
         case .balanced:
             await balancedProvider?.checkAvailability()
             provider = balancedProvider
@@ -213,6 +225,7 @@ class EmbeddingManager: ObservableObject {
 
     var tinyChat: TinyChatEmbeddingProvider? { tinyChatProvider }
     var openWebUI: OpenWebUIEmbeddingProvider? { openWebUIProvider }
+    var lmStudio: LMStudioEmbeddingProvider? { lmStudioProvider }
 
     func generateEmbedding(for text: String) async throws -> [Float] {
         guard let provider = activeProvider, provider.isAvailable else {
