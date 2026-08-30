@@ -104,7 +104,6 @@
 		EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */; };
 		EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002030000000000000001 /* MLXEmbeddingProvider.swift */; };
 		EMB001040000000000000001 /* OpenAIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */; };
-		EMB001060000000000000001 /* LMStudioEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002060000000000000001 /* LMStudioEmbeddingProvider.swift */; };
 		EMB001050000000000000001 /* SentenceTransformerProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMB002050000000000000001 /* SentenceTransformerProvider.swift */; };
 		F9C2F929F356DB18CE9FBA36 /* VectorDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3533E5F905952EC4B14E8BD9 /* VectorDatabase.swift */; };
 		MB0000010000000000000001 /* MBox_ExplorerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = MB0000020000000000000001 /* MBox_ExplorerApp.swift */; };
@@ -201,6 +200,7 @@
 		FE0000000000000000000010 /* OpenRouterFailoverTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "OpenRouterFailoverTests.swift"; sourceTree = "<group>"; };
 		FE0000000000000000000011 /* SummarizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "SummarizationTests.swift"; sourceTree = "<group>"; };
 		079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenWebUIEmbeddingProvider.swift; path = AI/Embeddings/OpenWebUIEmbeddingProvider.swift; sourceTree = "<group>"; };
+			B2C3D4E5F6G7H8I9J0K1L2M3 /* LMStudioEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LMStudioEmbeddingProvider.swift; path = AI/Embeddings/LMStudioEmbeddingProvider.swift; sourceTree = "<group>";};
 		115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "MBox Explorer Widget/Assets.xcassets"; sourceTree = "<group>"; };
 		1D32F6CD61ACBEADE2914689 /* MBoxExplorerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MBoxExplorerWidget.swift; sourceTree = "<group>"; };
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
@@ -286,7 +286,6 @@
 		EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OllamaEmbeddingProvider.swift; path = AI/Embeddings/OllamaEmbeddingProvider.swift; sourceTree = "<group>"; };
 		EMB002030000000000000001 /* MLXEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MLXEmbeddingProvider.swift; path = AI/Embeddings/MLXEmbeddingProvider.swift; sourceTree = "<group>"; };
 		EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenAIEmbeddingProvider.swift; path = AI/Embeddings/OpenAIEmbeddingProvider.swift; sourceTree = "<group>"; };
-		EMB002060000000000000001 /* LMStudioEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LMStudioEmbeddingProvider.swift; path = AI/Embeddings/LMStudioEmbeddingProvider.swift; sourceTree = "<group>"; };
 		EMB002050000000000000001 /* SentenceTransformerProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SentenceTransformerProvider.swift; path = AI/Embeddings/SentenceTransformerProvider.swift; sourceTree = "<group>"; };
 		MB0000020000000000000001 /* MBox_ExplorerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBox_ExplorerApp.swift; sourceTree = "<group>"; };
 		MB0000040000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -509,10 +508,10 @@
 				EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */,
 				EMB002030000000000000001 /* MLXEmbeddingProvider.swift */,
 				EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */,
-				EMB002060000000000000001 /* LMStudioEmbeddingProvider.swift */,
 				EMB002050000000000000001 /* SentenceTransformerProvider.swift */,
 				D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */,
 				079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */,
+			B2C3D4E5F6G7H8I9J0K1L2M3 /* LMStudioEmbeddingProvider.swift */,
 			);
 			name = Embeddings;
 			sourceTree = "<group>";
@@ -976,7 +975,6 @@
 				EMB001020000000000000001 /* OllamaEmbeddingProvider.swift in Sources */,
 				EMB001030000000000000001 /* MLXEmbeddingProvider.swift in Sources */,
 				EMB001040000000000000001 /* OpenAIEmbeddingProvider.swift in Sources */,
-				EMB001060000000000000001 /* LMStudioEmbeddingProvider.swift in Sources */,
 				EMB001050000000000000001 /* SentenceTransformerProvider.swift in Sources */,
 				NF100001000000000000001 /* ThreadSummarizer.swift in Sources */,
 				NF100002000000000000001 /* ActionItemExtractor.swift in Sources */,
@@ -1011,6 +1009,7 @@
 				NF100032000000000000001 /* QuickLookPreview.swift in Sources */,
 				162EA02AA9581D8F680F992B /* TinyChatEmbeddingProvider.swift in Sources */,
 				31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */,
+				B2C3D4E5F6G7H8I9J0K1L2M3 /* LMStudioEmbeddingProvider.swift in Sources */,
 				WD100001000000000000001 /* WidgetData.swift in Sources */,
 				WD100002000000000000001 /* SharedDataManager.swift in Sources */,
 				E573DEB54B7EF36B8D867E6B /* NovaAPIServer.swift in Sources */,

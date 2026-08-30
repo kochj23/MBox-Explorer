@@ -53,7 +53,7 @@ final class BalancedEmbeddingProvider: EmbeddingProvider {
         manager.balancer.checkOut(model.id)
         defer { manager.balancer.checkIn(model.id) }
         do {
-            let embedding = try await manager.embed(text: text, model: model.modelName)
+            let embedding = try await manager.embed(text: text, model: model.modelName, backend: model.backend)
             if !embedding.isEmpty { embeddingDimension = embedding.count }
             return embedding
         } catch {

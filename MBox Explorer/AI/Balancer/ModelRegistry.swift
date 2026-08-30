@@ -55,6 +55,7 @@ enum ModelRegistry {
     static let ollamaBaseURL = "http://localhost:11434"
     /// Default Nova Gateway base URL (OpenAI-compatible, inherits Nova's routing).
     static let novaGatewayDefaultURL = "http://127.0.0.1:18792"
+    static let lmStudioDefaultURL = "http://localhost:1234"
 
     // MARK: Pure parsing (network-free, unit-tested)
 
@@ -69,6 +70,18 @@ enum ModelRegistry {
         return models.compactMap { entry -> DiscoveredModel? in
             guard let name = entry["name"] as? String, !name.isEmpty else { return nil }
             return DiscoveredModel(modelName: name, backend: .ollama, endpoint: endpoint)
+        }
+    }
+
+    static func parseLMStudioModels(_ data: Data, baseURL: String = lmStudioDefaultURL) -> [DiscoveredModel] {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let models = json["data"] as? [[String: Any]] else {
+            return []
+        }
+        let endpoint = "\(baseURL)/v1/chat/completions"
+        return models.compactMap { entry -> DiscoveredModel? in
+            guard let id = entry["id"] as? String, !id.isEmpty else { return nil }
+            return DiscoveredModel(modelName: id, backend: .lmStudio, endpoint: endpoint)
         }
     }
 
@@ -115,6 +128,7 @@ enum ModelRegistry {
         mlx: [DiscoveredModel] = [],
         frontier: [DiscoveredModel] = [],
         novaGateway: DiscoveredModel? = nil,
+        lmStudio: [DiscoveredModel] = [],
         useAllLocalModels: Bool,
         enableAllFrontierModels: Bool,
         useNovaGateway: Bool
@@ -123,6 +137,7 @@ enum ModelRegistry {
         if useAllLocalModels {
             pool.append(contentsOf: ollama)
             pool.append(contentsOf: mlx)
+            pool.append(contentsOf: lmStudio)
         }
         if enableAllFrontierModels {
             pool.append(contentsOf: frontier)
@@ -130,7 +145,6 @@ enum ModelRegistry {
         if useNovaGateway, let nova = novaGateway {
             pool.append(nova)
         }
-        // De-duplicate by id while preserving first-seen order.
         var seen = Set<String>()
         return pool.filter { seen.insert($0.id).inserted }
     }
@@ -144,6 +158,17 @@ enum ModelRegistry {
             let (data, response) = try await session.data(from: url)
             guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
             return parseOllamaTags(data, baseURL: baseURL)
+        } catch {
+            return []
+        }
+    }
+
+    static func discoverLMStudio(baseURL: String = lmStudioDefaultURL, session: URLSession = .shared) async -> [DiscoveredModel] {
+        guard let url = URL(string: "\(baseURL)/v1/models") else { return [] }
+        do {
+            let (data, response) = try await session.data(from: url)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { return [] }
+            return parseLMStudioModels(data, baseURL: baseURL)
         } catch {
             return []
         }
