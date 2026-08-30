@@ -9,6 +9,11 @@
 
 import Foundation
 
+#if DEBUG
+import os.log
+import class MBox_Explorer.DebugLogger
+#endif
+
 enum AutoReopen {
     static let defaultsKey = "autoReopenLastArchive"
 
@@ -20,7 +25,32 @@ enum AutoReopen {
     /// The archive to auto-open on launch, or nil if the feature is off or there
     /// is no still-existing recent file.
     static func fileToReopen(enabled: Bool, recent: [URL]) -> URL? {
-        guard enabled else { return nil }
-        return recent.first { FileManager.default.fileExists(atPath: $0.path) }
+        #if DEBUG
+        DebugLogger.shared.info("AutoReopen.fileToReopen: enabled=\(enabled), recent.count=\(recent.count)")
+        #endif
+        guard enabled else {
+            #if DEBUG
+            DebugLogger.shared.debug("AutoReopen.fileToReopen: disabled")
+            #endif
+            return nil
+        }
+
+        for url in recent {
+            let exists = FileManager.default.fileExists(atPath: url.path)
+            #if DEBUG
+            DebugLogger.shared.debug("AutoReopen.fileToReopen: checking \(url.lastPathComponent), exists=\(exists)")
+            #endif
+            if exists {
+                #if DEBUG
+                DebugLogger.shared.info("AutoReopen.fileToReopen: selected \(url.lastPathComponent)")
+                #endif
+                return url
+            }
+        }
+
+        #if DEBUG
+        DebugLogger.shared.debug("AutoReopen.fileToReopen: no valid file found")
+        #endif
+        return nil
     }
 }

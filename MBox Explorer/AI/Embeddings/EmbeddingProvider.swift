@@ -58,6 +58,7 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
     case sentenceTransformers = "Sentence Transformers"
     case tinyChat = "TinyChat"
     case openWebUI = "OpenWebUI"
+    case lmStudio = "LM Studio"
     case balanced = "Balanced (All Local Models)"
     case none = "None (Keyword Search Only)"
 
@@ -77,6 +78,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "TinyChat by Jason Cox - OpenAI-compatible (local/cloud)"
         case .openWebUI:
             return "OpenWebUI - Self-hosted AI platform (local)"
+        case .lmStudio:
+            return "LM Studio - Local LLM server with embeddings (local)"
         case .balanced:
             return "Load-balanced across every local Ollama model (bulk indexing fans out)"
         case .none:
@@ -98,6 +101,8 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
             return "docker run -d -p 8000:8000 jasonacox/tinychat:latest"
         case .openWebUI:
             return "docker run -d -p 8080:8080 ghcr.io/open-webui/open-webui:main"
+        case .lmStudio:
+            return "Download and run LM Studio from https://lmstudio.ai"
         case .balanced:
             return "Enable \"All local models\" in AI Settings and run Ollama with one or more models"
         case .none:
@@ -139,11 +144,15 @@ class EmbeddingManager: ObservableObject {
     private var pythonProvider: SentenceTransformerProvider?
     private var tinyChatProvider: TinyChatEmbeddingProvider?
     private var openWebUIProvider: OpenWebUIEmbeddingProvider?
+    private var lmStudioProvider: LMStudioEmbeddingProvider?
     private var balancedProvider: BalancedEmbeddingProvider?
 
     private var activeProvider: EmbeddingProvider?
 
     private init() {
+        #if DEBUG
+        DebugLogger.shared.info("EmbeddingManager.init: starting")
+        #endif
         let savedProvider = UserDefaults.standard.string(forKey: "EmbeddingManager_SelectedProvider") ?? "Ollama"
         self.selectedProvider = EmbeddingProviderType(rawValue: savedProvider) ?? .ollama
 
@@ -154,17 +163,31 @@ class EmbeddingManager: ObservableObject {
         pythonProvider = SentenceTransformerProvider()
         tinyChatProvider = TinyChatEmbeddingProvider()
         openWebUIProvider = OpenWebUIEmbeddingProvider()
-        balancedProvider = BalancedEmbeddingProvider()
+        lmStudioProvider = LMStudioEmbeddingProvider()
+        balancedProvider = BalancedEmbeddingProvider(manager: .shared)
 
+        #if DEBUG
+        DebugLogger.shared.info("EmbeddingManager.init: providers initialized, starting updateActiveProvider task")
+        #endif
         Task {
             await updateActiveProvider()
+            #if DEBUG
+            DebugLogger.shared.info("EmbeddingManager.init: updateActiveProvider task completed")
+            #endif
         }
     }
 
     func updateActiveProvider() async {
+        // Sync Ollama provider with current settings before checking
+        syncOllamaProvider()
+
         await MainActor.run {
             statusMessage = "Checking \(selectedProvider.rawValue)..."
         }
+        
+        #if DEBUG
+        DebugLogger.shared.info("EmbeddingManager.updateActiveProvider: selectedProvider=\(selectedProvider.rawValue)")
+        #endif
 
         let provider: EmbeddingProvider?
 
@@ -187,6 +210,9 @@ class EmbeddingManager: ObservableObject {
         case .openWebUI:
             await openWebUIProvider?.checkAvailability()
             provider = openWebUIProvider
+        case .lmStudio:
+            await lmStudioProvider?.checkAvailability()
+            provider = lmStudioProvider
         case .balanced:
             await balancedProvider?.checkAvailability()
             provider = balancedProvider
@@ -206,13 +232,27 @@ class EmbeddingManager: ObservableObject {
             } else {
                 statusMessage = "\(selectedProvider.rawValue) not available"
             }
+            
+            #if DEBUG
+            DebugLogger.shared.info("EmbeddingManager: activeProvider=\(provider?.name ?? "none"), isAvailable=\(isAvailable), status=\(statusMessage)")
+            #endif
         }
+    }
+
+    /// Sync OllamaEmbeddingProvider with current Ollama settings from UserDefaults
+    func syncOllamaProvider() {
+        let currentURL = UserDefaults.standard.string(forKey: "ollamaServerURL") ?? "http://localhost:11434"
+        let currentModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") ?? "nomic-embed-text"
+
+        ollamaProvider?.updateBaseURL(currentURL)
+        ollamaProvider?.updateModel(currentModel)
     }
 
     // MARK: - Provider Access
 
     var tinyChat: TinyChatEmbeddingProvider? { tinyChatProvider }
     var openWebUI: OpenWebUIEmbeddingProvider? { openWebUIProvider }
+    var lmStudio: LMStudioEmbeddingProvider? { lmStudioProvider }
 
     func generateEmbedding(for text: String) async throws -> [Float] {
         guard let provider = activeProvider, provider.isAvailable else {

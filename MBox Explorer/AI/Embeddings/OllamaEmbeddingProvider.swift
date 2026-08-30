@@ -17,31 +17,50 @@ class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
     @Published var selectedModel = "nomic-embed-text"
 
     var embeddingDimension: Int {
-        // nomic-embed-text: 768, all-minilm: 384
-        switch selectedModel {
-        case "nomic-embed-text": return 768
-        case "all-minilm": return 384
-        case "mxbai-embed-large": return 1024
-        default: return 768
+        // nomic-embed-text: 768, all-minilm: 384, bge-m3: 1024, mxbai-embed-large: 1024
+        let model = selectedModel.lowercased()
+        if model.contains("bge") || model.contains("mxbai") || model.contains("e5-large") {
+            return 1024
         }
+        if model.contains("minilm") || model.contains("e5-small") || model.contains("gte-small") {
+            return 384
+        }
+        return 768  // nomic-embed-text, e5-base, gte-base, etc.
     }
 
-    private let baseURL: String
+    private var baseURL: String
     private var availableModels: [String] = []
 
-    init(baseURL: String = "http://localhost:11434") {
-        self.baseURL = baseURL
+    init(baseURL: String? = nil) {
+        // Use shared Ollama URL from UserDefaults, fallback to default
+        self.baseURL = baseURL ?? UserDefaults.standard.string(forKey: "ollamaServerURL") ?? "http://localhost:11434"
 
-        // Load saved model preference
-        if let savedModel = UserDefaults.standard.string(forKey: "OllamaEmbedding_Model") {
+        // Load saved model preference from shared key
+        if let savedModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") {
             self.selectedModel = savedModel
         }
     }
 
+    /// Update the base URL (called when user changes Ollama server in settings)
+    func updateBaseURL(_ urlString: String) {
+        self.baseURL = urlString
+    }
+
+    /// Update the selected model (called when user changes embedding model in settings)
+    func updateModel(_ model: String) {
+        self.selectedModel = model
+    }
+
     func checkAvailability() async {
+        #if DEBUG
+        DebugLogger.shared.debug("OllamaEmbeddingProvider.checkAvailability: baseURL=\(baseURL), selectedModel=\(selectedModel)")
+        #endif
         do {
             // Check if Ollama is running
             guard let url = URL(string: "\(baseURL)/api/tags") else {
+                #if DEBUG
+                DebugLogger.shared.warn("OllamaEmbeddingProvider: invalid URL \(baseURL)/api/tags")
+                #endif
                 await MainActor.run { isAvailable = false }
                 return
             }
@@ -50,19 +69,29 @@ class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
 
             guard let httpResponse = response as? HTTPURLResponse,
                   httpResponse.statusCode == 200 else {
+                #if DEBUG
+                DebugLogger.shared.warn("OllamaEmbeddingProvider: HTTP status \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+                #endif
                 await MainActor.run { isAvailable = false }
                 return
             }
 
-            // Parse available models
-            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let models = json["models"] as? [[String: Any]] {
-                let modelNames = models.compactMap { $0["name"] as? String }
+            // Parse available models using JSONDecoder for consistency with OllamaClient
+            let decoder = JSONDecoder()
+            if let modelsResponse = try? decoder.decode(OllamaModelsResponse.self, from: data) {
+                let modelNames = modelsResponse.models.map { $0.name }
+                #if DEBUG
+                DebugLogger.shared.info("OllamaEmbeddingProvider: found models: \(modelNames)")
+                #endif
 
                 // Check for embedding models
                 let embeddingModels = modelNames.filter {
-                    $0.contains("embed") || $0.contains("nomic") || $0.contains("minilm") || $0.contains("mxbai")
+                    $0.contains("embed") || $0.contains("nomic") || $0.contains("minilm") || $0.contains("mxbai") || $0.contains("bge") || $0.contains("e5-") || $0.contains("gte-")
                 }
+
+                #if DEBUG
+                DebugLogger.shared.info("OllamaEmbeddingProvider: embedding models: \(embeddingModels)")
+                #endif
 
                 await MainActor.run {
                     availableModels = embeddingModels
@@ -74,11 +103,25 @@ class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
                     }
                 }
             } else {
+                #if DEBUG
+                DebugLogger.shared.warn("OllamaEmbeddingProvider: failed to parse models response")
+                #endif
                 await MainActor.run { isAvailable = false }
             }
         } catch {
+            #if DEBUG
+            DebugLogger.shared.error("OllamaEmbeddingProvider.checkAvailability error: \(error)")
+            #endif
             await MainActor.run { isAvailable = false }
         }
+    }
+
+    // Ollama API response model for /api/tags
+    private struct OllamaModelsResponse: Codable {
+        struct Model: Codable {
+            let name: String
+        }
+        let models: [Model]
     }
 
     func generateEmbedding(for text: String) async throws -> [Float] {
@@ -129,7 +172,7 @@ class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
 
     func setModel(_ model: String) {
         selectedModel = model
-        UserDefaults.standard.set(model, forKey: "OllamaEmbedding_Model")
+        UserDefaults.standard.set(model, forKey: "ollamaEmbeddingModel")
     }
 
     var models: [String] { availableModels }

@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+#if DEBUG
+import class MBox_Explorer.DebugLogger
+#endif
+
 struct ContentView: View {
     @StateObject private var viewModel = MboxViewModel()
     @StateObject private var alertManager = AlertManager()
@@ -42,9 +46,18 @@ struct ContentView: View {
                 .onAppear {
                     viewModel.alertManager = alertManager
                     // #4: reopen the last archive on launch (instant thanks to the parse cache).
+                    #if DEBUG
+                    let recentFiles = RecentFilesManager.shared.recentFiles
+                    DebugLogger.shared.logAutoReopenCheck(enabled: AutoReopen.isEnabled, recentCount: recentFiles.count)
+                    #endif
+
                     if viewModel.emails.isEmpty,
                        let url = AutoReopen.fileToReopen(enabled: AutoReopen.isEnabled,
                                                          recent: RecentFilesManager.shared.recentFiles) {
+                        #if DEBUG
+                        let exists = FileManager.default.fileExists(atPath: url.path)
+                        DebugLogger.shared.logFileToReopen(url: url, exists: exists)
+                        #endif
                         loadMboxFile(url)
                     }
                 }
@@ -142,6 +155,9 @@ struct ContentView: View {
     }
 
     private func loadMboxFile(_ url: URL) {
+        #if DEBUG
+        DebugLogger.shared.logLoadMboxFile(url: url)
+        #endif
         Task {
             await viewModel.loadMboxFile(url: url)
             // Add to recent files after successful load

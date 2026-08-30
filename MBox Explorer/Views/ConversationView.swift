@@ -13,7 +13,7 @@ import SwiftUI
 struct ConversationView: View {
     @ObservedObject var viewModel: MboxViewModel
     @StateObject private var conversationManager = ConversationManager.shared
-    @StateObject private var vectorDB = VectorDatabase()
+    @StateObject private var vectorDB = VectorDatabase.shared
     @StateObject private var commitmentTracker = CommitmentTracker.shared
     @StateObject private var dailyBriefing = DailyBriefingEngine.shared
     @StateObject private var smartSuggestions = SmartSuggestionsEngine.shared

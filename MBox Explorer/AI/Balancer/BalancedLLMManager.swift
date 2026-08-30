@@ -32,6 +32,7 @@ final class BalancedLLMManager: ObservableObject {
     @Published var useNovaGateway: Bool { didSet { persist(Keys.useNova, useNovaGateway) } }
     @Published var novaGatewayURL: String { didSet { UserDefaults.standard.set(novaGatewayURL, forKey: Keys.novaURL) } }
     @Published var selectedOpenRouterModel: String { didSet { UserDefaults.standard.set(selectedOpenRouterModel, forKey: Keys.openRouterModel) } }
+    @Published var lmStudioURL: String { didSet { UserDefaults.standard.set(lmStudioURL, forKey: Keys.lmStudioURL) } }
 
     // MARK: - Discovered state
 
@@ -58,6 +59,7 @@ final class BalancedLLMManager: ObservableObject {
         static let useNova = "Balancer_UseNovaGateway"
         static let novaURL = "Balancer_NovaGatewayURL"
         static let openRouterModel = "Balancer_SelectedOpenRouterModel"
+        static let lmStudioURL = "Balancer_LMStudioURL"
     }
 
     private func persist(_ key: String, _ value: Bool) {
@@ -75,6 +77,7 @@ final class BalancedLLMManager: ObservableObject {
         self.useNovaGateway = d.object(forKey: Keys.useNova) as? Bool ?? false
         self.novaGatewayURL = d.string(forKey: Keys.novaURL) ?? ModelRegistry.novaGatewayDefaultURL
         self.selectedOpenRouterModel = d.string(forKey: Keys.openRouterModel) ?? OpenRouterProvider.defaultModel
+        self.lmStudioURL = d.string(forKey: Keys.lmStudioURL) ?? ModelRegistry.lmStudioDefaultURL
     }
 
     // MARK: - Toggle state
@@ -102,6 +105,7 @@ final class BalancedLLMManager: ObservableObject {
         case .mlx: return await checkMLX()
         case .openRouter: return await checkOpenRouter()
         case .novaGateway: return await checkNovaGateway()
+        case .lmStudio: return await checkLMStudio()
         default: return false
         }
     }
@@ -153,7 +157,7 @@ final class BalancedLLMManager: ObservableObject {
         } catch { return false }
     }
 
-    private func checkNovaGateway() async -> Bool {
+private func checkNovaGateway() async -> Bool {
         // Probe the OpenAI-compatible models listing; fall back to the base URL.
         let candidates = ["\(novaGatewayURL)/v1/models", "\(novaGatewayURL)/"].compactMap { URL(string: $0) }
         for url in candidates {
@@ -163,6 +167,21 @@ final class BalancedLLMManager: ObservableObject {
             } catch { continue }
         }
         return false
+    }
+
+    private func checkLMStudio() async -> Bool {
+        let candidates = ["\(lmStudioURL)/v1/models", "\(lmStudioURL)/"].compactMap { URL(string: $0) }
+        for url in candidates {
+            do {
+                let (_, response) = try await session.data(from: url)
+                if (response as? HTTPURLResponse)?.statusCode == 200 { return true }
+            } catch { continue }
+        }
+        return false
+    }
+
+    private func discoverLMStudio() async -> [DiscoveredModel] {
+        await ModelRegistry.discoverLMStudio(baseURL: lmStudioURL, session: session)
     }
 
     /// Refresh the Nova Gateway status flag for the settings UI (never throws).
@@ -180,6 +199,7 @@ final class BalancedLLMManager: ObservableObject {
         var ollama: [DiscoveredModel] = []
         var mlx: [DiscoveredModel] = []
         var frontier: [DiscoveredModel] = []
+        var lmStudio: [DiscoveredModel] = []
 
         if useAllLocalModels {
             ollama = await ModelRegistry.discoverOllama(baseURL: ollamaBaseURL, session: session)
@@ -188,6 +208,7 @@ final class BalancedLLMManager: ObservableObject {
         if enableAllFrontierModels {
             frontier = ModelRegistry.frontierModels(from: openRouterModels)
         }
+        lmStudio = await discoverLMStudio()
         let nova = useNovaGateway ? ModelRegistry.novaGatewayModel(url: novaGatewayURL) : nil
 
         let pool = ModelRegistry.assemblePool(
@@ -195,6 +216,7 @@ final class BalancedLLMManager: ObservableObject {
             mlx: mlx,
             frontier: frontier,
             novaGateway: nova,
+            lmStudio: lmStudio,
             useAllLocalModels: useAllLocalModels,
             enableAllFrontierModels: enableAllFrontierModels,
             useNovaGateway: useNovaGateway
@@ -271,6 +293,8 @@ final class BalancedLLMManager: ObservableObject {
             guard let key = openRouterAPIKey(), !key.isEmpty else { throw LLMError.noBackendAvailable }
             return try await generateOpenAICompatible(endpoint: model.endpoint, model: model.modelName, headers: OpenRouterProvider.authHeaders(apiKey: key), prompt: prompt, systemPrompt: systemPrompt, temperature: temperature, maxTokens: maxTokens)
         case .novaGateway:
+            return try await generateOpenAICompatible(endpoint: model.endpoint, model: model.modelName, headers: [:], prompt: prompt, systemPrompt: systemPrompt, temperature: temperature, maxTokens: maxTokens)
+        case .lmStudio:
             return try await generateOpenAICompatible(endpoint: model.endpoint, model: model.modelName, headers: [:], prompt: prompt, systemPrompt: systemPrompt, temperature: temperature, maxTokens: maxTokens)
         default:
             throw LLMError.noBackendAvailable
@@ -373,13 +397,16 @@ final class BalancedLLMManager: ObservableObject {
 
     // MARK: - Balanced embeddings (bulk semantic indexing)
 
-    /// The local, Ollama-served models eligible to spread embedding work across.
+    /// The local, Ollama/LM Studio-served models eligible to spread embedding work across.
     /// Bulk indexing routes its model selection through here so the work fans out
     /// over every local model instead of hammering one.
     func localEmbeddingPool() async -> [DiscoveredModel] {
         guard useAllLocalModels else { return [] }
-        return await ModelRegistry.discoverOllama(baseURL: ollamaBaseURL, session: session)
+        let ollamaModels = await ModelRegistry.discoverOllama(baseURL: ollamaBaseURL, session: session)
             .filter { $0.backend == .ollama }
+        let lmStudioModels = await ModelRegistry.discoverLMStudio(baseURL: lmStudioURL, session: session)
+            .filter { $0.backend == .lmStudio }
+        return ollamaModels + lmStudioModels
     }
 
     /// Pick the next local model for an embedding request via the load balancer.
@@ -387,11 +414,43 @@ final class BalancedLLMManager: ObservableObject {
         balancer.next(pool: pool, policy: balancerPolicy)
     }
 
-    /// Generate one embedding against a specific Ollama model (used by the
+    /// Generate one embedding against a specific local model (used by the
     /// balanced embedding provider). Network call, so kept off the pure path.
-    func embed(text: String, model: String) async throws -> [Float] {
-        guard let url = URL(string: "\(ollamaBaseURL)/api/embeddings") else { throw LLMError.invalidURL }
+    func embed(text: String, model: String, backend: LLMBackendType) async throws -> [Float] {
+        let baseURL: String
+        switch backend {
+        case .ollama:
+            baseURL = self.ollamaBaseURL
+        case .lmStudio:
+            baseURL = lmStudioURL
+        default:
+            throw LLMError.noBackendAvailable
+        }
+
+        // Try Ollama-style endpoint first, then OpenAI-compatible
+        if let result = try? await embedOllamaStyle(text: text, model: model, baseURL: baseURL) {
+            return result
+        }
+        return try await embedOpenAIStyle(text: text, model: model, baseURL: baseURL)
+    }
+
+    private func embedOllamaStyle(text: String, model: String, baseURL: String) async throws -> [Float]? {
+        guard let url = URL(string: "\(baseURL)/api/embeddings") else { return nil }
         let body: [String: Any] = ["model": model, "prompt": text]
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.timeoutInterval = 120
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+        struct EmbeddingResponse: Codable { let embedding: [Float] }
+        return try? JSONDecoder().decode(EmbeddingResponse.self, from: data).embedding
+    }
+
+    private func embedOpenAIStyle(text: String, model: String, baseURL: String) async throws -> [Float] {
+        guard let url = URL(string: "\(baseURL)/v1/embeddings") else { throw LLMError.invalidURL }
+        let body: [String: Any] = ["input": text, "model": model]
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -401,7 +460,10 @@ final class BalancedLLMManager: ObservableObject {
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw LLMError.httpError((response as? HTTPURLResponse)?.statusCode ?? 0)
         }
-        struct EmbeddingResponse: Codable { let embedding: [Float] }
-        return try JSONDecoder().decode(EmbeddingResponse.self, from: data).embedding
+        struct EmbeddingResponse: Codable {
+            struct DataItem: Codable { let embedding: [Float] }
+            let data: [DataItem]
+        }
+        return try JSONDecoder().decode(EmbeddingResponse.self, from: data).data.first?.embedding ?? []
     }
 }

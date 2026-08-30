@@ -19,17 +19,21 @@ private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.sel
 
 /// Local vector database for semantic search
 class VectorDatabase: ObservableObject {
+    static let shared = VectorDatabase()
+
     @Published var isIndexed = false
     @Published var isIndexing = false
     @Published var indexProgress: Double = 0.0
     @Published var totalDocuments = 0
 
     private var indexCancellationRequested = false
+    private var currentIndexTask: Task<Void, Never>?
 
     /// Request that an in-progress indexing run stop. Already-indexed emails are
     /// persisted, so a later run resumes where this one left off.
     func cancelIndexing() {
         indexCancellationRequested = true
+        currentIndexTask?.cancel()
     }
 
     /// email.id values already stored in the vector table (the INSERT OR REPLACE
@@ -78,6 +82,13 @@ class VectorDatabase: ObservableObject {
         // Initialize embedding provider
         Task {
             await initializeEmbeddings()
+        }
+
+        // Restore index state from existing database
+        Task { @MainActor in
+            let existingIds = indexedIDs()
+            self.isIndexed = !existingIds.isEmpty
+            self.totalDocuments = existingIds.count
         }
     }
 
@@ -183,6 +194,9 @@ class VectorDatabase: ObservableObject {
 
     /// Index emails for semantic search with embeddings
     func indexEmails(_ emails: [Email], progressCallback: @escaping (Double) -> Void) async {
+        currentIndexTask = Task { }
+        defer { currentIndexTask = nil }
+        if Task.isCancelled { return }
         indexCancellationRequested = false
         await MainActor.run {
             isIndexing = true
@@ -250,10 +264,14 @@ class VectorDatabase: ObservableObject {
                 }
 
                 do {
+                    try Task.checkCancellation()
+                    if indexCancellationRequested { cancelled = true; break }
                     embeddings = try await embeddingManager.generateBatchEmbeddings(for: texts)
+                } catch is CancellationError {
+                    cancelled = true; break
                 } catch {
+                    if indexCancellationRequested || Task.isCancelled { cancelled = true; break }
                     print("Embedding generation error (\(embeddingManager.selectedProvider.rawValue)): \(error.localizedDescription)")
-                    // Continue without embeddings
                 }
             }
 
@@ -272,13 +290,15 @@ class VectorDatabase: ObservableObject {
             }
         }
 
-        // Rebuild FTS index to ensure all content is searchable
-        rebuildFTSIndex()
+        if !cancelled {
+            rebuildFTSIndex()
+        }
 
         await MainActor.run {
             self.isIndexing = false
-            self.isIndexed = !cancelled
-            self.totalDocuments = emails.count
+            self.isIndexed = !cancelled ? true : !self.indexedIDs().isEmpty
+            self.totalDocuments = self.indexedIDs().count
+            if cancelled { self.indexProgress = Double(self.indexedIDs().count) / Double(emails.count) }
         }
     }
 

@@ -12,7 +12,7 @@ import SwiftUI
 
 struct AskView: View {
     @ObservedObject var viewModel: MboxViewModel
-    @StateObject private var vectorDB = VectorDatabase()
+    @StateObject private var vectorDB = VectorDatabase.shared
     @StateObject private var llm = LocalLLM()
 
     @State private var question = ""
@@ -113,13 +113,37 @@ struct AskView: View {
 
                         // Index status
                         if vectorDB.isIndexed {
-                            HStack(spacing: 4) {
+                            HStack(spacing: 8) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.green)
                                     .font(.caption)
                                 Text("\(vectorDB.totalDocuments) emails indexed")
                                     .font(.caption)
                                     .foregroundColor(.green)
+                                if !viewModel.emails.isEmpty {
+                                    if vectorDB.isIndexing {
+                                        HStack(spacing: 6) {
+                                            ProgressView().scaleEffect(0.6).frame(width: 12, height: 12)
+                                            if vectorDB.indexProgress > 0.01 {
+                                                ProgressView(value: vectorDB.indexProgress).frame(width: 60)
+                                                Text("\(Int(vectorDB.indexProgress*100))%").font(.caption2).monospacedDigit()
+                                            } else {
+                                                Text("Preparing…").font(.caption2).foregroundColor(.secondary)
+                                            }
+                                            Button(action: { vectorDB.cancelIndexing() }) { Image(systemName: "xmark.circle.fill") }.buttonStyle(.plain).help("Cancel")
+                                        }
+                                    } else {
+                                        Button(action: {
+                                            vectorDB.isIndexing = true; vectorDB.indexProgress = 0
+                                            Task.detached(priority: .userInitiated) {
+                                                vectorDB.clearIndex()
+                                                await vectorDB.indexEmails(viewModel.emails) { _ in }
+                                            }
+                                        }) {
+                                            Text("Re-index")
+                                        }.buttonStyle(.bordered).controlSize(.mini)
+                                    }
+                                }
                             }
                         } else if !viewModel.emails.isEmpty {
                             HStack(spacing: 8) {
@@ -182,25 +206,33 @@ struct AskView: View {
     }
 
     private var indexButton: some View {
-        Button(action: {
-            Task {
-                // Clear any existing index first to prevent cross-contamination from previous MBOX files
-                vectorDB.clearIndex()
-                await vectorDB.indexEmails(viewModel.emails) { _ in }
-            }
-        }) {
-            if vectorDB.indexProgress > 0 && vectorDB.indexProgress < 1.0 {
-                HStack {
-                    Text("Indexing... \(Int(vectorDB.indexProgress * 100))%")
-                    ProgressView()
-                        .scaleEffect(0.7)
+        Group {
+            if vectorDB.isIndexing {
+                HStack(spacing: 8) {
+                    if vectorDB.indexProgress > 0.01 {
+                        ProgressView(value: vectorDB.indexProgress).frame(width: 80)
+                        Text("\(Int(vectorDB.indexProgress * 100))%").font(.caption2).monospacedDigit()
+                    } else {
+                        ProgressView().scaleEffect(0.7).frame(width: 14, height: 14)
+                        Text("Starting…").font(.caption2).foregroundColor(.secondary)
+                    }
+                    Button(action: { vectorDB.cancelIndexing() }) {
+                        Image(systemName: "xmark.circle.fill")
+                    }.buttonStyle(.plain).help("Cancel indexing")
                 }
             } else {
-                Text("Index Emails")
+                Button(action: {
+                    vectorDB.isIndexing = true; vectorDB.indexProgress = 0.001
+                    Task.detached(priority: .userInitiated) {
+                        await vectorDB.indexEmails(viewModel.emails) { _ in }
+                    }
+                }) {
+                    Text("Index Emails")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
             }
         }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.small)
     }
 
     // MARK: - Input Area
