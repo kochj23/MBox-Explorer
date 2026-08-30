@@ -19,7 +19,7 @@ class TopicClustering: ObservableObject {
     @Published var emailTopics: [UUID: String] = [:] // emailId -> topic
 
     private let llm = LocalLLM.shared
-    private let vectorDB = VectorDatabase()
+    private let vectorDB = VectorDatabase.shared
 
     // Predefined categories for initial classification
     private let defaultCategories = [

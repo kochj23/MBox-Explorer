@@ -28,6 +28,7 @@
 		21C49790555A4EC12B1343FD /* VoiceConversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEE96C78F48CEB6C7304C75 /* VoiceConversation.swift */; };
 		29A4A2C7786A5F418C391848 /* RelationshipMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5B3C2D9205F703C1F972B28 /* RelationshipMapper.swift */; };
 		31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */; };
+		LMB001000000000000000001 /* LMStudioEmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 079E96CC45CDE63932C5618E /* LMStudioEmbeddingProvider.swift */; };
 		35623238323635642D613432662D343039662D623365342D /* OllamaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38316534653438322D383937622D343030322D626162642D /* OllamaClient.swift */; };
 		36336134366232392D636337322D343030352D616562332D /* AIBackendManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36613561333466622D393563312D343432662D626339392D /* AIBackendManager.swift */; };
 		372BFD5E200ECAE22DE0FCBF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */; };
@@ -96,6 +97,7 @@
 		D9A983AFD1DA9E9C2B7BB264 /* IndexingResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FC5380624A8AE06E8A82ED /* IndexingResumeTests.swift */; };
 		DE6CF6C10136C8796C843526 /* DraftGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C416248D332727979824ABF /* DraftGenerator.swift */; };
 		E18EF37E86A008DCF77F9B93 /* AutoReopen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7B84CBF552BA14933C9B85 /* AutoReopen.swift */; };
+		DEBUG001000000000000000001 /* DebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEBUG002000000000000000001 /* DebugLogger.swift */; };
 		E4A2C652D0EE51C645582730 /* SentimentAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A626555D09AC8D8B0588A12 /* SentimentAnalyzer.swift */; };
 		E573DEB54B7EF36B8D867E6B /* NovaAPIServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7293E3CDEBC8AE4091F8ABC5 /* NovaAPIServer.swift */; };
 		E8C56921423EB5D65EA45BDC /* OptimizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 716173C5350B4778BA97F502 /* OptimizationTests.swift */; };
@@ -200,6 +202,8 @@
 		FE0000000000000000000010 /* OpenRouterFailoverTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "OpenRouterFailoverTests.swift"; sourceTree = "<group>"; };
 		FE0000000000000000000011 /* SummarizationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "SummarizationTests.swift"; sourceTree = "<group>"; };
 		079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = OpenWebUIEmbeddingProvider.swift; path = AI/Embeddings/OpenWebUIEmbeddingProvider.swift; sourceTree = "<group>"; };
+	079E96CC45CDE63932C5618E /* LMStudioEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LMStudioEmbeddingProvider.swift; path = AI/Embeddings/LMStudioEmbeddingProvider.swift; sourceTree = "<group>"; };
+		079E96CC45CDE63932C5618E /* LMStudioEmbeddingProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LMStudioEmbeddingProvider.swift; path = AI/Embeddings/LMStudioEmbeddingProvider.swift; sourceTree = "<group>"; };
 		115D4C75DA6C34BE59C9CBB5 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "MBox Explorer Widget/Assets.xcassets"; sourceTree = "<group>"; };
 		1D32F6CD61ACBEADE2914689 /* MBoxExplorerWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MBoxExplorerWidget.swift; sourceTree = "<group>"; };
 		1DA6206E86CAEFE924E9D19C /* AskView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AskView.swift; sourceTree = "<group>"; };
@@ -242,6 +246,7 @@
 		A5F4CE25F784349CFA39C493 /* MBox ExplorerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MBox ExplorerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B6531667EE7C788EA76F5A0F /* PersonaChat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PersonaChat.swift; path = AI/Advanced/PersonaChat.swift; sourceTree = "<group>"; };
 		BA7B84CBF552BA14933C9B85 /* AutoReopen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AutoReopen.swift; sourceTree = "<group>"; };
+		DEBUG002000000000000000001 /* DebugLogger.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DebugLogger.swift; sourceTree = "<group>"; };
 		C05E899E2E16AF86CE1182DC /* VoiceUnified.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = VoiceUnified.swift; path = AICapabilities/VoiceUnified.swift; sourceTree = "<group>"; };
 		C694C61F87B9BA4073BA75EA /* UnifiedAICapabilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = UnifiedAICapabilities.swift; path = AICapabilities/UnifiedAICapabilities.swift; sourceTree = "<group>"; };
 		D004E8BC2EB1AA8900304FC0 /* AlertManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertManager.swift; sourceTree = "<group>"; };
@@ -504,12 +509,13 @@
 			isa = PBXGroup;
 			children = (
 				EMB002010000000000000001 /* EmbeddingProvider.swift */,
-				EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */,
-				EMB002030000000000000001 /* MLXEmbeddingProvider.swift */,
-				EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */,
-				EMB002050000000000000001 /* SentenceTransformerProvider.swift */,
-				D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */,
-				079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */,
+EMB002020000000000000001 /* OllamaEmbeddingProvider.swift */,
+		EMB002030000000000000001 /* MLXEmbeddingProvider.swift */,
+		EMB002040000000000000001 /* OpenAIEmbeddingProvider.swift */,
+		EMB002050000000000000001 /* SentenceTransformerProvider.swift */,
+		D49684E8221083E6F0CE2A0E /* TinyChatEmbeddingProvider.swift */,
+		079E96CC45CDE63932C5618D /* OpenWebUIEmbeddingProvider.swift */,
+		079E96CC45CDE63932C5618E /* LMStudioEmbeddingProvider.swift */,
 			);
 			name = Embeddings;
 			sourceTree = "<group>";
@@ -644,6 +650,7 @@
 				254C3D82E413E5E40929B945 /* AppVersion.swift */,
 				1F440477CD8FE038E1EB2A1F /* FilePermissions.swift */,
 				BA7B84CBF552BA14933C9B85 /* AutoReopen.swift */,
+				DEBUG002000000000000000001 /* DebugLogger.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -1007,6 +1014,7 @@
 				NF100032000000000000001 /* QuickLookPreview.swift in Sources */,
 				162EA02AA9581D8F680F992B /* TinyChatEmbeddingProvider.swift in Sources */,
 				31B32F335F40F33687FCD270 /* OpenWebUIEmbeddingProvider.swift in Sources */,
+				LMB001000000000000000001 /* LMStudioEmbeddingProvider.swift in Sources */,
 				WD100001000000000000001 /* WidgetData.swift in Sources */,
 				WD100002000000000000001 /* SharedDataManager.swift in Sources */,
 				E573DEB54B7EF36B8D867E6B /* NovaAPIServer.swift in Sources */,
@@ -1014,6 +1022,7 @@
 				85390B0CDC914F4335E18474 /* AppVersion.swift in Sources */,
 				4818DF0AFE0564B942CF60F4 /* FilePermissions.swift in Sources */,
 				E18EF37E86A008DCF77F9B93 /* AutoReopen.swift in Sources */,
+				DEBUG001000000000000000001 /* DebugLogger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

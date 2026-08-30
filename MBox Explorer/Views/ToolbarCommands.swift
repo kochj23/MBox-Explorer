@@ -10,17 +10,17 @@ import SwiftUI
 // MARK: - AI Status Indicator for Toolbar
 
 struct AIStatusIndicator: View {
-    @StateObject private var llm = LocalLLM()
+    @StateObject private var aiBackend = AIBackendManager.shared
     @State private var showingSettings = false
 
     var body: some View {
         Button(action: { showingSettings = true }) {
             HStack(spacing: 6) {
                 Circle()
-                    .fill(llm.isAvailable ? Color.green : Color.orange)
+                    .fill(aiBackend.activeBackend != nil ? Color.green : Color.orange)
                     .frame(width: 8, height: 8)
 
-                if let backend = llm.getActiveBackend() {
+                if let backend = aiBackend.activeBackend {
                     Text(backend.rawValue)
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
@@ -38,7 +38,7 @@ struct AIStatusIndicator: View {
             )
         }
         .buttonStyle(.plain)
-        .help(llm.isAvailable ? "AI is connected - click to configure" : "AI is offline - click to configure")
+        .help(aiBackend.activeBackend != nil ? "AI is connected - click to configure" : "AI is offline - click to configure")
         .sheet(isPresented: $showingSettings) {
             AISettingsView()
         }

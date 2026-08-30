@@ -27,7 +27,7 @@ class BackgroundIndexer: ObservableObject {
     private var startTime: Date?
     private var processedCount = 0
 
-    private let vectorDB = VectorDatabase()
+    private let vectorDB = VectorDatabase.shared
     private let embeddingManager = EmbeddingManager.shared
 
     // MARK: - Start Indexing

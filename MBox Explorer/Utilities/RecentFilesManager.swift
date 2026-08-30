@@ -7,6 +7,10 @@
 
 import Foundation
 
+#if DEBUG
+import os.log
+#endif
+
 class RecentFilesManager {
     static let shared = RecentFilesManager()
 
@@ -17,12 +21,18 @@ class RecentFilesManager {
 
     /// Get list of recent file URLs
     var recentFiles: [URL] {
+        #if DEBUG
+        DebugLogger.shared.debug("RecentFilesManager.recentFiles: fetching recent files")
+        #endif
         guard let data = UserDefaults.standard.data(forKey: recentFilesKey),
               let bookmarks = try? JSONDecoder().decode([Data].self, from: data) else {
+            #if DEBUG
+            DebugLogger.shared.debug("RecentFilesManager.recentFiles: no recent files found")
+            #endif
             return []
         }
 
-        return bookmarks.compactMap { bookmark -> URL? in
+        let urls = bookmarks.compactMap { bookmark -> URL? in
             var isStale = false
             guard let url = try? URL(resolvingBookmarkData: bookmark,
                                      options: .withSecurityScope,
@@ -30,18 +40,32 @@ class RecentFilesManager {
                                      bookmarkDataIsStale: &isStale),
                   !isStale,
                   FileManager.default.fileExists(atPath: url.path) else {
+                #if DEBUG
+                DebugLogger.shared.debug("RecentFilesManager.recentFiles: skipping stale/missing bookmark")
+                #endif
                 return nil
             }
             return url
         }
+
+        #if DEBUG
+        DebugLogger.shared.debug("RecentFilesManager.recentFiles: resolved \(urls.count) valid URLs")
+        #endif
+        return urls
     }
 
     /// Add a file to recent files list
     func addRecentFile(_ url: URL) {
+        #if DEBUG
+        DebugLogger.shared.logRecentFileAdded(url: url)
+        #endif
         // Create security-scoped bookmark
         guard let bookmark = try? url.bookmarkData(options: .withSecurityScope,
                                                     includingResourceValuesForKeys: nil,
                                                     relativeTo: nil) else {
+            #if DEBUG
+            DebugLogger.shared.warn("RecentFilesManager.addRecentFile: failed to create bookmark for \(url.lastPathComponent)")
+            #endif
             return
         }
 
@@ -75,11 +99,17 @@ class RecentFilesManager {
         // Save
         if let data = try? JSONEncoder().encode(bookmarks) {
             UserDefaults.standard.set(data, forKey: recentFilesKey)
+            #if DEBUG
+            DebugLogger.shared.debug("RecentFilesManager.addRecentFile: saved \(bookmarks.count) bookmarks to UserDefaults")
+            #endif
         }
     }
 
     /// Clear all recent files
     func clearRecentFiles() {
+        #if DEBUG
+        DebugLogger.shared.logRecentFilesCleared()
+        #endif
         UserDefaults.standard.removeObject(forKey: recentFilesKey)
     }
 }

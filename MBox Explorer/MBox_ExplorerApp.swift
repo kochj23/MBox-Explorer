@@ -7,15 +7,31 @@
 
 import SwiftUI
 
+#if DEBUG
+import class MBox_Explorer.DebugLogger
+#endif
+
 @main
 struct MBox_ExplorerApp: App {
     @StateObject private var recentFilesViewModel = RecentFilesViewModel()
     @AppStorage(AutoReopen.defaultsKey) private var autoReopen = true
 
+    init() {
+        #if DEBUG
+        DebugLogger.shared.logAppLaunch()
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(recentFilesViewModel)
+                .onAppear {
+                    #if DEBUG
+                    DebugLogger.shared.logSystemState()
+                    DebugLogger.shared.dumpRecentFiles()
+                    #endif
+                }
         }
         .commands {
             CommandGroup(replacing: .appInfo) {

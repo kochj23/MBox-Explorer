@@ -20,6 +20,7 @@ enum LLMBackendType: String, CaseIterable, Codable, Sendable {
     case openWebUI = "openwebui"
     case openRouter = "openrouter"
     case novaGateway = "novagateway"
+    case lmStudio = "lmstudio"
     case auto = "auto"
 
     var displayName: String {
@@ -31,6 +32,7 @@ enum LLMBackendType: String, CaseIterable, Codable, Sendable {
         case .openWebUI: return "OpenWebUI"
         case .openRouter: return "OpenRouter (Frontier Models)"
         case .novaGateway: return "Nova Gateway"
+        case .lmStudio: return "LM Studio"
         case .auto: return "Auto (Prefer Ollama)"
         }
     }
@@ -44,6 +46,7 @@ enum LLMBackendType: String, CaseIterable, Codable, Sendable {
         case .openWebUI: return "globe"
         case .openRouter: return "cloud"
         case .novaGateway: return "sparkle.magnifyingglass"
+        case .lmStudio: return "brain"
         case .auto: return "sparkles"
         }
     }
@@ -57,6 +60,7 @@ enum LLMBackendType: String, CaseIterable, Codable, Sendable {
         case .openWebUI: return "http://localhost:8080"
         case .openRouter: return OpenRouterProvider.baseURL
         case .novaGateway: return ModelRegistry.novaGatewayDefaultURL
+        case .lmStudio: return "http://localhost:1234"
         case .auto: return ""
         }
     }
@@ -70,6 +74,7 @@ enum LLMBackendType: String, CaseIterable, Codable, Sendable {
         case .openWebUI: return "Self-hosted AI platform (localhost:8080)"
         case .openRouter: return "Frontier cloud models via OpenRouter (bring your own key)"
         case .novaGateway: return "Nova's gateway — OpenAI-compatible, inherits Nova's own routing (127.0.0.1:18792)"
+        case .lmStudio: return "LM Studio local LLM server (OpenAI-compatible, localhost:1234)"
         case .auto: return "Automatically choose best available backend"
         }
     }

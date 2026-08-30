@@ -22,7 +22,7 @@ import Foundation
 final class BalancedEmbeddingProvider: EmbeddingProvider {
     let name = "Balanced (All Local Models)"
 
-    private(set) var isAvailable = false
+    @Published private(set) var isAvailable = false
     /// Ollama's default embedding models are 768-d (nomic-embed-text); reported as
     /// a stable default and corrected after the first successful embedding.
     private(set) var embeddingDimension: Int = 768
@@ -31,7 +31,7 @@ final class BalancedEmbeddingProvider: EmbeddingProvider {
     /// The local model pool the balancer spreads embedding work across.
     private var pool: [DiscoveredModel] = []
 
-    init(manager: BalancedLLMManager = .shared) {
+    init(manager: BalancedLLMManager) {
         self.manager = manager
     }
 
@@ -50,13 +50,14 @@ final class BalancedEmbeddingProvider: EmbeddingProvider {
         let choice = await MainActor.run { manager.nextEmbeddingModel(from: pool) }
         guard let model = choice else { throw EmbeddingError.providerUnavailable(name) }
 
-        manager.balancer.checkOut(model.id)
-        defer { manager.balancer.checkIn(model.id) }
+        await MainActor.run { manager.balancer.checkOut(model.id) }
         do {
-            let embedding = try await manager.embed(text: text, model: model.modelName)
+            let embedding = try await manager.embed(text: text, model: model.modelName, backend: model.backend)
             if !embedding.isEmpty { embeddingDimension = embedding.count }
+            await MainActor.run { manager.balancer.checkIn(model.id) }
             return embedding
         } catch {
+            await MainActor.run { manager.balancer.checkIn(model.id) }
             throw EmbeddingError.generationFailed(error.localizedDescription)
         }
     }

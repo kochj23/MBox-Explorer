@@ -19,20 +19,26 @@ struct AISettingsView: View {
 
     @State private var serverURL: String = ""
     @State private var selectedLLMModel: String = ""
-    @State private var selectedEmbeddingModel: String = ""
+    @State private var ollamaEmbeddingModel: String = ""
     @State private var temperature: Float = 0.7
     @State private var maxTokens: Int = 2048
     @State private var showTestResult = false
     @State private var testResultMessage = ""
     @State private var isTestingConnection = false
+    @State private var isTestingLMStudio = false
+    @State private var showLMStudioTestResult = false
+    @State private var lmStudioTestResult = ""
     @State private var isPullingModel = false
     @State private var pullProgress = ""
     @State private var modelToPull = ""
 
+    // Separate state variables for each backend's embedding model
+    
     // TinyChat / OpenWebUI settings
     @State private var tinyChatURL: String = "http://localhost:8000"
     @State private var openWebUIURL: String = "http://localhost:8080"
     @State private var openWebUIAPIKey: String = ""
+    @State private var lmStudioURL: String = "http://localhost:1234"
 
     var body: some View {
         ScrollView {
@@ -102,6 +108,7 @@ struct AISettingsView: View {
                         .onChange(of: aiBackend.selectedBackend) { _ in
                             Task {
                                 await aiBackend.checkBackendAvailability()
+                                aiBackend.saveSettings()
                             }
                         }
 
@@ -138,6 +145,12 @@ struct AISettingsView: View {
                                 Image(systemName: aiBackend.isMLXAvailable ? "checkmark.circle.fill" : "xmark.circle")
                                     .foregroundColor(aiBackend.isMLXAvailable ? .green : .gray)
                                 Text("MLX Toolkit")
+                                    .font(.caption)
+                            }
+                            HStack {
+                                Image(systemName: aiBackend.isLMStudioAvailable ? "checkmark.circle.fill" : "xmark.circle")
+                                    .foregroundColor(aiBackend.isLMStudioAvailable ? .green : .gray)
+                                Text("LM Studio")
                                     .font(.caption)
                             }
                         }
@@ -226,9 +239,10 @@ struct AISettingsView: View {
 
                         TextField("Server URL", text: $serverURL)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: serverURL) { newValue in
-                                UserDefaults.standard.set(newValue, forKey: "ollamaServerURL")
-                            }
+.onChange(of: serverURL) { newValue in
+                            UserDefaults.standard.set(newValue, forKey: "ollamaServerURL")
+                            embeddingManager.syncOllamaProvider()
+                        }
 
                         HStack {
                             Button("Test Connection") {
@@ -271,14 +285,16 @@ struct AISettingsView: View {
                                     .font(.caption)
                                     .foregroundColor(.secondary)
 
-                                Picker("Embedding Model", selection: $selectedEmbeddingModel) {
+                                Picker("Embedding Model", selection: $ollamaEmbeddingModel) {
                                     ForEach(ollamaClient.availableModels, id: \.self) { model in
                                         Text(model).tag(model)
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
-                                .onChange(of: selectedEmbeddingModel) { newValue in
+                                .onChange(of: ollamaEmbeddingModel) { newValue in
                                     ollamaClient.updateEmbeddingModel(newValue)
+                                    UserDefaults.standard.set(newValue, forKey: "ollamaEmbeddingModel")
+                                    embeddingManager.syncOllamaProvider()
                                 }
                             }
                         }
@@ -389,6 +405,109 @@ struct AISettingsView: View {
                     .padding(.vertical, 8)
                 }
 
+                // MARK: - LM Studio Configuration
+                GroupBox(label: Label("LM Studio", systemImage: "brain")) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Run local LLMs via LM Studio's OpenAI-compatible API")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        TextField("Server URL", text: $lmStudioURL)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: lmStudioURL) { newValue in
+                                UserDefaults.standard.set(newValue, forKey: "AIBackendManager_LMStudioServerURL")
+                                aiBackend.lmStudioServerURL = newValue
+                            }
+
+                        Button("Test Connection") {
+                            isTestingLMStudio = true
+                            showLMStudioTestResult = false
+                            Task {
+                                let success = await aiBackend.checkLMStudioAvailability()
+                                await MainActor.run {
+                                    isTestingLMStudio = false
+                                    showLMStudioTestResult = true
+                                    lmStudioTestResult = success ? "Successfully connected to LM Studio" : "Failed to connect. Make sure LM Studio is running."
+                                    if success {
+                                        aiBackend.isLMStudioAvailable = true
+                                    }
+                                }
+                            }
+                        }
+                        .disabled(isTestingLMStudio)
+
+                        if isTestingLMStudio {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                        }
+
+                        HStack {
+                            Circle()
+                                .fill(aiBackend.isLMStudioAvailable ? Color.green : Color.gray)
+                                .frame(width: 8, height: 8)
+                            Text(aiBackend.isLMStudioAvailable ? "Available" : "Not detected")
+                                .font(.caption)
+                                .foregroundColor(aiBackend.isLMStudioAvailable ? .green : .gray)
+                        }
+
+                        if showLMStudioTestResult {
+                            Text(lmStudioTestResult)
+                                .foregroundColor(aiBackend.isLMStudioAvailable ? .green : .red)
+                                .font(.caption)
+                        }
+
+                        if !aiBackend.lmStudioModels.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("LLM Model")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                Picker("LLM Model", selection: $aiBackend.selectedLMStudioModel) {
+                                    ForEach(aiBackend.lmStudioModels, id: \.self) { model in
+                                        Text(model).tag(model)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .onChange(of: aiBackend.selectedLMStudioModel) { newValue in
+                                    aiBackend.saveSettings()
+                                }
+
+                                Text("Embedding Model")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                Picker("Embedding Model", selection: $aiBackend.selectedLMStudioEmbeddingModel) {
+                                    ForEach(aiBackend.lmStudioModels, id: \.self) { model in
+                                        Text(model).tag(model)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .onChange(of: aiBackend.selectedLMStudioEmbeddingModel) { newValue in
+                                    UserDefaults.standard.set(newValue, forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel")
+                                    embeddingManager.lmStudio?.setModel(newValue)
+                                }
+                            }
+                        } else {
+                            Text("No models detected. Load a model in LM Studio first.")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Default: http://localhost:1234")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            Text("Start LM Studio, load a model, and click the server icon")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Link("lmstudio.ai", destination: URL(string: "https://lmstudio.ai")!)
+                            .font(.caption)
+                    }
+                    .padding(.vertical, 8)
+                }
+
                 // MARK: - Generation Parameters
                 GroupBox(label: Label("Generation Parameters", systemImage: "slider.horizontal.3")) {
                     VStack(alignment: .leading, spacing: 12) {
@@ -494,11 +613,12 @@ struct AISettingsView: View {
     private func loadSettings() {
         serverURL = UserDefaults.standard.string(forKey: "ollamaServerURL") ?? "http://localhost:11434"
         selectedLLMModel = UserDefaults.standard.string(forKey: "ollamaLLMModel") ?? "llama2"
-        selectedEmbeddingModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") ?? "nomic-embed-text"
+        ollamaEmbeddingModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") ?? "nomic-embed-text"
         tinyChatURL = UserDefaults.standard.string(forKey: "TinyChatEmbedding_URL") ?? "http://localhost:8000"
         openWebUIURL = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_URL") ?? "http://localhost:8080"
         openWebUIAPIKey = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_APIKey") ?? ""
         openRouterKey = balancer.openRouterAPIKey() ?? ""
+        lmStudioURL = UserDefaults.standard.string(forKey: "AIBackendManager_LMStudioServerURL") ?? "http://localhost:1234"
 
         temperature = UserDefaults.standard.float(forKey: "ollamaTemperature")
         if temperature == 0 {
@@ -512,6 +632,7 @@ struct AISettingsView: View {
         Task {
             await ollamaClient.checkConnection()
             await embeddingManager.updateActiveProvider()
+            await aiBackend.checkBackendAvailability()
         }
     }
 
@@ -522,6 +643,7 @@ struct AISettingsView: View {
         Task {
             await ollamaClient.updateServerURL(serverURL)
             await ollamaClient.checkConnection()
+            embeddingManager.syncOllamaProvider()
 
             await MainActor.run {
                 isTestingConnection = false
