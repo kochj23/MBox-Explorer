@@ -38,10 +38,10 @@ class LMStudioEmbeddingProvider: EmbeddingProvider, ObservableObject {
     }
 
     private func loadSettings() {
-        if let savedURL = UserDefaults.standard.string(forKey: "LMStudioEmbedding_URL") {
+        if let savedURL = UserDefaults.standard.string(forKey: "AIBackendManager_LMStudioServerURL") {
             self.baseURL = savedURL
         }
-        if let savedModel = UserDefaults.standard.string(forKey: "LMStudioEmbedding_Model") {
+        if let savedModel = UserDefaults.standard.string(forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel") {
             self.selectedModel = savedModel
         }
     }
@@ -63,7 +63,7 @@ class LMStudioEmbeddingProvider: EmbeddingProvider, ObservableObject {
                 await MainActor.run {
                     if self.baseURL != url {
                         self.baseURL = url
-                        UserDefaults.standard.set(url, forKey: "LMStudioEmbedding_URL")
+                        UserDefaults.standard.set(url, forKey: "AIBackendManager_LMStudioServerURL")
                     }
                 }
 
@@ -95,7 +95,7 @@ class LMStudioEmbeddingProvider: EmbeddingProvider, ObservableObject {
                     self.availableModels = models
                     if !models.contains(selectedModel) && !models.isEmpty {
                         self.selectedModel = models[0]
-                        UserDefaults.standard.set(models[0], forKey: "LMStudioEmbedding_Model")
+                        UserDefaults.standard.set(models[0], forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel")
                     }
                 }
             }
@@ -121,7 +121,7 @@ class LMStudioEmbeddingProvider: EmbeddingProvider, ObservableObject {
                     self.availableModels = modelNames
                     if !modelNames.contains(selectedModel) && !modelNames.isEmpty {
                         self.selectedModel = modelNames[0]
-                        UserDefaults.standard.set(modelNames[0], forKey: "LMStudioEmbedding_Model")
+                        UserDefaults.standard.set(modelNames[0], forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel")
                     }
                 }
             }
@@ -221,11 +221,21 @@ class LMStudioEmbeddingProvider: EmbeddingProvider, ObservableObject {
 
     func setBaseURL(_ url: String) {
         baseURL = url
-        UserDefaults.standard.set(url, forKey: "LMStudioEmbedding_URL")
+        UserDefaults.standard.set(url, forKey: "AIBackendManager_LMStudioServerURL")
     }
 
     func setModel(_ model: String) {
         selectedModel = model
-        UserDefaults.standard.set(model, forKey: "LMStudioEmbedding_Model")
+        UserDefaults.standard.set(model, forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel")
+    }
+
+    /// Update the base URL (called when user changes LM Studio server in settings)
+    func updateBaseURL(_ urlString: String) {
+        self.baseURL = urlString
+    }
+
+    /// Update the selected model (called when user changes embedding model in settings)
+    func updateModel(_ model: String) {
+        self.selectedModel = model
     }
 }

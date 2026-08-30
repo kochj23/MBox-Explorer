@@ -34,7 +34,6 @@ struct AISettingsView: View {
     
     // Separate state variables for each backend's embedding model
     @State private var ollamaEmbeddingModel: String = ""
-    @State private var lmStudioEmbeddingModel: String = ""
 
     // TinyChat / OpenWebUI settings
     @State private var tinyChatURL: String = "http://localhost:8000"
@@ -110,6 +109,7 @@ struct AISettingsView: View {
                         .onChange(of: aiBackend.selectedBackend) { _ in
                             Task {
                                 await aiBackend.checkBackendAvailability()
+                                aiBackend.saveSettings()
                             }
                         }
 
@@ -415,7 +415,7 @@ struct AISettingsView: View {
                         TextField("Server URL", text: $lmStudioURL)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .onChange(of: lmStudioURL) { newValue in
-                                UserDefaults.standard.set(newValue, forKey: "LMStudioServerURL")
+                                UserDefaults.standard.set(newValue, forKey: "AIBackendManager_LMStudioServerURL")
                                 aiBackend.lmStudioServerURL = newValue
                             }
 
@@ -474,14 +474,14 @@ struct AISettingsView: View {
                                     .font(.caption)
                                     .foregroundColor(.secondary)
 
-                                Picker("Embedding Model", selection: $lmStudioEmbeddingModel) {
+                                Picker("Embedding Model", selection: $aiBackend.selectedLMStudioEmbeddingModel) {
                                     ForEach(aiBackend.lmStudioModels, id: \.self) { model in
                                         Text(model).tag(model)
                                     }
                                 }
                                 .pickerStyle(MenuPickerStyle())
-                                .onChange(of: lmStudioEmbeddingModel) { newValue in
-                                    UserDefaults.standard.set(newValue, forKey: "lmStudioEmbeddingModel")
+                                .onChange(of: aiBackend.selectedLMStudioEmbeddingModel) { newValue in
+                                    UserDefaults.standard.set(newValue, forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel")
                                     embeddingManager.lmStudio?.setModel(newValue)
                                 }
                                 
@@ -631,8 +631,7 @@ struct AISettingsView: View {
         openWebUIURL = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_URL") ?? "http://localhost:8080"
         openWebUIAPIKey = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_APIKey") ?? ""
         openRouterKey = balancer.openRouterAPIKey() ?? ""
-        lmStudioURL = UserDefaults.standard.string(forKey: "LMStudioServerURL") ?? "http://localhost:1234"
-        lmStudioEmbeddingModel = UserDefaults.standard.string(forKey: "lmStudioEmbeddingModel") ?? ""
+        lmStudioURL = UserDefaults.standard.string(forKey: "AIBackendManager_LMStudioServerURL") ?? "http://localhost:1234"
 
         temperature = UserDefaults.standard.float(forKey: "ollamaTemperature")
         if temperature == 0 {
@@ -647,6 +646,7 @@ struct AISettingsView: View {
             await ollamaClient.checkConnection()
             await embeddingManager.updateActiveProvider()
             await aiBackend.checkBackendAvailability()
+                                aiBackend.saveSettings()
         }
     }
 

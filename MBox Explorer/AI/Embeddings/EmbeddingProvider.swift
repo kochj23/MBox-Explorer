@@ -170,7 +170,31 @@ class EmbeddingManager: ObservableObject {
         }
     }
 
+    /// Sync OllamaEmbeddingProvider with current Ollama settings from UserDefaults
+    func syncOllamaProvider() {
+        let currentURL = UserDefaults.standard.string(forKey: "ollamaServerURL") ?? "http://localhost:11434"
+        let currentModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") ?? "nomic-embed-text"
+
+        ollamaProvider?.updateBaseURL(currentURL)
+        ollamaProvider?.updateModel(currentModel)
+    }
+
+    /// Sync LMStudioEmbeddingProvider with current LM Studio settings from UserDefaults
+    func syncLMStudioProvider() {
+        let currentURL = UserDefaults.standard.string(forKey: "AIBackendManager_LMStudioServerURL") ?? "http://localhost:1234"
+        let currentModel = UserDefaults.standard.string(forKey: "AIBackendManager_SelectedLMStudioEmbeddingModel") ?? ""
+
+        lmStudioProvider?.updateBaseURL(currentURL)
+        lmStudioProvider?.updateModel(currentModel)
+    }
+
+
     func updateActiveProvider() async {
+
+        // Sync providers with current settings before checking
+        syncOllamaProvider()
+        syncLMStudioProvider()
+
         await MainActor.run {
             statusMessage = "Checking \(selectedProvider.rawValue)..."
         }

@@ -117,6 +117,7 @@ class AIBackendManager: ObservableObject {
     @Published var lmStudioServerURL: String = "http://localhost:1234"
     @Published var lmStudioModels: [String] = []
     @Published var selectedLMStudioModel: String = ""
+    @Published var selectedLMStudioEmbeddingModel: String = ""
 
     // Temperature settings (user-configurable)
     @Published var questionTemperature: Float = 0.2  // Low for factual Q&A (reduces hallucinations)
@@ -138,6 +139,7 @@ class AIBackendManager: ObservableObject {
         static let openWebUIServerURL = "AIBackendManager_OpenWebUIServerURL"
         static let lmStudioServerURL = "AIBackendManager_LMStudioServerURL"
         static let lmStudioModels = "AIBackendManager_LMStudioModels"
+        static let selectedLMStudioEmbeddingModel = "AIBackendManager_SelectedLMStudioEmbeddingModel"
         static let selectedLMStudioModel = "AIBackendManager_SelectedLMStudioModel"
         static let questionTemperature = "AIBackendManager_QuestionTemperature"
         static let summaryTemperature = "AIBackendManager_SummaryTemperature"
@@ -172,6 +174,7 @@ class AIBackendManager: ObservableObject {
         // Load LM Studio models
         if let savedModels = userDefaults.array(forKey: Keys.lmStudioModels) as? [String] {
             lmStudioModels = savedModels
+        selectedLMStudioEmbeddingModel = userDefaults.string(forKey: Keys.selectedLMStudioEmbeddingModel) ?? ""
         }
         selectedLMStudioModel = userDefaults.string(forKey: Keys.selectedLMStudioModel) ?? ""
 
@@ -189,6 +192,7 @@ class AIBackendManager: ObservableObject {
         userDefaults.set(tinyLLMServerURL, forKey: Keys.tinyLLMServerURL)
         userDefaults.set(tinyChatServerURL, forKey: Keys.tinyChatServerURL)
         userDefaults.set(openWebUIServerURL, forKey: Keys.openWebUIServerURL)
+        userDefaults.set(selectedLMStudioEmbeddingModel, forKey: Keys.selectedLMStudioEmbeddingModel)
         userDefaults.set(lmStudioServerURL, forKey: Keys.lmStudioServerURL)
         userDefaults.set(lmStudioModels, forKey: Keys.lmStudioModels)
         userDefaults.set(selectedLMStudioModel, forKey: Keys.selectedLMStudioModel)
@@ -965,7 +969,7 @@ class AIBackendManager: ObservableObject {
     }
 
     private func generateEmbeddingsWithLMStudio(text: String) async throws -> [Float] {
-        let model = selectedLMStudioModel.isEmpty ? (lmStudioModels.first ?? "default") : selectedLMStudioModel
+        let model = selectedLMStudioEmbeddingModel.isEmpty ? (lmStudioModels.first ?? "default") : selectedLMStudioModel
 
         guard let url = URL(string: "\(lmStudioServerURL)/v1/embeddings") else {
             throw AIBackendError.invalidConfiguration
