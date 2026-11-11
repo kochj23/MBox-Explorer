@@ -17,7 +17,6 @@ class SmartForwarder: ObservableObject {
     @Published var lastSummary: ForwardSummary?
     @Published var isGenerating = false
 
-    private let aiBackend = AIBackendManager.shared
 
     private init() {}
 
@@ -54,7 +53,7 @@ class SmartForwarder: ObservableObject {
         """
 
         do {
-            let summary = try await aiBackend.generate(
+            let summary = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert at creating concise, professional email summaries for executive communication."
             )
@@ -109,7 +108,7 @@ class SmartForwarder: ObservableObject {
         """
 
         do {
-            let summary = try await aiBackend.generate(
+            let summary = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You create concise email summaries for forwarding."
             )
@@ -158,7 +157,7 @@ class SmartForwarder: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You redact sensitive information while preserving business-relevant content."
             )
@@ -184,7 +183,7 @@ class SmartForwarder: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You write brief, professional email forward notes.",
                 temperature: 0.5
@@ -227,7 +226,7 @@ class SmartForwarder: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You create audience-appropriate email summaries."
             )

@@ -91,7 +91,7 @@ class TopicClustering: ObservableObject {
             topicClusters.append(cluster)
         }
 
-        await MainActor.run {
+        await MainActor.run { [topicClusters] in
             self.clusters = topicClusters
             self.progress = 1.0
         }
@@ -115,7 +115,7 @@ class TopicClustering: ObservableObject {
         Category:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt)
         let category = response.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
         // Validate against known categories
@@ -166,7 +166,7 @@ class TopicClustering: ObservableObject {
         Discovered Topics:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt)
         return parseDiscoveredTopics(from: response)
     }
 
@@ -265,7 +265,8 @@ class TopicClustering: ObservableObject {
         Summary:
         """
 
-        return await llm.summarize(content: prompt)
+        let builtIn = "\(emails.count) emails about \(topic)."
+        return await llm.respond(to: prompt, fallback: { builtIn })
     }
 
     private func extractKeywords(from emails: [Email]) -> [String] {

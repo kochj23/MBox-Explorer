@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import NovaAIKit
 
 /// Main conversational interface for interacting with email archive
 struct ConversationView: View {
@@ -154,7 +155,7 @@ struct ConversationView: View {
                     }
                     .padding()
                 }
-                .onChange(of: conversationManager.currentConversation?.messages.count) { _ in
+                .onChange(of: conversationManager.currentConversation?.messages.count) {
                     if let lastId = conversationManager.currentConversation?.messages.last?.id {
                         withAnimation {
                             proxy.scrollTo(lastId, anchor: .bottom)
@@ -202,21 +203,8 @@ struct ConversationView: View {
     }
 
     private var statusIndicator: some View {
-        HStack(spacing: 4) {
-            Circle()
-                .fill(AIBackendManager.shared.activeBackend != nil ? Color.green : Color.orange)
-                .frame(width: 8, height: 8)
-
-            if let backend = AIBackendManager.shared.activeBackend {
-                Text(backend.rawValue)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            } else {
-                Text("AI Unavailable")
-                    .font(.caption)
-                    .foregroundColor(.orange)
-            }
-        }
+        NovaAIStatusIndicator(ai: AppAI.shared)
+            .font(.caption)
     }
 
     private var suggestionCards: some View {

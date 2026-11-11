@@ -181,7 +181,7 @@ class EmailForensics: ObservableObject {
         }
 
         // Check for DKIM-Signature
-        if let dkimSig = headers["DKIM-Signature"] ?? headers["dkim-signature"] {
+        if headers["DKIM-Signature"] != nil || headers["dkim-signature"] != nil {
             if dkim == .notChecked {
                 dkim = .present // Signature exists but no verification result
             }
@@ -355,7 +355,6 @@ class EmailForensics: ObservableObject {
         }
 
         // Header anomalies
-        let normalHeaders = Set(["From", "To", "Subject", "Date", "Message-ID", "MIME-Version", "Content-Type"])
         var unusualHeaders: [String] = []
         for key in headers.keys {
             if key.hasPrefix("X-") && !key.hasPrefix("X-Mailer") && !key.hasPrefix("X-Originating") {

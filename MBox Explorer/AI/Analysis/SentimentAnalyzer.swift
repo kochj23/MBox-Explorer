@@ -20,7 +20,6 @@ class SentimentAnalyzer: ObservableObject {
     @Published var analysisProgress: Double = 0
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
 
     // Sentiment keywords
     private let positiveWords = Set([
@@ -192,7 +191,7 @@ class SentimentAnalyzer: ObservableObject {
         }
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert at analyzing emotional tone and sentiment in professional communication."
             )

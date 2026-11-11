@@ -275,7 +275,7 @@ class VectorDatabase: ObservableObject {
         // Rebuild FTS index to ensure all content is searchable
         rebuildFTSIndex()
 
-        await MainActor.run {
+        await MainActor.run { [cancelled] in
             self.isIndexing = false
             self.isIndexed = !cancelled
             self.totalDocuments = emails.count
@@ -442,7 +442,7 @@ class VectorDatabase: ObservableObject {
             if sqlite3_prepare_v2(db, fetchSQL, -1, &statement, nil) == SQLITE_OK {
                 while sqlite3_step(statement) == SQLITE_ROW {
                     // Safely extract text columns with null checks
-                    guard let idPtr = sqlite3_column_text(statement, 0),
+                    guard sqlite3_column_text(statement, 0) != nil,
                           let emailIdPtr = sqlite3_column_text(statement, 1),
                           let contentPtr = sqlite3_column_text(statement, 2),
                           let fromPtr = sqlite3_column_text(statement, 3),
@@ -451,7 +451,6 @@ class VectorDatabase: ObservableObject {
                         continue
                     }
 
-                    let id = String(cString: idPtr)
                     let emailId = String(cString: emailIdPtr)
                     let content = String(cString: contentPtr)
                     let fromAddress = String(cString: fromPtr)

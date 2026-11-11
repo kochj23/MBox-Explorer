@@ -19,7 +19,6 @@ class PatternDetector: ObservableObject {
     @Published var isAnalyzing = false
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
 
     private init() {
         loadPatterns()
@@ -108,7 +107,7 @@ class PatternDetector: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert at identifying communication patterns."
             )

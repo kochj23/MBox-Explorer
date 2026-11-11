@@ -334,10 +334,10 @@ private struct ViewNotifications: ViewModifier {
     private func openAISettingsWindow() {
         let settingsView = AISettingsView()
         let hostingController = NSHostingController(rootView: settingsView)
-        hostingController.title = "Ollama AI Settings"
+        hostingController.title = "AI Settings"
 
         let window = NSWindow(contentViewController: hostingController)
-        window.title = "Ollama AI Settings"
+        window.title = "AI Settings"
         window.styleMask = [.titled, .closable, .resizable]
         window.setContentSize(NSSize(width: 600, height: 700))
         window.center()

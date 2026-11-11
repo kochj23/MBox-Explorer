@@ -19,7 +19,6 @@ class CommitmentTracker: ObservableObject {
     @Published var analysisProgress: Double = 0
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
 
     // Commitment patterns
     private let commitmentPhrases = [
@@ -161,7 +160,7 @@ class CommitmentTracker: ObservableObject {
             """
 
             do {
-                let response = try await aiBackend.generate(
+                let response = try await AppAI.ask(
                     prompt: prompt,
                     systemPrompt: "You are an expert at identifying commitments and action items in emails."
                 )

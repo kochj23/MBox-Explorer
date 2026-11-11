@@ -27,7 +27,6 @@ class ConversationManager: ObservableObject {
     // MARK: - Dependencies
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
     private var vectorDB: VectorDatabase?
 
     // MARK: - Configuration
@@ -156,9 +155,10 @@ class ConversationManager: ObservableObject {
 
         let startTime = Date()
 
+        // Search for relevant emails (not AI: also the built-in answer when AI is off or down)
+        let searchResults = await searchRelevantEmails(query: content)
+
         do {
-            // Search for relevant emails
-            let searchResults = await searchRelevantEmails(query: content)
 
             // Build context with conversation history + email results
             let (systemPrompt, userPrompt) = buildPrompts(
@@ -168,7 +168,7 @@ class ConversationManager: ObservableObject {
             )
 
             // Generate response
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: userPrompt,
                 systemPrompt: systemPrompt,
                 temperature: 0.7
@@ -185,7 +185,7 @@ class ConversationManager: ObservableObject {
             let metadata = MessageMetadata(
                 queryType: detectQueryType(content),
                 processingTime: processingTime,
-                modelUsed: aiBackend.activeBackend?.rawValue,
+                modelUsed: AppAI.shared.status.lastSource?.label,
                 searchResults: searchResults.count,
                 suggestedFollowUps: followUps
             )
@@ -222,10 +222,12 @@ class ConversationManager: ObservableObject {
         } catch {
             lastError = error.localizedDescription
 
-            // Add error message
+            // Built-in answer: say why AI was not used and list the matching emails (with citations).
+            let citations = createCitations(from: searchResults)
             let errorMessage = ConversationMessage(
                 role: .assistant,
-                content: "I encountered an error: \(error.localizedDescription). Please try again."
+                content: Self.builtInAnswer(reason: error.localizedDescription, results: searchResults),
+                citations: citations
             )
             conversation.addMessage(errorMessage)
             currentConversation = conversation
@@ -420,6 +422,20 @@ class ConversationManager: ObservableObject {
         return .search
     }
 
+    /// The answer shown when AI is unavailable: the reason plus the best keyword/semantic matches.
+    nonisolated static func builtInAnswer(reason: String, results: [SearchResult]) -> String {
+        var text = "\(reason)\n\n"
+        if results.isEmpty {
+            text += "No matching emails were found for this question."
+        } else {
+            text += "Matching emails:\n"
+            for (i, r) in results.prefix(5).enumerated() {
+                text += "[\(i + 1)] \(r.from) — \"\(r.subject)\" (\(r.date))\n"
+            }
+        }
+        return text
+    }
+
     private func generateConversationTitle(firstMessage: String) async -> String {
         // Use AI to generate a concise title
         let prompt = """
@@ -430,7 +446,7 @@ class ConversationManager: ObservableObject {
         """
 
         do {
-            let title = try await aiBackend.generate(
+            let title = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You generate concise conversation titles. Respond with only the title.",
                 temperature: 0.3

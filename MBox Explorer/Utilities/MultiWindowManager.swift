@@ -18,6 +18,8 @@ class MultiWindowManager: ObservableObject {
     @Published var openWindows: [MBoxWindow] = []
 
     fileprivate var windowControllers: [UUID: NSWindowController] = [:]
+    /// NSWindow.delegate is weak: keep each window's delegate alive until it closes.
+    fileprivate var windowDelegates: [UUID: WindowDelegate] = [:]
 
     // MARK: - Window Operations
 
@@ -111,7 +113,9 @@ class MultiWindowManager: ObservableObject {
         windowControllers[window.id] = controller
 
         // Handle window close
-        nsWindow.delegate = WindowDelegate(windowId: window.id, manager: self)
+        let delegate = WindowDelegate(windowId: window.id, manager: self)
+        windowDelegates[window.id] = delegate
+        nsWindow.delegate = delegate
 
         controller.showWindow(nil)
     }
@@ -141,6 +145,7 @@ class WindowDelegate: NSObject, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         manager?.openWindows.removeAll { $0.id == windowId }
         manager?.windowControllers.removeValue(forKey: windowId)
+        manager?.windowDelegates.removeValue(forKey: windowId)
     }
 }
 

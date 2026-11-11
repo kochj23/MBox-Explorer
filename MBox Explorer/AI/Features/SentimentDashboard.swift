@@ -71,7 +71,7 @@ class DashboardSentimentAnalyzer: ObservableObject {
             allResults.append(result)
 
             let progressValue = Double(index + 1) / Double(emails.count)
-            await MainActor.run {
+            await MainActor.run { [allResults] in
                 self.progress = progressValue
                 self.results = allResults
             }

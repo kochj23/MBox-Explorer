@@ -75,7 +75,7 @@ class ActionItemExtractor: ObservableObject {
         Action Items:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt)
 
         if response.contains("NO_ACTION_ITEMS") {
             return []
@@ -113,7 +113,7 @@ class ActionItemExtractor: ObservableObject {
                 allItems.append(contentsOf: items)
 
                 let progressValue = Double(index + 1) / Double(potentialEmails.count)
-                await MainActor.run {
+                await MainActor.run { [allItems] in
                     self.progress = progressValue
                     self.extractedItems = allItems
                 }

@@ -64,7 +64,7 @@ struct WordCloudView: View {
                 }
             }
             .frame(width: 150)
-            .onChange(of: sourceType) { _ in
+            .onChange(of: sourceType) {
                 generateWordCloud()
             }
 
@@ -75,7 +75,7 @@ struct WordCloudView: View {
                 }
             }
             .frame(width: 120)
-            .onChange(of: dateFilter) { _ in
+            .onChange(of: dateFilter) {
                 generateWordCloud()
             }
 

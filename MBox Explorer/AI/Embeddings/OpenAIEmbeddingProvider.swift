@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import NovaAIKit
 
 /// OpenAI embedding provider using text-embedding-3-small/large
 class OpenAIEmbeddingProvider: EmbeddingProvider, ObservableObject {
@@ -43,32 +44,20 @@ class OpenAIEmbeddingProvider: EmbeddingProvider, ObservableObject {
     ]
 
     init() {
-        // Load API key from AIBackendManager
-        loadAPIKey()
-
-        // Load saved model preference
+        // The API key is read from the Keychain (AppAI, com.jkoch.mboxexplorer.openai) when availability is checked.
         if let savedModel = UserDefaults.standard.string(forKey: "OpenAIEmbedding_Model") {
             self.selectedModel = savedModel
         }
     }
 
-    private func loadAPIKey() {
-        // Try to get from AIBackendManager's cloud credentials
-        if let data = try? Data(contentsOf: getCredentialsURL()),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-           let openai = json["openai"] as? [String: Any],
-           let key = openai["apiKey"] as? String {
-            apiKey = key
-        }
-    }
-
-    private func getCredentialsURL() -> URL {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return appSupport.appendingPathComponent("MBoxExplorer/cloud_credentials.json")
+    /// The OpenAI key from the Keychain (never stored in files or UserDefaults).
+    private func loadAPIKey() async {
+        let keys = await MainActor.run { AppAI.shared.keys }
+        apiKey = keys.key(for: .openAI)
     }
 
     func checkAvailability() async {
-        loadAPIKey()
+        await loadAPIKey()
 
         guard let key = apiKey, !key.isEmpty else {
             await MainActor.run { isAvailable = false }
@@ -81,13 +70,6 @@ class OpenAIEmbeddingProvider: EmbeddingProvider, ObservableObject {
             await MainActor.run { isAvailable = true }
         } catch {
             await MainActor.run { isAvailable = false }
-        }
-    }
-
-    func setAPIKey(_ key: String) {
-        apiKey = key
-        Task {
-            await checkAvailability()
         }
     }
 

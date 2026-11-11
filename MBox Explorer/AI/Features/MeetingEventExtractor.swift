@@ -88,7 +88,7 @@ class MeetingEventExtractor: ObservableObject {
         Events:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt)
 
         if response.contains("NO_EVENTS") {
             return []
@@ -126,7 +126,7 @@ class MeetingEventExtractor: ObservableObject {
                 allEvents.append(contentsOf: events)
 
                 let progressValue = Double(index + 1) / Double(potentialEmails.count)
-                await MainActor.run {
+                await MainActor.run { [allEvents] in
                     self.progress = progressValue
                     self.extractedEvents = allEvents
                 }

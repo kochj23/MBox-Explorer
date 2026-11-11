@@ -372,6 +372,9 @@ class OpenWebUIEmbeddingProvider: EmbeddingProvider, ObservableObject {
         }
     }
 
+    /// True when an embedding API key is stored (the value itself is never shown).
+    var hasStoredAPIKey: Bool { loadAPIKeyFromKeychain() != nil }
+
     var models: [String] { availableModels }
     var serverURL: String { baseURL }
 }

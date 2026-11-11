@@ -5,7 +5,40 @@ All notable changes to MBox Explorer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.4.0] - 2026-11-11
+
+### Changed
+- AI: migrated to NovaAIKit 1.0.0 (one AI feature set across Jordan's macOS apps). Every AI feature (Ask/RAG,
+  conversations, summaries, extractors, digests, smart replies, persona chat, decision/commitment/relationship
+  analysis, drafts, daily briefing) now goes through `AppAI` with: AI on/off, a built-in (non-AI) result for every
+  feature, backend picker (Auto, Ollama, MLX, TinyLLM, TinyChat, OpenWebUI, Nova Gateway, OpenRouter, OpenAI) with
+  model picker and editable URLs, Auto failover with timeouts and retries, output validation (empty/reasoning/
+  length checks, invented figures rejected in summaries and statistics answers) and a status indicator in the
+  toolbar, Ask and Conversation views.
+- Removed the app's own AI clients: `AIBackendManager`, `OllamaClient`, the in-app load balancer
+  (`BalancedLLMManager`, `ModelRegistry`, `OpenRouterProvider`, `LLMBackendType`, `KeychainStore`), the unused
+  `AICapabilities` layer and the dead root-level `AIBackendManager*` / `EthicalAIGuardian` copies. The Google
+  Cloud, Azure, AWS and IBM Watson backends are gone.
+- Settings › AI is now NovaAIKit's settings view plus a "Semantic Search" tab for the (unchanged) embedding
+  providers. The Ollama embedding provider follows the Ollama URL from the AI settings.
+
+### Security
+- API keys live only in the Keychain under `com.jkoch.mboxexplorer.<backend>` and are only sent over https.
+- One-time migration: old settings are imported; a plaintext OpenAI key in UserDefaults or in
+  `~/Library/Application Support/MBoxExplorer/cloud_credentials.json` moves to the Keychain and the plaintext copy
+  is deleted; the old `com.jordankoch.MBoxExplorer` OpenAI item moves to the new service; the removed backends'
+  secrets (UserDefaults and Keychain) are deleted.
+
+### Fixed
+- Zero compiler warnings (captured-var concurrency warnings, deprecated `onChange`/Spotlight APIs, a window
+  delegate that was released immediately, unused values).
+- `SecurityTests.testNoHardcodedAPIKeysInSource` no longer depends on a fixed checkout path.
+
+### Tests
+- `AIKitAdoptionTests` (security, performance, retry, unit, integration, functional, frame/UI state) and the
+  balancer/OpenRouter/summarization tests rewritten against NovaAIKit. 198 tests, all passing.
+
+## [2.3.0]
 
 ### Added
 - **Multi-model load balancing.** Three persisted toggles in AI Settings (All local

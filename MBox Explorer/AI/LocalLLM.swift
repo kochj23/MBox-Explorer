@@ -7,9 +7,11 @@
 //  Date: 2025-12-03
 //  Updated: 2025-01-17 - Replaced MLX stub with Ollama
 //  Updated: 2025-01-30 - Enhanced RAG pipeline, conversation memory, custom prompts
+//  Updated: 2026-11-11 - All AI calls go through NovaAIKit (AppAI); built-in answers when AI is off/down
 //
 
 import Foundation
+import NovaAIKit
 
 /// Metadata about the email archive for AI context
 struct EmailMetadata {
@@ -104,7 +106,8 @@ struct RAGResult {
     let processingTime: TimeInterval
 }
 
-/// Local LLM manager using AI Backend (Ollama or MLX) with RAG Pipeline
+/// Email Q&A (RAG) and summaries on top of AppAI (NovaAIKit). Keeps the app's prompts, conversation memory and
+/// the built-in (non-AI) answers.
 class LocalLLM: ObservableObject {
     static let shared = LocalLLM()
 
@@ -142,7 +145,8 @@ class LocalLLM: ObservableObject {
         }
     }
 
-    private let aiBackend = AIBackendManager.shared
+    /// Temperature for factual Q&A (low = fewer hallucinations).
+    static let questionTemperature = 0.2
 
     static let defaultSystemPrompt = """
     You are an email archive assistant analyzing a user's MBOX email archive.
@@ -170,16 +174,22 @@ class LocalLLM: ObservableObject {
     }
 
     func checkAvailability() async {
-        await aiBackend.checkBackendAvailability()
-        await MainActor.run {
-            isAvailable = aiBackend.activeBackend != nil
-        }
+        let reachable = await Self.refreshedReachability()
+        await MainActor.run { isAvailable = reachable }
     }
 
-    /// Get active backend for display
+    /// AppAI's reachability, probing the backends only when nothing has been checked yet.
     @MainActor
-    func getActiveBackend() -> AIBackend? {
-        return aiBackend.activeBackend
+    private static func refreshedReachability() async -> Bool {
+        let ai = AppAI.shared
+        if ai.status.state == .unknown { await ai.refreshStatus() }
+        return ai.status.isReachable
+    }
+
+    /// Active backend label for display ("Ollama (qwen3:8b)"), nil when AI is off or offline.
+    @MainActor
+    func getActiveBackend() -> String? {
+        AppAI.activeBackendLabel
     }
 
     /// Clear conversation history
@@ -197,18 +207,6 @@ class LocalLLM: ObservableObject {
     func askQuestionRAG(_ question: String, context: [SearchResult], metadata: EmailMetadata? = nil) async -> RAGResult {
         let startTime = Date()
         let questionType = QuestionType.detect(question)
-
-        guard isAvailable else {
-            let basicAnswer = generateBasicAnswer(question, context: context)
-            return RAGResult(
-                answer: "AI Backend not available. Using basic context extraction:\n\n" + basicAnswer,
-                promptSent: "",
-                systemPromptUsed: "",
-                sourcesUsed: context,
-                questionType: questionType,
-                processingTime: Date().timeIntervalSince(startTime)
-            )
-        }
 
         await MainActor.run {
             isProcessing = true
@@ -329,14 +327,16 @@ class LocalLLM: ObservableObject {
 
         // Step 5: Generate response using AI Backend
         do {
-            let response = try await aiBackend.generate(
+            let validate = Self.answerValidator(for: questionType, source: userPrompt)
+            let response = try await AppAI.ask(
                 prompt: userPrompt,
                 systemPrompt: systemPrompt,
-                temperature: aiBackend.questionTemperature
+                temperature: Self.questionTemperature,
+                validate: validate
             )
 
             // Add to conversation history
-            await MainActor.run {
+            await MainActor.run { [sourcesToUse] in
                 lastResponse = response
 
                 if useConversationMemory {
@@ -359,10 +359,8 @@ class LocalLLM: ObservableObject {
                 processingTime: Date().timeIntervalSince(startTime)
             )
         } catch {
-            let errorMessage = "AI Backend error: \(error.localizedDescription)"
-            print(errorMessage)
             return RAGResult(
-                answer: errorMessage + "\n\nFalling back to basic extraction:\n\n" + generateBasicAnswer(question, context: context),
+                answer: error.localizedDescription + "\n\nBuilt-in answer (no AI):\n\n" + Self.generateBasicAnswer(question, context: context),
                 promptSent: userPrompt,
                 systemPromptUsed: systemPrompt,
                 sourcesUsed: sourcesToUse,
@@ -414,7 +412,23 @@ class LocalLLM: ObservableObject {
         return try? encoder.encode(conversationHistory)
     }
 
-    private func generateBasicAnswer(_ question: String, context: [SearchResult]) -> String {
+    /// Validator for Q&A replies: non-empty, and for statistics questions every figure (above 20, so list markers
+    /// and small counts are allowed) must appear in the statistics/emails that were sent (no invented numbers).
+    static func answerValidator(for type: QuestionType, source: String) -> @Sendable (String) throws -> String {
+        let checkNumbers = (type == .statistics || type == .topList || type == .dateRange)
+        return { raw in
+            let text = try AppAI.validText(raw)
+            if checkNumbers {
+                let invented = AppAI.inventedFigures(in: text, source: source)
+                if !invented.isEmpty {
+                    throw NovaAIValidationError("the reply contains figures that are not in the mailbox statistics: \(invented.prefix(5).joined(separator: ", "))")
+                }
+            }
+            return text
+        }
+    }
+
+    static func generateBasicAnswer(_ question: String, context: [SearchResult]) -> String {
         var answer = "Found \(context.count) relevant emails:\n\n"
 
         for (index, result) in context.prefix(3).enumerated() {
@@ -433,10 +447,6 @@ class LocalLLM: ObservableObject {
 
     /// Generate summary of email or thread
     func summarize(content: String) async -> String {
-        guard isAvailable else {
-            return generateBasicSummary(content)
-        }
-
         await MainActor.run {
             isProcessing = true
         }
@@ -453,20 +463,38 @@ class LocalLLM: ObservableObject {
         \(content.prefix(2000))
         """
 
-        do {
-            let summary = try await aiBackend.generate(
-                prompt: prompt,
-                systemPrompt: "You are a concise email summarizer. Provide brief, clear summaries.",
-                temperature: 0.3 // Lower temperature for more consistent summaries
-            )
-            return summary
-        } catch {
-            print("Summarization error: \(error.localizedDescription)")
-            return generateBasicSummary(content)
-        }
+        let result = await AppAI.text(
+            prompt: prompt,
+            systemPrompt: "You are a concise email summarizer. Provide brief, clear summaries.",
+            temperature: 0.3, // Lower temperature for more consistent summaries
+            maxTokens: 400,
+            validate: Self.summaryValidator,
+            fallback: { Self.generateBasicSummary(content) }
+        )
+        return result.value
     }
 
-    private func generateBasicSummary(_ content: String) -> String {
+    /// Summaries: non-empty, plain text, at most 1200 characters.
+    static let summaryValidator: @Sendable (String) throws -> String = { raw in
+        NovaAIText.plain(try AppAI.validText(raw), max: 1200)
+    }
+
+    /// Send an app-built prompt as-is (the extractor/clustering/reply features build their own prompts and parse the
+    /// reply). Returns "" when AI is off, unreachable or the reply is unusable, so each feature runs its built-in
+    /// keyword/rule path.
+    func respond(to prompt: String, systemPrompt: String? = nil, temperature: Double = 0.3, maxTokens: Int = 1500,
+                 fallback: @escaping @Sendable () -> String = { "" }) async -> String {
+        await MainActor.run { isProcessing = true }
+        defer { Task { @MainActor in isProcessing = false } }
+        let result = await AppAI.text(prompt: prompt, systemPrompt: systemPrompt, temperature: temperature,
+                                      maxTokens: maxTokens, fallback: fallback)
+        return result.value
+    }
+
+    /// Shown in place of AI-written prose when AI is off or unavailable.
+    static let aiUnavailableNote = "AI text unavailable (AI is off or unreachable; see Settings › AI). Built-in details are shown."
+
+    static func generateBasicSummary(_ content: String) -> String {
         let lines = content.components(separatedBy: .newlines)
         let firstLines = lines.prefix(10).joined(separator: " ")
 

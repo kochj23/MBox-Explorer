@@ -18,7 +18,6 @@ class DailyBriefingEngine: ObservableObject {
     @Published var isGenerating = false
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
     private let commitmentTracker = CommitmentTracker.shared
     private let sentimentAnalyzer = SentimentAnalyzer.shared
 
@@ -324,7 +323,7 @@ class DailyBriefingEngine: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You write brief, professional email activity summaries.",
                 temperature: 0.3

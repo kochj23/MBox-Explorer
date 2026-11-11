@@ -152,11 +152,9 @@ struct TimelineView: View {
 
     private var dateLabels: some View {
         let data = calculateTimelineData()
-        let calendar = Calendar.current
 
         return HStack(alignment: .top, spacing: 0) {
             ForEach(Array(data.sortedDays.enumerated()), id: \.element) { index, day in
-                let components = calendar.dateComponents([.day, .month, .year], from: day)
                 let showLabel = shouldShowLabel(at: index, for: day, in: data.sortedDays)
 
                 VStack {

@@ -51,7 +51,8 @@ class ThreadSummarizer: ObservableObject {
         Summary:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let body = email.body
+        let response = await llm.respond(to: prompt, fallback: { LocalLLM.generateBasicSummary(body) })
 
         return EmailSummary(
             emailId: email.id,
@@ -113,7 +114,8 @@ class ThreadSummarizer: ObservableObject {
         Thread Summary:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let firstBody = sortedEmails.first?.body ?? ""
+        let response = await llm.respond(to: prompt, fallback: { LocalLLM.aiUnavailableNote + "\n\n" + LocalLLM.generateBasicSummary(firstBody) })
 
         return ThreadSummary(
             threadId: sortedEmails.first?.messageId ?? UUID().uuidString,
@@ -188,7 +190,7 @@ class ThreadSummarizer: ObservableObject {
         Daily Digest:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt, fallback: { LocalLLM.aiUnavailableNote })
 
         return DailyDigest(
             date: date,
@@ -259,7 +261,7 @@ class ThreadSummarizer: ObservableObject {
         Weekly Digest:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt, fallback: { LocalLLM.aiUnavailableNote })
 
         return WeeklyDigest(
             weekStart: weekStart,
@@ -326,7 +328,7 @@ class ThreadSummarizer: ObservableObject {
         Executive Summary:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt, fallback: { LocalLLM.aiUnavailableNote })
 
         return ExecutiveSummary(
             totalEmails: emails.count,

@@ -57,7 +57,7 @@ struct CommandPaletteView: View {
                 .onSubmit {
                     executeSelectedCommand()
                 }
-                .onChange(of: searchText) { _ in
+                .onChange(of: searchText) {
                     selectedIndex = 0
                 }
 
@@ -91,7 +91,7 @@ struct CommandPaletteView: View {
                     }
                 }
             }
-            .onChange(of: selectedIndex) { newIndex in
+            .onChange(of: selectedIndex) { _, newIndex in
                 withAnimation {
                     proxy.scrollTo(newIndex, anchor: .center)
                 }

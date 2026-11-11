@@ -18,7 +18,6 @@ class EmailSearchAgent: ObservableObject {
     @Published var isSearching = false
     @Published var searchProgress: String = ""
 
-    private let aiBackend = AIBackendManager.shared
     private var vectorDB: VectorDatabase?
 
     private init() {}
@@ -272,7 +271,7 @@ class EmailSearchAgent: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You identify emails matching behavioral patterns. Only return email IDs."
             )
@@ -384,7 +383,7 @@ class EmailSearchAgent: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You summarize email search results concisely."
             )

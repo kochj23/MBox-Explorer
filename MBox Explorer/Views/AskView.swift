@@ -9,6 +9,7 @@
 //
 
 import SwiftUI
+import NovaAIKit
 
 struct AskView: View {
     @ObservedObject var viewModel: MboxViewModel
@@ -95,21 +96,9 @@ struct AskView: View {
 
                     // Status bar
                     HStack(spacing: 12) {
-                        // AI Status
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(llm.isAvailable ? .green : .orange)
-                                .frame(width: 8, height: 8)
-                            Text(llm.isAvailable ? "AI Connected" : "AI Offline")
-                                .font(.caption)
-                                .foregroundColor(llm.isAvailable ? .green : .orange)
-
-                            if let backend = llm.getActiveBackend() {
-                                Text("(\(backend.rawValue))")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
+                        // AI Status (NovaAIKit: dot + backend/model; click re-checks)
+                        NovaAIStatusIndicator(ai: AppAI.shared)
+                            .font(.caption)
 
                         // Index status
                         if vectorDB.isIndexed {

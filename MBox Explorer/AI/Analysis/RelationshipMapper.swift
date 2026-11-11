@@ -20,7 +20,6 @@ class RelationshipMapper: ObservableObject {
     @Published var analysisProgress: Double = 0
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
 
     private init() {}
 
@@ -242,7 +241,7 @@ class RelationshipMapper: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert at analyzing professional relationships from email communication."
             )

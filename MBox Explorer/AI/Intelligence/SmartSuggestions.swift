@@ -18,7 +18,6 @@ class SmartSuggestionsEngine: ObservableObject {
     @Published var isAnalyzing = false
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
 
     private init() {}
 

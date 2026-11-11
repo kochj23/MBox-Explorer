@@ -281,7 +281,7 @@ class NaturalLanguageFilter: ObservableObject {
         Parsed Filter:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt)
         return parseAIResponse(response, originalQuery: query)
     }
 

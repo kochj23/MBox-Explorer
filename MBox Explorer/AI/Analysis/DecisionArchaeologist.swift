@@ -18,7 +18,6 @@ class DecisionArchaeologist: ObservableObject {
     @Published var isAnalyzing = false
 
     private let database = ConversationDatabase.shared
-    private let aiBackend = AIBackendManager.shared
 
     // Decision indicators
     private let decisionPhrases = [
@@ -117,7 +116,7 @@ class DecisionArchaeologist: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert at analyzing decision-making processes in professional email threads."
             )
@@ -166,7 +165,7 @@ class DecisionArchaeologist: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are a business analyst creating clear decision documentation."
             )
@@ -212,7 +211,7 @@ class DecisionArchaeologist: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are a business analyst comparing strategic decisions."
             )
@@ -232,7 +231,7 @@ class DecisionArchaeologist: ObservableObject {
 
         for email in emails {
             // Normalize subject for threading
-            var threadKey = email.subject
+            let threadKey = email.subject
                 .lowercased()
                 .replacingOccurrences(of: #"^(re:|fw:|fwd:)\s*"#, with: "", options: .regularExpression)
                 .trimmingCharacters(in: .whitespaces)
@@ -293,7 +292,7 @@ class DecisionArchaeologist: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You extract decisions from email threads. Be precise and only identify clear decisions."
             )

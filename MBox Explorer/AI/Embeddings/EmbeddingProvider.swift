@@ -99,7 +99,7 @@ enum EmbeddingProviderType: String, CaseIterable, Identifiable {
         case .openWebUI:
             return "docker run -d -p 8080:8080 ghcr.io/open-webui/open-webui:main"
         case .balanced:
-            return "Enable \"All local models\" in AI Settings and run Ollama with one or more models"
+            return "Run Ollama (URL in Settings › AI) with one or more models"
         case .none:
             return nil
         }

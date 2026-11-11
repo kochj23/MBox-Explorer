@@ -722,7 +722,9 @@ final class SecurityTests: XCTestCase {
 
     func testNoHardcodedAPIKeysInSource() throws {
         // Scan key source files for common credential patterns
-        let sourceDir = "/Volumes/Data/xcode/MBox Explorer/MBox Explorer"
+        // The app sources next to this test target (works in any checkout).
+        let sourceDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("MBox Explorer").path
         let fileManager = FileManager.default
 
         guard let enumerator = fileManager.enumerator(atPath: sourceDir) else {
@@ -1070,6 +1072,7 @@ final class FunctionalTests: XCTestCase {
 
         // Attachment detection
         let withAttachments = emails.filter { $0.hasAttachments }
+        XCTAssertLessThanOrEqual(withAttachments.count, emails.count)
         // The invoice email should have an attachment detected
         let invoiceEmail = emails.first { $0.from == "external@vendor.com" }
         if let invoice = invoiceEmail, invoice.hasAttachments {
@@ -1121,6 +1124,7 @@ final class FunctionalTests: XCTestCase {
         ]
 
         let withAttachments = emails.filter { $0.hasAttachments }
+        XCTAssertLessThanOrEqual(withAttachments.count, emails.count)
         XCTAssertEqual(withAttachments.count, 1, "Should find 1 email with attachments")
 
         let withoutAttachments = emails.filter { !$0.hasAttachments }

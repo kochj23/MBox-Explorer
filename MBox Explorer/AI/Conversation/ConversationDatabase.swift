@@ -844,7 +844,7 @@ class ConversationDatabase: ObservableObject {
         FROM decisions
         """
 
-        if let topic = topic {
+        if topic != nil {
             sql += " WHERE topic LIKE ?"
         }
 

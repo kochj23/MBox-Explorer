@@ -18,7 +18,6 @@ class TimeTravelEngine: ObservableObject {
     @Published var periodSummary: PeriodSummary?
     @Published var isAnalyzing = false
 
-    private let aiBackend = AIBackendManager.shared
 
     private init() {}
 
@@ -202,7 +201,7 @@ class TimeTravelEngine: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You help users understand their email history by answering questions about specific time periods."
             )
@@ -242,7 +241,7 @@ class TimeTravelEngine: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You analyze changes in communication patterns around significant events."
             )
@@ -303,7 +302,6 @@ class TimeTravelEngine: ObservableObject {
         guard !emails.isEmpty else { return [] }
 
         let subjects = emails.prefix(20).map { $0.subject }
-        let uniqueSubjects = Set(subjects)
 
         // Look for high-activity subjects
         var subjectCounts: [String: Int] = [:]

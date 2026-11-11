@@ -18,7 +18,6 @@ class DraftGenerator: ObservableObject {
     @Published var isGenerating = false
     @Published var writingStyleProfile: WritingStyleProfile?
 
-    private let aiBackend = AIBackendManager.shared
     private let database = ConversationDatabase.shared
 
     private init() {}
@@ -64,7 +63,7 @@ class DraftGenerator: ObservableObject {
         """
 
         do {
-            let body = try await aiBackend.generate(
+            let body = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert email writer. Generate professional, clear email replies.",
                 temperature: 0.7
@@ -136,7 +135,7 @@ class DraftGenerator: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert email writer. Generate clear, professional emails.",
                 temperature: 0.7
@@ -188,7 +187,7 @@ class DraftGenerator: ObservableObject {
         """
 
         do {
-            let improvedBody = try await aiBackend.generate(
+            let improvedBody = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert email editor. Improve emails while maintaining their core message.",
                 temperature: 0.5
@@ -222,7 +221,7 @@ class DraftGenerator: ObservableObject {
         """
 
         do {
-            let rewrittenBody = try await aiBackend.generate(
+            let rewrittenBody = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an expert at adjusting email tone.",
                 temperature: 0.6

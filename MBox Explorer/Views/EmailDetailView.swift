@@ -13,8 +13,8 @@ struct EmailDetailView: View {
     @State private var showRawSource = false
     @State private var highlightEnabled = true
 
-    @StateObject private var summarizer = BalancedSummarizer()
-    @State private var summaryResult: BalancedSummary?
+    @StateObject private var summarizer = AISummarizer()
+    @State private var summaryResult: AISummary?
     @State private var isSummarizing = false
     @State private var showingSummary = false
 

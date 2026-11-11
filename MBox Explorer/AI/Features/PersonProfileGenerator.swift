@@ -89,7 +89,7 @@ class PersonProfileGenerator: ObservableObject {
         Profile:
         """
 
-        let aiSummary = await llm.summarize(content: prompt)
+        let aiSummary = await llm.respond(to: prompt, fallback: { LocalLLM.aiUnavailableNote })
 
         // Extract topics from subjects
         let topics = extractTopics(from: allRelated)
@@ -214,7 +214,7 @@ class PersonProfileGenerator: ObservableObject {
         let sorted = all.compactMap { $0.dateObject }.sorted()
 
         // Calculate average response time (simplified)
-        var responseTimes: [TimeInterval] = []
+        let responseTimes: [TimeInterval] = []
         // This would need thread analysis for accurate response times
 
         return PersonStats(

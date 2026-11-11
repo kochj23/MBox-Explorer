@@ -19,7 +19,6 @@ class PersonaChat: ObservableObject {
     @Published var personaConversation: [PersonaMessage] = []
     @Published var isGenerating = false
 
-    private let aiBackend = AIBackendManager.shared
 
     private init() {}
 
@@ -108,7 +107,7 @@ class PersonaChat: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an AI that accurately impersonates email senders to help users understand different perspectives. Stay in character based on the provided email samples.",
                 temperature: 0.7
@@ -154,7 +153,7 @@ class PersonaChat: ObservableObject {
         """
 
         do {
-            return try await aiBackend.generate(
+            return try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You predict how someone would respond based on their communication history.",
                 temperature: 0.6

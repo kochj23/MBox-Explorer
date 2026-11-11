@@ -2,58 +2,78 @@
 //  AISettingsView.swift
 //  MBox Explorer
 //
-//  AI configuration settings with multiple backend support
+//  AI settings: the NovaAIKit settings (on/off, backend, model, URLs, Keychain keys, timeout, status, test
+//  connection) plus MBox Explorer's own semantic-search embedding settings.
 //  Author: Jordan Koch
-//  Date: 2025-01-17
-//  Updated: 2026-01-30 - Added TinyChat, OpenWebUI, embedding provider selection
+//  Updated: 2026-11-11 - Chat/summary AI moved to NovaAIKit; embeddings stay app-owned
 //
 
 import SwiftUI
+import NovaAIKit
 
 struct AISettingsView: View {
-    @StateObject private var ollamaClient = OllamaClient()
-    @StateObject private var embeddingManager = EmbeddingManager.shared
-    @StateObject private var aiBackend = AIBackendManager.shared
-    @StateObject private var balancer = BalancedLLMManager.shared
-    @State private var openRouterKey: String = ""
+    /// Set when the view is shown as a sheet (adds a Done button).
+    var onClose: (() -> Void)?
 
-    @State private var serverURL: String = ""
-    @State private var selectedLLMModel: String = ""
-    @State private var selectedEmbeddingModel: String = ""
-    @State private var temperature: Float = 0.7
-    @State private var maxTokens: Int = 2048
-    @State private var showTestResult = false
-    @State private var testResultMessage = ""
-    @State private var isTestingConnection = false
-    @State private var isPullingModel = false
-    @State private var pullProgress = ""
-    @State private var modelToPull = ""
+    @ObservedObject private var ai: NovaAI
+    @State private var tab = 0
 
-    // TinyChat / OpenWebUI settings
+    /// - Parameter ai: the NovaAI to configure; nil = `AppAI.shared` (tests pass their own).
+    init(ai: NovaAI? = nil, onClose: (() -> Void)? = nil) {
+        self.ai = ai ?? AppAI.shared
+        self.onClose = onClose
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("", selection: $tab) {
+                Text("AI").tag(0)
+                Text("Semantic Search").tag(1)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding()
+
+            if tab == 0 {
+                NovaAISettingsView(ai: ai, footer: AppAI.settingsFooter)
+            } else {
+                EmbeddingSettingsView()
+            }
+
+            if let onClose {
+                Divider()
+                HStack {
+                    Spacer()
+                    Button("Done", action: onClose).keyboardShortcut(.defaultAction)
+                }
+                .padding()
+            }
+        }
+        .frame(minWidth: 560, minHeight: 620)
+    }
+}
+
+/// Embedding provider settings for semantic search (not chat AI; NovaAIKit does not cover embeddings).
+struct EmbeddingSettingsView: View {
+    @ObservedObject private var embeddingManager = EmbeddingManager.shared
+
     @State private var tinyChatURL: String = "http://localhost:8000"
     @State private var openWebUIURL: String = "http://localhost:8080"
-    @State private var openWebUIAPIKey: String = ""
+    @State private var openWebUIKeyDraft: String = ""
+    @State private var openWebUIKeyStored = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // MARK: - Embedding Provider Selection
                 GroupBox(label: Label("Embedding Provider", systemImage: "brain.head.profile")) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Choose how semantic search embeddings are generated")
+                        Text("Choose how semantic search embeddings are generated. Keyword search always works.")
                             .font(.caption)
                             .foregroundColor(.secondary)
 
                         Picker("Embedding Provider", selection: $embeddingManager.selectedProvider) {
                             ForEach(EmbeddingProviderType.allCases) { provider in
-                                HStack {
-                                    Text(provider.rawValue)
-                                    if provider == embeddingManager.selectedProvider && embeddingManager.isAvailable {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                    }
-                                }
-                                .tag(provider)
+                                Text(provider.rawValue).tag(provider)
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
@@ -75,358 +95,70 @@ struct AISettingsView: View {
                         }
 
                         if let attribution = embeddingManager.selectedProvider.attribution {
-                            Link(attribution, destination: URL(string: attribution.components(separatedBy: "(").last?.dropLast().description ?? "")!)
+                            Text(attribution)
                                 .font(.caption2)
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-
-                // MARK: - LLM Backend Selection
-                GroupBox(label: Label("LLM Backend", systemImage: "cpu")) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Choose the AI backend for chat and summarization")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Picker("LLM Backend", selection: $aiBackend.selectedBackend) {
-                            ForEach(AIBackend.allCases, id: \.self) { backend in
-                                HStack {
-                                    Image(systemName: backend.icon)
-                                    Text(backend.rawValue)
-                                }
-                                .tag(backend)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        .onChange(of: aiBackend.selectedBackend) { _ in
-                            Task {
-                                await aiBackend.checkBackendAvailability()
-                            }
-                        }
-
-                        HStack {
-                            Circle()
-                                .fill(aiBackend.activeBackend != nil ? Color.green : Color.red)
-                                .frame(width: 8, height: 8)
-                            Text("Active: \(aiBackend.activeBackend?.rawValue ?? "None")")
-                                .font(.caption)
-                                .foregroundColor(aiBackend.activeBackend != nil ? .green : .red)
-                        }
-
-                        // Show availability status for each backend
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Image(systemName: aiBackend.isOllamaAvailable ? "checkmark.circle.fill" : "xmark.circle")
-                                    .foregroundColor(aiBackend.isOllamaAvailable ? .green : .gray)
-                                Text("Ollama")
-                                    .font(.caption)
-                            }
-                            HStack {
-                                Image(systemName: aiBackend.isTinyChatAvailable ? "checkmark.circle.fill" : "xmark.circle")
-                                    .foregroundColor(aiBackend.isTinyChatAvailable ? .green : .gray)
-                                Text("TinyChat")
-                                    .font(.caption)
-                            }
-                            HStack {
-                                Image(systemName: aiBackend.isOpenWebUIAvailable ? "checkmark.circle.fill" : "xmark.circle")
-                                    .foregroundColor(aiBackend.isOpenWebUIAvailable ? .green : .gray)
-                                Text("OpenWebUI")
-                                    .font(.caption)
-                            }
-                            HStack {
-                                Image(systemName: aiBackend.isMLXAvailable ? "checkmark.circle.fill" : "xmark.circle")
-                                    .foregroundColor(aiBackend.isMLXAvailable ? .green : .gray)
-                                Text("MLX Toolkit")
-                                    .font(.caption)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-
-                // MARK: - Multi-Model Load Balancing
-                GroupBox(label: Label("Multi-Model Load Balancing", systemImage: "square.stack.3d.up")) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Spread AI work across every enabled model. Nova is never required — this works with local models and/or an OpenRouter key alone.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        Toggle("All local models (Ollama + MLX)", isOn: $balancer.useAllLocalModels)
-                            .onChange(of: balancer.useAllLocalModels) { _ in
-                                Task { _ = await balancer.discoverEnabledPool() }
-                            }
-
-                        Toggle("All frontier models (OpenRouter)", isOn: $balancer.enableAllFrontierModels)
-                            .onChange(of: balancer.enableAllFrontierModels) { _ in
-                                Task { _ = await balancer.discoverEnabledPool() }
-                            }
-
-                        Toggle("Nova Gateway (optional)", isOn: $balancer.useNovaGateway)
-                            .onChange(of: balancer.useNovaGateway) { _ in
-                                Task {
-                                    await balancer.refreshNovaGatewayStatus()
-                                    _ = await balancer.discoverEnabledPool()
-                                }
-                            }
-
-                        if balancer.useNovaGateway {
-                            HStack {
-                                Circle()
-                                    .fill(balancer.novaGatewayStatus.isConnected ? Color.green : Color.orange)
-                                    .frame(width: 8, height: 8)
-                                Text(balancer.novaGatewayStatus.isConnected ? "Nova Gateway available" : "Nova Gateway unavailable")
-                                    .font(.caption2)
-                                    .foregroundColor(balancer.novaGatewayStatus.isConnected ? .green : .orange)
-                            }
-                            TextField("Nova Gateway URL", text: $balancer.novaGatewayURL)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .font(.caption)
-                        }
-
-                        if balancer.enableAllFrontierModels {
-                            SecureField("OpenRouter API Key", text: $openRouterKey)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: openRouterKey) { newValue in
-                                    balancer.setOpenRouterAPIKey(newValue)
-                                }
-                            Text(balancer.hasOpenRouterKey ? "Key stored in Keychain" : "No key set — frontier models will be skipped")
-                                .font(.caption2)
-                                .foregroundColor(balancer.hasOpenRouterKey ? .green : .orange)
-                        }
-
-                        Divider()
-
-                        HStack {
-                            Image(systemName: "square.stack.3d.up.fill")
-                                .foregroundColor(balancer.isBalancingEnabled ? .accentColor : .secondary)
-                            Text(balancer.poolStatus)
-                                .font(.caption)
                                 .foregroundColor(.secondary)
-                            Spacer()
-                            Button("Refresh Pool") {
-                                Task { _ = await balancer.discoverEnabledPool() }
-                            }
-                            .font(.caption)
                         }
+
+                        Text("The Ollama embedding provider uses the Ollama URL from the AI tab. The OpenAI provider uses the OpenAI key stored there (Keychain).")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                     .padding(.vertical, 8)
                 }
 
-                // MARK: - Ollama Configuration
-                GroupBox(label: Label("Ollama", systemImage: "server.rack")) {
+                GroupBox(label: Label("TinyChat Embeddings", systemImage: "bubble.left.and.bubble.right")) {
                     VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Circle()
-                                .fill(ollamaClient.isConnected ? Color.green : Color.red)
-                                .frame(width: 10, height: 10)
-                            Text(ollamaClient.isConnected ? "Connected" : "Not Connected")
-                                .foregroundColor(ollamaClient.isConnected ? .green : .red)
-                        }
-
-                        TextField("Server URL", text: $serverURL)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: serverURL) { newValue in
-                                UserDefaults.standard.set(newValue, forKey: "ollamaServerURL")
-                            }
-
-                        HStack {
-                            Button("Test Connection") {
-                                testOllamaConnection()
-                            }
-                            .disabled(isTestingConnection)
-
-                            if isTestingConnection {
-                                ProgressView()
-                                    .scaleEffect(0.7)
-                            }
-                        }
-
-                        if showTestResult {
-                            Text(testResultMessage)
-                                .foregroundColor(ollamaClient.isConnected ? .green : .red)
-                                .font(.caption)
-                        }
-
-                        Divider()
-
-                        // Model selection
-                        if !ollamaClient.availableModels.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("LLM Model")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                Picker("LLM Model", selection: $selectedLLMModel) {
-                                    ForEach(ollamaClient.availableModels, id: \.self) { model in
-                                        Text(model).tag(model)
-                                    }
-                                }
-                                .pickerStyle(MenuPickerStyle())
-                                .onChange(of: selectedLLMModel) { newValue in
-                                    ollamaClient.updateLLMModel(newValue)
-                                }
-
-                                Text("Embedding Model")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-
-                                Picker("Embedding Model", selection: $selectedEmbeddingModel) {
-                                    ForEach(ollamaClient.availableModels, id: \.self) { model in
-                                        Text(model).tag(model)
-                                    }
-                                }
-                                .pickerStyle(MenuPickerStyle())
-                                .onChange(of: selectedEmbeddingModel) { newValue in
-                                    ollamaClient.updateEmbeddingModel(newValue)
-                                }
-                            }
-                        }
-
-                        // Pull model
-                        Divider()
-
-                        Text("Pull Model")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
-                        HStack {
-                            TextField("Model name (e.g., llama2)", text: $modelToPull)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                            Button("Pull") {
-                                pullModel()
-                            }
-                            .disabled(modelToPull.isEmpty || isPullingModel)
-                        }
-
-                        if isPullingModel {
-                            HStack {
-                                ProgressView()
-                                    .scaleEffect(0.7)
-                                Text(pullProgress)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-
-                // MARK: - TinyChat Configuration
-                GroupBox(label: Label("TinyChat", systemImage: "bubble.left.and.bubble.right")) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("TinyChat by Jason Cox - OpenAI-compatible chat interface")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
                         TextField("Server URL", text: $tinyChatURL)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: tinyChatURL) { newValue in
-                                UserDefaults.standard.set(newValue, forKey: "TinyChatEmbedding_URL")
-                                embeddingManager.tinyChat?.setBaseURL(newValue)
-                            }
+                            .onSubmit { embeddingManager.tinyChat?.setBaseURL(tinyChatURL) }
 
-                        Button("Test TinyChat Connection") {
-                            Task {
-                                await embeddingManager.tinyChat?.checkAvailability()
-                            }
+                        Button("Save & Test") {
+                            embeddingManager.tinyChat?.setBaseURL(tinyChatURL)
+                            Task { await embeddingManager.tinyChat?.checkAvailability() }
                         }
 
-                        HStack {
-                            Circle()
-                                .fill(embeddingManager.tinyChat?.isAvailable == true ? Color.green : Color.gray)
-                                .frame(width: 8, height: 8)
-                            Text(embeddingManager.tinyChat?.isAvailable == true ? "Available" : "Not detected")
-                                .font(.caption)
-                                .foregroundColor(embeddingManager.tinyChat?.isAvailable == true ? .green : .gray)
-                        }
-
-                        Link("github.com/jasonacox/tinychat", destination: URL(string: "https://github.com/jasonacox/tinychat")!)
-                            .font(.caption)
+                        availability(embeddingManager.tinyChat?.isAvailable == true)
                     }
                     .padding(.vertical, 8)
                 }
 
-                // MARK: - OpenWebUI Configuration
-                GroupBox(label: Label("OpenWebUI", systemImage: "globe")) {
+                GroupBox(label: Label("OpenWebUI Embeddings", systemImage: "globe")) {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Self-hosted AI platform with OpenAI-compatible API")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-
                         TextField("Server URL", text: $openWebUIURL)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: openWebUIURL) { newValue in
-                                UserDefaults.standard.set(newValue, forKey: "OpenWebUIEmbedding_URL")
-                                embeddingManager.openWebUI?.setBaseURL(newValue)
-                            }
-
-                        SecureField("API Key (optional)", text: $openWebUIAPIKey)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: openWebUIAPIKey) { newValue in
-                                embeddingManager.openWebUI?.setAPIKey(newValue)
-                            }
-
-                        Button("Test OpenWebUI Connection") {
-                            Task {
-                                await embeddingManager.openWebUI?.checkAvailability()
-                            }
-                        }
+                            .onSubmit { embeddingManager.openWebUI?.setBaseURL(openWebUIURL) }
 
                         HStack {
-                            Circle()
-                                .fill(embeddingManager.openWebUI?.isAvailable == true ? Color.green : Color.gray)
-                                .frame(width: 8, height: 8)
-                            Text(embeddingManager.openWebUI?.isAvailable == true ? "Available" : "Not detected")
-                                .font(.caption)
-                                .foregroundColor(embeddingManager.openWebUI?.isAvailable == true ? .green : .gray)
+                            SecureField(openWebUIKeyStored ? "API key stored in Keychain" : "API Key (optional)", text: $openWebUIKeyDraft)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            Button("Store") {
+                                embeddingManager.openWebUI?.setAPIKey(openWebUIKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines))
+                                openWebUIKeyDraft = ""
+                                openWebUIKeyStored = embeddingManager.openWebUI?.hasStoredAPIKey ?? false
+                            }
+                            .disabled(openWebUIKeyDraft.isEmpty)
+                            if openWebUIKeyStored {
+                                Button("Remove") {
+                                    embeddingManager.openWebUI?.setAPIKey("")
+                                    openWebUIKeyStored = false
+                                }
+                            }
                         }
 
-                        Link("github.com/open-webui/open-webui", destination: URL(string: "https://github.com/open-webui/open-webui")!)
-                            .font(.caption)
+                        Button("Save & Test") {
+                            embeddingManager.openWebUI?.setBaseURL(openWebUIURL)
+                            Task { await embeddingManager.openWebUI?.checkAvailability() }
+                        }
+
+                        availability(embeddingManager.openWebUI?.isAvailable == true)
                     }
                     .padding(.vertical, 8)
                 }
 
-                // MARK: - Generation Parameters
-                GroupBox(label: Label("Generation Parameters", systemImage: "slider.horizontal.3")) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        VStack(alignment: .leading) {
-                            Text("Temperature: \(String(format: "%.2f", temperature))")
-                                .font(.caption)
-
-                            Slider(value: $temperature, in: 0.0...1.0, step: 0.1)
-                                .onChange(of: temperature) { newValue in
-                                    ollamaClient.updateTemperature(newValue)
-                                }
-
-                            Text("Lower = more conservative, Higher = more creative")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-
-                        Divider()
-
-                        VStack(alignment: .leading) {
-                            Stepper("Max Tokens: \(maxTokens)", value: $maxTokens, in: 512...8192, step: 512)
-                                .onChange(of: maxTokens) { newValue in
-                                    UserDefaults.standard.set(newValue, forKey: "ollamaMaxTokens")
-                                }
-
-                            Text("Maximum length of generated responses")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 8)
-                }
-
-                // MARK: - Database & Reindexing
                 GroupBox(label: Label("Database", systemImage: "cylinder")) {
                     VStack(alignment: .leading, spacing: 12) {
                         Button(action: {
-                            // Trigger reindex - to be implemented via notification
                             NotificationCenter.default.post(name: NSNotification.Name("RegenerateEmbeddings"), object: nil)
                         }) {
                             Label("Regenerate All Embeddings", systemImage: "arrow.clockwise")
@@ -440,129 +172,25 @@ struct AISettingsView: View {
                     }
                     .padding(.vertical, 8)
                 }
-
-                // MARK: - Help
-                GroupBox(label: Label("Quick Setup Guide", systemImage: "questionmark.circle")) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Ollama (Recommended for local):")
-                            .font(.caption)
-                            .bold()
-
-                        Group {
-                            Text("brew install ollama")
-                            Text("ollama serve")
-                            Text("ollama pull llama3.2")
-                            Text("ollama pull nomic-embed-text")
-                        }
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .monospaced()
-
-                        Divider()
-
-                        Text("TinyChat:")
-                            .font(.caption)
-                            .bold()
-
-                        Text("docker run -d -p 8000:8000 jasonacox/tinychat:latest")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .monospaced()
-
-                        Divider()
-
-                        Text("OpenWebUI:")
-                            .font(.caption)
-                            .bold()
-
-                        Text("docker run -d -p 8080:8080 ghcr.io/open-webui/open-webui:main")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .monospaced()
-                    }
-                    .padding(.vertical, 8)
-                }
             }
             .padding()
         }
-        .frame(minWidth: 550, minHeight: 600)
         .onAppear {
-            loadSettings()
+            tinyChatURL = embeddingManager.tinyChat?.serverURL ?? tinyChatURL
+            openWebUIURL = embeddingManager.openWebUI?.serverURL ?? openWebUIURL
+            openWebUIKeyStored = embeddingManager.openWebUI?.hasStoredAPIKey ?? false
+            Task { await embeddingManager.updateActiveProvider() }
         }
     }
 
-    private func loadSettings() {
-        serverURL = UserDefaults.standard.string(forKey: "ollamaServerURL") ?? "http://localhost:11434"
-        selectedLLMModel = UserDefaults.standard.string(forKey: "ollamaLLMModel") ?? "llama2"
-        selectedEmbeddingModel = UserDefaults.standard.string(forKey: "ollamaEmbeddingModel") ?? "nomic-embed-text"
-        tinyChatURL = UserDefaults.standard.string(forKey: "TinyChatEmbedding_URL") ?? "http://localhost:8000"
-        openWebUIURL = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_URL") ?? "http://localhost:8080"
-        openWebUIAPIKey = UserDefaults.standard.string(forKey: "OpenWebUIEmbedding_APIKey") ?? ""
-        openRouterKey = balancer.openRouterAPIKey() ?? ""
-
-        temperature = UserDefaults.standard.float(forKey: "ollamaTemperature")
-        if temperature == 0 {
-            temperature = 0.7
-        }
-        maxTokens = UserDefaults.standard.integer(forKey: "ollamaMaxTokens")
-        if maxTokens == 0 {
-            maxTokens = 4096
-        }
-
-        Task {
-            await ollamaClient.checkConnection()
-            await embeddingManager.updateActiveProvider()
-        }
-    }
-
-    private func testOllamaConnection() {
-        isTestingConnection = true
-        showTestResult = false
-
-        Task {
-            await ollamaClient.updateServerURL(serverURL)
-            await ollamaClient.checkConnection()
-
-            await MainActor.run {
-                isTestingConnection = false
-                showTestResult = true
-
-                if ollamaClient.isConnected {
-                    testResultMessage = "Successfully connected to Ollama"
-                } else {
-                    testResultMessage = "Failed to connect. Make sure Ollama is running."
-                }
-            }
-        }
-    }
-
-    private func pullModel() {
-        isPullingModel = true
-        pullProgress = "Pulling \(modelToPull)..."
-
-        Task {
-            do {
-                try await ollamaClient.pullModel(name: modelToPull) { status in
-                    Task { @MainActor in
-                        pullProgress = status
-                    }
-                }
-
-                await MainActor.run {
-                    isPullingModel = false
-                    pullProgress = "Successfully pulled \(modelToPull)"
-                    modelToPull = ""
-
-                    Task {
-                        await ollamaClient.loadAvailableModels()
-                    }
-                }
-            } catch {
-                await MainActor.run {
-                    isPullingModel = false
-                    pullProgress = "Failed: \(error.localizedDescription)"
-                }
-            }
+    private func availability(_ ok: Bool) -> some View {
+        HStack {
+            Circle()
+                .fill(ok ? Color.green : Color.gray)
+                .frame(width: 8, height: 8)
+            Text(ok ? "Available" : "Not detected")
+                .font(.caption)
+                .foregroundColor(ok ? .green : .gray)
         }
     }
 }

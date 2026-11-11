@@ -51,7 +51,7 @@ class SmartReplyGenerator: ObservableObject {
         Suggestions:
         """
 
-        let response = await llm.summarize(content: prompt)
+        let response = await llm.respond(to: prompt)
         let parsed = parseQuickReplies(response)
 
         await MainActor.run {
@@ -146,7 +146,7 @@ class SmartReplyGenerator: ObservableObject {
         Reply:
         """
 
-        let reply = await llm.summarize(content: prompt)
+        let reply = await llm.respond(to: prompt, fallback: { "Hi,\n\nThanks for your email. I'll review this and get back to you shortly.\n\nBest regards" })
 
         var finalReply = reply
 
@@ -160,7 +160,7 @@ class SmartReplyGenerator: ObservableObject {
             finalReply += "\n\nOn \(formattedDate), \(email.from) wrote:\n\(quotedOriginal)"
         }
 
-        await MainActor.run {
+        await MainActor.run { [finalReply] in
             fullReply = finalReply
         }
 
@@ -186,7 +186,17 @@ class SmartReplyGenerator: ObservableObject {
         Suggest a brief follow-up:
         """
 
-        return await llm.summarize(content: prompt)
+        return await llm.respond(to: prompt, fallback: { "Hi,\n\nJust following up on this thread. Is there any update on the open items?\n\nThanks" })
+    }
+
+    /// Built-in meeting reply used when AI is unavailable.
+    static func meetingTemplate(_ response: MeetingResponse) -> String {
+        switch response {
+        case .accept: return "Thanks for the invitation. I'll be there."
+        case .decline: return "Thanks for the invitation. Unfortunately I can't make it this time."
+        case .tentative: return "Thanks for the invitation. I'm tentatively available and will confirm shortly."
+        case .proposeNew: return "Thanks for the invitation. That time doesn't work for me. Could we find another time?"
+        }
     }
 
     func generateMeetingResponse(for email: Email, response: MeetingResponse) async -> String {
@@ -214,7 +224,8 @@ class SmartReplyGenerator: ObservableObject {
         Response (1-2 sentences):
         """
 
-        return await llm.summarize(content: prompt)
+        let template = Self.meetingTemplate(response)
+        return await llm.respond(to: prompt, fallback: { template })
     }
 }
 
@@ -312,7 +323,7 @@ struct SmartReplyView: View {
 
                 Button("Generate") {
                     Task {
-                        await generator.generateFullReply(for: email, tone: selectedTone)
+                        _ = await generator.generateFullReply(for: email, tone: selectedTone)
                         customReply = generator.fullReply
                     }
                 }

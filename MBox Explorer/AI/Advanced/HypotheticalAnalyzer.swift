@@ -17,7 +17,6 @@ class HypotheticalAnalyzer: ObservableObject {
     @Published var lastAnalysis: HypotheticalAnalysis?
     @Published var isAnalyzing = false
 
-    private let aiBackend = AIBackendManager.shared
 
     private init() {}
 
@@ -49,7 +48,7 @@ class HypotheticalAnalyzer: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You are an analyst who explores hypothetical scenarios based on documented communication history. Be thoughtful about what the emails actually show vs. speculation."
             )
@@ -115,7 +114,7 @@ class HypotheticalAnalyzer: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You trace the implications of decisions through email communication patterns."
             )
@@ -160,7 +159,7 @@ class HypotheticalAnalyzer: ObservableObject {
         """
 
         do {
-            let response = try await aiBackend.generate(
+            let response = try await AppAI.ask(
                 prompt: prompt,
                 systemPrompt: "You compare actual outcomes with hypothetical alternatives based on email evidence."
             )

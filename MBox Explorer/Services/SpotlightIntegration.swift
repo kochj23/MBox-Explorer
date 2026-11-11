@@ -169,14 +169,16 @@ class SpotlightIntegration: ObservableObject {
         let queryString = "title == \"*\(query)*\"cd || textContent == \"*\(query)*\"cd || authorNames == \"*\(query)*\"cd"
 
         return try await withCheckedThrowingContinuation { continuation in
-            let searchQuery = CSSearchQuery(queryString: queryString, attributes: [
+            let context = CSSearchQueryContext()
+            context.fetchAttributes = [
                 "title",
                 "contentDescription",
                 "authorNames",
                 "authorEmailAddresses",
                 "recipientNames",
                 "contentCreationDate"
-            ])
+            ]
+            let searchQuery = CSSearchQuery(queryString: queryString, queryContext: context)
 
             var results: [SpotlightSearchResult] = []
 

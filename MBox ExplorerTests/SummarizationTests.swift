@@ -2,11 +2,12 @@
 //  SummarizationTests.swift
 //  MBox ExplorerTests
 //
-//  Deterministic (no-network) tests for the balanced email-summarization
-//  request builder and the graceful-no-backend availability decision.
+//  Deterministic (no-network) tests for the email-summarization request builder, the fallback reasons
+//  (NovaAIKit) and the basic extractive summary.
 //
 
 import XCTest
+import NovaAIKit
 @testable import MBox_Explorer
 
 final class SummarizationTests: XCTestCase {
@@ -58,54 +59,51 @@ final class SummarizationTests: XCTestCase {
         XCTAssertFalse(prompt.contains("1 messages"))
     }
 
-    // MARK: - Graceful availability decision (no-backend path)
+    // MARK: - Why the built-in summary was used (NovaAIKit fallback reasons)
 
-    func testAvailabilityPrefersBalancedWhenPoolHealthy() {
-        let a = SummarizationRequest.availability(isBalancingEnabled: true, balancerHasBackend: true, singleBackendAvailable: false)
-        XCTAssertEqual(a, .balanced)
+    func testReasonNilWhenAIProducedTheSummary() {
+        XCTAssertNil(AISummarizer.reason(.ai(backend: .ollama, model: "m")))
     }
 
-    func testAvailabilityFallsBackToSingleBackend() {
-        let a = SummarizationRequest.availability(isBalancingEnabled: false, balancerHasBackend: false, singleBackendAvailable: true)
-        XCTAssertEqual(a, .single)
+    func testReasonWhenAIIsOff() {
+        XCTAssertTrue(AISummarizer.reason(.fallback(.disabled))?.contains("turned off") == true)
     }
 
-    func testAvailabilityUnavailableWhenBalancingOnButPoolEmpty() {
-        let a = SummarizationRequest.availability(isBalancingEnabled: true, balancerHasBackend: false, singleBackendAvailable: false)
-        guard case .unavailable(let reason) = a else { return XCTFail("expected unavailable") }
-        XCTAssertTrue(reason.contains("no enabled backend is reachable"))
+    func testReasonWhenNoBackendAnswered() {
+        let r = AISummarizer.reason(.fallback(.unavailable("Ollama: connection refused")))
+        XCTAssertTrue(r?.contains("No AI backend answered") == true)
+        XCTAssertTrue(r?.contains("connection refused") == true)
     }
 
-    func testAvailabilityUnavailableWhenNothingConfigured() {
-        let a = SummarizationRequest.availability(isBalancingEnabled: false, balancerHasBackend: false, singleBackendAvailable: false)
-        guard case .unavailable(let reason) = a else { return XCTFail("expected unavailable") }
-        XCTAssertTrue(reason.contains("No AI backend is available"))
+    func testReasonWhenReplyRejected() {
+        XCTAssertTrue(AISummarizer.reason(.fallback(.validationFailed("empty summary")))?.contains("rejected") == true)
     }
 
-    func testAvailabilityBalancedWinsOverSingle() {
-        // When both are possible, the balanced pool is preferred.
-        let a = SummarizationRequest.availability(isBalancingEnabled: true, balancerHasBackend: true, singleBackendAvailable: true)
-        XCTAssertEqual(a, .balanced)
+    func testEveryFallbackReasonMentionsTheBuiltInText() {
+        for r in [AISummarizer.reason(.fallback(.disabled)), AISummarizer.reason(.fallback(.unavailable("x"))),
+                  AISummarizer.reason(.fallback(.validationFailed("y")))] {
+            XCTAssertTrue(r?.contains("first lines") == true)
+        }
     }
 
     // MARK: - Basic extractive fallback (never crashes, always returns text)
 
     func testBasicSummaryFromMultilineContent() {
         let content = "First line.\n\nSecond line.\nThird line."
-        let summary = BalancedSummarizer.basicSummary(content)
+        let summary = AISummarizer.basicSummary(content)
         XCTAssertTrue(summary.contains("First line."))
         XCTAssertFalse(summary.isEmpty)
     }
 
     func testBasicSummaryTruncatesAndEllipsizes() {
         let content = String(repeating: "word ", count: 400)
-        let summary = BalancedSummarizer.basicSummary(content)
+        let summary = AISummarizer.basicSummary(content)
         XCTAssertLessThanOrEqual(summary.count, 302)
         XCTAssertTrue(summary.hasSuffix("…"))
     }
 
     func testBasicSummaryEmptyContentIsSafe() {
-        XCTAssertEqual(BalancedSummarizer.basicSummary(""), "")
-        XCTAssertEqual(BalancedSummarizer.basicSummary("\n\n   \n"), "")
+        XCTAssertEqual(AISummarizer.basicSummary(""), "")
+        XCTAssertEqual(AISummarizer.basicSummary("\n\n   \n"), "")
     }
 }

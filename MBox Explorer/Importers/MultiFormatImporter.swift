@@ -112,7 +112,7 @@ class MultiFormatImporter: ObservableObject {
         }
 
         for (index, fileURL) in files.enumerated() {
-            await MainActor.run {
+            await MainActor.run { [files] in
                 currentFile = fileURL.lastPathComponent
                 progress = Double(index) / Double(files.count)
             }
@@ -166,7 +166,7 @@ class MultiFormatImporter: ObservableObject {
                 let imported = try await importEML(at: url)
                 emails.append(contentsOf: imported)
 
-                await MainActor.run {
+                await MainActor.run { [emails] in
                     progress = Double(index + 1) / Double(urls.count)
                     importedCount = emails.count
                 }

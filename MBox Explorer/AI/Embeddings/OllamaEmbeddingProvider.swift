@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import NovaAIKit
 
 /// Ollama embedding provider using nomic-embed-text or similar models
 class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
@@ -26,11 +27,15 @@ class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
         }
     }
 
-    private let baseURL: String
+    private var baseURL: String
+    /// True when the URL follows the Ollama URL in the AI settings (AppAI); false when injected.
+    private let followsAppAI: Bool
     private var availableModels: [String] = []
 
-    init(baseURL: String = "http://localhost:11434") {
-        self.baseURL = baseURL
+    /// - Parameter baseURL: fixed Ollama URL; nil = use the Ollama URL from the AI settings.
+    init(baseURL: String? = nil) {
+        self.baseURL = baseURL ?? NovaAIBackend.ollama.defaultURL
+        self.followsAppAI = baseURL == nil
 
         // Load saved model preference
         if let savedModel = UserDefaults.standard.string(forKey: "OllamaEmbedding_Model") {
@@ -39,6 +44,9 @@ class OllamaEmbeddingProvider: EmbeddingProvider, ObservableObject {
     }
 
     func checkAvailability() async {
+        if followsAppAI {
+            baseURL = await MainActor.run { AppAI.shared.settings.url(for: .ollama) }
+        }
         do {
             // Check if Ollama is running
             guard let url = URL(string: "\(baseURL)/api/tags") else {
