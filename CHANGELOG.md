@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Tests
 - `AIKitAdoptionTests` (security, performance, retry, unit, integration, functional, frame/UI state) and the
-  balancer/OpenRouter/summarization tests rewritten against NovaAIKit. 198 tests, all passing.
+  balancer/OpenRouter/summarization tests rewritten against NovaAIKit. 199 tests, all passing.
 
 ## [2.3.0]
 

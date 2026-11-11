@@ -339,6 +339,17 @@ final class AIKitIntegrationTests: XCTestCase {
         XCTAssertEqual(ai.settings.backend, .tinyChat)
     }
 
+    /// An embedding model saved as the chat model by an old version is dropped (it cannot chat).
+    func testEmbeddingModelIsNotUsedForChat() {
+        let d = AITestKit.throwaway()
+        d.set("snowflake-arctic-embed:335m", forKey: "ollamaLLMModel")
+        let ai = AITestKit.makeAI()
+        AppAI.migrateLegacy(ai, defaults: d, credentialsFile: nil)
+        XCTAssertEqual(ai.settings.model(for: .ollama), NovaAIBackend.ollama.defaultModel)
+        XCTAssertTrue(AppAI.isEmbeddingModel("nomic-embed-text"))
+        XCTAssertFalse(AppAI.isEmbeddingModel("qwen3:8b"))
+    }
+
     /// Auto failover: Ollama down → the next reachable backend answers (TinyChat here, OpenAI-compatible).
     func testAutoFailsOverPastADeadBackend() async throws {
         OllamaStubProtocol.script([.status(500), .status(500), .text("from the next backend")])

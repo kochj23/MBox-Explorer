@@ -150,6 +150,9 @@ extension AppAI {
         // 3c. Removed backends' Keychain secrets.
         ai.keys.deleteObsoleteLegacyItems(service: legacyKeychainService)
 
+        // Old versions could save an embedding model (e.g. nomic-embed-text) as the chat model; it cannot chat.
+        dropEmbeddingChatModels(ai)
+
         // App-specific settings, once.
         guard !defaults.bool(forKey: legacyMigrationMarker) else { return }
         defaults.set(true, forKey: legacyMigrationMarker)
@@ -164,8 +167,24 @@ extension AppAI {
             s.setModel(m, for: .openRouter)
         }
         if s != ai.settings { ai.settings = s }
+        dropEmbeddingChatModels(ai)
         legacyObsoleteKeys.forEach { defaults.removeObject(forKey: $0) }
         migrateCredentialsFile(credentialsFile, ai: ai)
+    }
+
+    /// True for model names that are embedding-only (they cannot answer chat requests).
+    nonisolated static func isEmbeddingModel(_ name: String) -> Bool {
+        let n = name.lowercased()
+        return n.contains("embed") || n.hasPrefix("bge-") || n.contains("/bge-") || n.contains("minilm")
+    }
+
+    /// Resets a chat model setting that names an embedding model back to the backend default.
+    static func dropEmbeddingChatModels(_ ai: NovaAI) {
+        var s = ai.settings
+        for (backend, model) in s.models where isEmbeddingModel(model) {
+            s.models.removeValue(forKey: backend)
+        }
+        if s != ai.settings { ai.settings = s }
     }
 
     /// Moves the OpenAI key out of the old plaintext credentials file into the Keychain, then deletes the file

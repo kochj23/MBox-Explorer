@@ -1,14 +1,19 @@
 # MBox Explorer
 
 ![Build](https://github.com/kochj23/MBox-Explorer/actions/workflows/build.yml/badge.svg)
-![Platform](https://img.shields.io/badge/platform-macOS%2013.0%2B-blue)
-![Swift](https://img.shields.io/badge/Swift-5.9-orange)
+![Version](https://img.shields.io/badge/version-2.4.0-blue)
+![Platform](https://img.shields.io/badge/platform-macOS%2014.0%2B-blue)
+![Swift](https://img.shields.io/badge/Swift-5-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-106-brightgreen)
+![Tests](https://img.shields.io/badge/tests-199-brightgreen)
 
-**AI-powered email archive viewer with native RAG pipeline, multi-format import, and semantic search.**
+**Email archive explorer for macOS: multi-format import, threaded browsing, semantic search, and optional AI
+(Ask, summaries, extraction, analysis) that always has a built-in fallback.**
 
-MBox Explorer parses MBOX, EML, EMLX, MSG, and Gmail Takeout archives into a searchable, threaded interface with a built-in retrieval-augmented generation pipeline for natural language queries against your email history. All AI processing runs locally via Ollama or MLX -- no data leaves your machine unless you opt into a cloud provider.
+MBox Explorer parses MBOX, EML, EMLX, MSG and Gmail Takeout archives into a fast, searchable, threaded interface.
+On top of that sit a retrieval-augmented "Ask" pipeline, AI summaries and a set of analysis tools. AI is powered by
+[NovaAIKit](https://github.com/kochj23/NovaAIKit), the shared AI layer of Jordan's macOS apps: local backends
+first, Keychain-only keys, and a built-in (non-AI) result for every feature when AI is off or unreachable.
 
 Written by Jordan Koch.
 
@@ -20,306 +25,191 @@ Written by Jordan Koch.
 graph TD
     subgraph Import
         A[MBOX / EML / EMLX / MSG / Gmail Takeout] --> B[MultiFormatImporter]
-        B --> C[MboxParser]
+        B --> C[Streaming MboxParser]
+        C --> CA[(Parse cache)]
     end
 
     subgraph Core
         C --> D[MboxViewModel]
-        D --> E[Email Model]
-        D --> F[Thread Detection]
-        D --> G[SmartFilters]
+        D --> E[Email model + thread detection]
+        D --> G[Smart filters / tags / search]
     end
 
-    subgraph RAG["RAG Pipeline"]
-        H[User Query] --> I[Question Router]
-        I --> J{Search Strategy}
-        J -->|Semantic| K[EmbeddingManager]
-        J -->|Keyword| L[FTS5 Full-Text Search]
-        J -->|Fallback| M[Direct Text Match]
-        K --> N[VectorDatabase SQLite]
+    subgraph Search["Search & retrieval"]
+        H[Question] --> I[Question router]
+        I --> K[EmbeddingManager]
+        I --> L[FTS5 keyword search]
+        K --> N[(VectorDatabase SQLite)]
         L --> N
-        M --> O[In-Memory Scan]
-        N --> P[Context Augmentation]
-        O --> P
-        P --> Q[LLM Generation]
-        Q --> R[Response + Source Citations]
+        N --> P[Context: statistics + emails + history]
     end
 
-    subgraph Backends["AI Backends"]
-        Q --> S[Ollama]
-        Q --> T[MLX]
-        Q --> U[TinyChat / TinyLLM]
-        Q --> V[Cloud: OpenAI / Azure / AWS / GCP / IBM]
+    subgraph AI["AI (NovaAIKit)"]
+        P --> AA[AppAI]
+        F1[Summaries / extractors / analysis / chat] --> AA
+        AA -->|AI on| NK[NovaAI: Auto failover, retries, validation]
+        AA -->|AI off or down| FB[Built-in result]
+        NK --> V{Validator}
+        V -->|ok| OUT[Answer + source label]
+        V -->|rejected twice| FB
+        FB --> OUT
     end
 
     subgraph Export
-        D --> W[ExportEngine]
-        W --> X[CSV / JSON / Markdown / TXT]
+        D --> W[ExportEngine: CSV / JSON / Markdown / TXT]
     end
 
     subgraph Widget["macOS Widget"]
-        D --> Y[SharedDataManager]
-        Y --> Z[WidgetKit S/M/L]
+        D --> Y[SharedDataManager] --> Z[WidgetKit S / M / L]
     end
 ```
+
+### AI backends and failover
+
+```mermaid
+graph LR
+    R[Request] --> T{Use AI?}
+    T -->|off| B[Built-in result]
+    T -->|on| AUTO{Backend}
+    AUTO -->|Auto| O[Ollama] --> M[MLX] --> TC[TinyChat] --> TL[TinyLLM] --> OW[OpenWebUI] --> NG[Nova Gateway] --> OR[OpenRouter*] --> OA[OpenAI*]
+    AUTO -->|fixed| ONE[Chosen backend]
+    OA -->|all failed| B
+    ONE -->|failed| B
+```
+
+`*` keyed backends join the chain only when a key is stored in the Keychain; keys are only ever sent over https.
 
 ---
 
 ## Features
 
-### Email Parsing and Browsing
+### Email parsing and browsing
 
 | Capability | Details |
 |---|---|
-| Supported formats | MBOX, EML, EMLX, Outlook MSG, Gmail Takeout ZIP |
-| Streaming parser | Reads the file line-by-line and emits one email per `From ` boundary — peak memory ~one message, not the whole archive. Honors mbox `>From ` quoting. |
-| Persistent parse cache | Parsed mailboxes are cached (keyed by path + size + mtime); reopening an unchanged archive is near-instant instead of re-parsing the whole file. Editing/replacing the file invalidates the cache. |
-| Thread detection | Groups emails by Message-ID / In-Reply-To / References |
-| Smart filters | Filter by sender, domain, date range, size, attachments |
-| Duplicate finder | Identifies duplicate messages across archives |
-| Regex search | Pattern-based search across bodies and headers |
-| Attachment browser | Browse, preview, and export attachments |
-| PII redaction | Redact personal information before export |
-| Mailbox merger | Combine multiple archives into one |
-| Tags and collections | Organize emails with custom tags |
-| Command palette | Quick access to all actions |
+| Formats | MBOX, EML, EMLX, Outlook MSG, Gmail Takeout ZIP |
+| Streaming parser | One email per `From ` boundary, peak memory about one message; honors mbox `>From ` quoting |
+| Parse cache | Keyed by path + size + mtime; reopening an unchanged archive is near-instant |
+| Auto-reopen | The last archive reopens on launch; indexing is resumable and cancellable |
+| Threads | Message-ID / In-Reply-To / References |
+| Filters and search | Smart filters, saved searches, regex search, command palette, quick open |
+| Tools | Duplicate finder, attachment browser, PII redaction, mailbox merger, tags and collections, email diff |
 
-### Ask AI (RAG Pipeline)
+### AI (NovaAIKit)
 
-| Component | Implementation |
-|---|---|
-| Vector database | SQLite + FTS5 full-text search + float-array embeddings |
-| Search strategy | Three-tier fallback: semantic, FTS5 keyword, direct text match |
-| Question routing | Auto-detects query type (statistics, content, summary, follow-up) |
-| Conversation memory | Maintains context across follow-ups (configurable history) |
-| Source citations | Every response shows which emails were used |
-| Temperature controls | Separate for Q&A (0.2), summary (0.3), creative (0.7) |
-| Debug panel | Inspect the full prompt sent to the LLM |
-| Export conversations | Save Q&A sessions as Markdown or JSON |
+Settings › AI (or the gear next to the AI status dot in the toolbar):
 
-### Embedding Providers
+- **Use AI** on/off. Off means nothing is sent anywhere and every feature uses its built-in result.
+- **Backend**: Auto (Ollama → MLX → TinyChat → TinyLLM → OpenWebUI → Nova Gateway → OpenRouter → OpenAI), or one
+  fixed backend. Per-backend URL and model (listed from the server), timeout, **Test connection**.
+- **Keys** (OpenRouter, OpenAI, optional OpenWebUI) go only to the macOS Keychain under
+  `com.jkoch.mboxexplorer.<backend>`; a stored key shows as "stored", never as text.
+- **Status indicator** (toolbar, Ask, Conversations): green online with backend and model, orange offline, grey off;
+  click to re-check.
+- **Validation**: replies are cleaned of reasoning blocks, must be non-empty and length-capped; summaries and
+  statistics answers are rejected if they contain figures that are not in the emails. A rejected reply is re-asked
+  once, then the built-in result is used.
 
-| Provider | Type | Setup |
+| Feature | With AI | Built-in result (AI off / unreachable / rejected) |
 |---|---|---|
-| Ollama | Local, free | `brew install ollama && ollama pull nomic-embed-text` |
-| MLX | Local, free | Built-in (Apple Silicon only) |
-| OpenAI | Cloud, paid | API key in Settings |
-| Sentence Transformers | Local, free | `pip install sentence-transformers` |
-| TinyChat | Local, free | OpenAI-compatible API on localhost |
-| OpenWebUI | Self-hosted | Web UI with embeddings |
+| Summarize email / thread | 2-4 sentence summary, labelled with its source | First lines of the message, with the reason |
+| Ask (RAG Q&A) | Answer grounded in mailbox statistics and retrieved emails, with citations | The reason plus the top matching emails |
+| Conversations | Multi-turn chat over the archive with citations and follow-ups | The reason plus the matching emails (cited) |
+| Action items, meetings, natural-language filter, topic labels | Parsed from the AI reply | Keyword/rule results or empty |
+| Digests, person profiles, executive summary | AI narrative plus computed statistics | Computed statistics with a short "AI unavailable" note |
+| Smart replies, follow-ups, meeting responses | Drafted by AI | Templates |
+| Persona chat, hypotheticals, time travel, decisions, commitments, relationships, drafts, forwarding, daily briefing | AI analysis | The analysis says why AI was not used; rule-based parts still run |
 
-### AI Analysis
+### Semantic search (embeddings)
 
-- Email and thread summarization via Ollama/MLX
-- Sentiment dashboard (NaturalLanguage framework)
-- Smart reply suggestions with tone options
-- Meeting/event extraction (EventKit integration)
-- Topic clustering
-- Communication relationship mapping
-- Phishing/threat detection
-- Action item extraction
-- Person profile generation from email history
-- Daily briefing engine
+Embeddings are separate from chat AI (Settings › AI › Semantic Search). Keyword (FTS5) search always works.
 
-### Multi-model load balancing
+| Provider | Type | Notes |
+|---|---|---|
+| Ollama | Local | Uses the Ollama URL from the AI settings |
+| Balanced (all local models) | Local | Round-robins bulk indexing across every local Ollama model |
+| MLX | Local | Apple Silicon |
+| Sentence Transformers | Local | `pip install sentence-transformers` |
+| TinyChat / OpenWebUI | Local / self-hosted | OpenAI-compatible endpoints; OpenWebUI key in the Keychain |
+| OpenAI | Cloud | Uses the OpenAI key from the AI settings (Keychain) |
 
-MBox Explorer can spread AI work across **every model available on your machine at
-once** instead of pinning everything to a single backend. Three independent toggles
-in **AI Settings** compose the balancer pool:
+### Analysis, export and visualization
 
-| Toggle | Pool contribution |
-|---|---|
-| **All local models** | Every Ollama model + locally-installed MLX models |
-| **All frontier models** | OpenRouter (bring-your-own-key, stored in the Keychain) |
-| **Nova Gateway** *(optional)* | One OpenAI-compatible backend at `127.0.0.1:18792` |
+- Sentiment dashboard (NaturalLanguage), phishing/threat detection, email forensics, relationship map
+- Export: TXT, CSV, JSON, Markdown, per email or per thread, AI-ready chunked export, contacts (vCard/CSV)
+- Spotlight indexing, Quick Look, follow-up notifications
+- Statistics dashboard (Swift Charts), network graph, timeline, heatmap, word cloud
 
-A pure, network-free `LoadBalancer` spreads requests across the healthy pool using a
-round-robin or least-busy policy, and unhealthy backends are gated out automatically.
+### macOS widget and Nova API
 
-**Nova is never required.** With zero Nova the app still balances across local Ollama/MLX
-and (if a key is set) OpenRouter. A failed Nova health check simply drops the gateway from
-the pool and the toggle reads *"unavailable"* — everything else keeps working. There is no
-hard dependency on Nova, PostgreSQL, or the gateway.
-
-```mermaid
-graph TD
-    subgraph Toggles["AI Settings — three toggles"]
-        T1[All local models]
-        T2[All frontier models]
-        T3["Nova Gateway (optional)"]
-    end
-
-    subgraph Discovery["ModelRegistry (pure)"]
-        T1 --> O[Ollama /api/tags]
-        T1 --> X[MLX HF-cache scan]
-        T2 --> R[OpenRouter models]
-        T3 --> NG[Nova Gateway model]
-        O --> P[assemblePool -> DiscoveredModel pool]
-        X --> P
-        R --> P
-        NG --> P
-    end
-
-    subgraph Balance["LoadBalancer (pure, network-free)"]
-        P --> HG[Health-gate unhealthy backends]
-        HG --> LB{round-robin / least-busy}
-    end
-
-    LB --> S[Email Summarization]
-    LB --> IDX[Bulk semantic indexing]
-
-    S -.->|no backend| SF[Basic extractive summary]
-    IDX -.->|no backend| KW[Keyword-only, resume-safe]
-```
-
-### AI email summarization
-
-A **Summarize** action in the email detail toolbar sends the selected email (or thread)
-through the balanced model pool and shows a concise 2-3 sentence summary. The request
-construction lives in a pure, unit-tested `SummarizationRequest` builder, and dispatch
-degrades gracefully in three tiers:
-
-1. **Balanced pool** — when any load-balancing toggle is on and a model is reachable.
-2. **Single active backend** — the app's existing Ollama/MLX/etc. selection.
-3. **Basic extraction** — a network-free extractive summary with a clear reason banner,
-   so the feature is never a crash and never a dead end.
-
-**Bulk semantic indexing** can also route through the balancer: selecting the
-**"Balanced (All Local Models)"** embedding provider fans indexing work out across every
-local Ollama model via the same `LoadBalancer`. Resumability is untouched —
-`VectorDatabase.pendingEmails(...)` still drives the resumable work set, so a cancelled or
-partial index picks up exactly where it left off.
-
-> The pure balancer core (`ModelRegistry`, `LoadBalancer`, `OpenRouterProvider`,
-> `OpenAICompatibleRequest`, `KeychainStore`) is shared verbatim with the AIStudio app.
-
-### Export and Integration
-
-| Format | Options |
-|---|---|
-| File formats | TXT, CSV, JSON, Markdown |
-| Export modes | Per-email, per-thread, or both |
-| AI-optimized export | Chunked text with metadata for downstream pipelines |
-| Contact exporter | vCard, CSV, or Address Book |
-| Spotlight | Emails indexed in macOS system search |
-| Quick Look | Space bar preview (native macOS) |
-| Notifications | Follow-up reminders via Notification Center |
-
-### Visualization
-
-- Statistics dashboard (Swift Charts)
-- Communication network graph
-- Timeline view
-- Activity heatmap
-- Word cloud
-- Email diff (side-by-side comparison)
-
-### macOS Widget (WidgetKit)
-
-| Size | Content |
-|---|---|
-| Small | Email count, loaded file name |
-| Medium | Stats + top 3 senders |
-| Large | Stats + senders + recent searches + quick search |
-
-Data syncs via App Group `group.com.jkoch.mboxexplorer`.
-
-### Nova API Server
-
-Local HTTP API on port **37434** (loopback only).
-
-```bash
-curl http://127.0.0.1:37434/api/status   # App status + uptime
-curl http://127.0.0.1:37434/api/ping     # Health check
-```
+- WidgetKit small/medium/large widgets; data shared through App Group `group.com.jkoch.mboxexplorer`.
+- Loopback-only status API on port **37434**: `curl http://127.0.0.1:37434/api/status`.
 
 ---
 
 ## Requirements
 
-- macOS 13.0 (Ventura) or later
-- For AI features: Ollama (`brew install ollama`) or MLX on Apple Silicon
-- Cloud providers are optional -- fully functional with local backends
+- macOS 14.0 or later
+- For AI: any one backend, e.g. Ollama (`brew install ollama && ollama pull qwen3:8b`). Everything works without AI.
 
 ## Installation
 
-### From DMG (recommended for most users)
+### From DMG
 
-1. Download the latest `.dmg` from [Releases](https://github.com/kochj23/MBox-Explorer/releases).
-2. Open it and drag **MBox Explorer** into your **Applications** folder.
-3. Launch it from Applications. That's it — no Xcode, no toolchains, nothing else to install.
+1. Open `MBox Explorer-v2.4.0-build4.dmg` and drag **MBox Explorer** onto **Applications**.
+2. Local builds are ad hoc signed. If macOS blocks the first launch: System Settings › Privacy & Security ›
+   **Open Anyway** (or `xattr -dr com.apple.quarantine "/Applications/MBox Explorer.app"`).
 
-> **See "MBox Explorer can't be opened because the developer cannot be verified"?**
-> That means you have a build that isn't yet Developer-ID-signed **and** notarized. To open it anyway:
-> - **macOS 14 and earlier:** Control-click (right-click) the app → **Open** → **Open**.
-> - **macOS 15 (Sequoia) / 26 and later:** double-click it, dismiss the dialog, then open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**.
-> - Or from Terminal: `xattr -dr com.apple.quarantine "/Applications/MBox Explorer.app"`
->
-> **Notarized releases open with no prompt at all** — maintainers, see [RELEASE.md](RELEASE.md).
+Developer-ID signed, notarized releases are produced by `scripts/release.sh` (see [RELEASE.md](RELEASE.md)).
 
-### From Source
+### From source
 
-Requires **Xcode 16 or later**. Because the app bundles **MLX** for on-device LLM inference, the build
-compiles Metal GPU shaders, which needs Apple's **Metal Toolchain** — a component Xcode 16 no longer
-ships by default. Install it once:
+Requires Xcode 16 or later and the Metal Toolchain (for the MLX dependency):
 
 ```bash
 xcodebuild -downloadComponent MetalToolchain
-# (or in Xcode: Settings → Components → Metal Toolchain → Get)
-```
-
-Then build:
-
-```bash
 git clone git@github.com:kochj23/MBox-Explorer.git
 cd MBox-Explorer
-open "MBox Explorer.xcodeproj"   # Xcode resolves Swift packages on first open (MLX, swift-transformers, …)
-# Build & run: Cmd+R
+open "MBox Explorer.xcodeproj"     # resolves NovaAIKit, mlx-swift, mlx-swift-lm
 ```
-
-> Skipping the Metal Toolchain step produces a wall of `CompileMetalFile … cannot execute tool 'metal'
-> due to missing Metal Toolchain` errors from the `mlx-swift` dependency. That's the missing component,
-> not a problem with the project.
-
----
 
 ## Usage
 
-1. Launch MBox Explorer
-2. Open an archive (File > Open -- supports MBOX, EML, EMLX, MSG, Gmail Takeout)
-3. Browse in list, timeline, heatmap, or network view
-4. Click "Ask AI" in the sidebar for natural language queries
-5. Optionally click "Index Emails" for semantic search via embeddings
+1. Open an archive (File › Open).
+2. Browse in list, three-column, timeline, heatmap or network view.
+3. Optionally index emails for semantic search, then use **Ask** or **Conversations**.
+4. Use **Summarize** in the email detail toolbar; the sheet shows whether the summary came from AI or is built-in.
 
 ---
 
-## Test Suite
+## Tests
 
-106+ tests covering parsing, export, AI pipeline, view model logic, and security — including
-`MailboxCacheTests` (7 categories: unit, integration, regression against the re-parse bug, performance,
-edge cases, security, and a UI/smoke test of the reopen flow).
+199 tests, all passing, including `AIKitAdoptionTests` in seven categories (security, performance, retry, unit,
+integration, functional, frame/UI state). AI tests use in-memory settings and key stores and a local URL protocol:
+no Keychain or network access.
 
 ```bash
-xcodebuild -scheme "MBox Explorer" -destination "platform=macOS" test
+xcodebuild -project "MBox Explorer.xcodeproj" -scheme "MBox Explorer" -destination "platform=macOS" test
 ```
 
 ---
 
-## Security and Privacy
+## Security and privacy
 
-- **Local-first**: Ollama and MLX run entirely on your Mac
-- **SQL injection prevention**: all database queries use parameterized bindings
-- **Keychain storage**: API keys stored in macOS Keychain via Security framework
-- **Ethical AI Guardian**: monitors all AI input/output for policy compliance
-- **No telemetry**: zero analytics, tracking, or phone-home behavior
+- Local-first: Ollama/MLX/TinyChat/TinyLLM/OpenWebUI run on your machine or LAN; cloud backends are opt-in.
+- API keys only in the macOS Keychain (`com.jkoch.mboxexplorer.*`), only sent over https.
+- Upgrading from 2.3 or earlier migrates once: old settings are imported; plaintext OpenAI keys (UserDefaults or
+  `cloud_credentials.json`) move to the Keychain and the plaintext copies are deleted; secrets of the removed
+  Google Cloud / Azure / AWS / IBM backends are deleted.
+- Parameterized SQL everywhere; loopback-only API server; no telemetry.
 
----
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md). 2.4.0: AI migrated to NovaAIKit 1.0.0.
 
 ## License
 
-MIT License -- Copyright 2026 Jordan Koch
-
-See [LICENSE](LICENSE) for the full text.
+MIT License, Copyright 2026 Jordan Koch. See [LICENSE](LICENSE).
 
 ---
 
